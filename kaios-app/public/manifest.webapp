@@ -1,0 +1,65 @@
+{
+  "name": "KaiOS Web Suite",
+  "description": "PC Suite for KaiOS",
+  "version": "1.0.0",
+  "launch_path": "/index.html",
+  "theme": "#431F7F",
+  "theme_color": "#431F7F",
+  "background_color": "#431F7F",
+  "fullscreen": "true",
+  "chrome": {
+    "statusbar": "overlap"
+  },
+  "orientation": "default",
+  "icons": {
+    "56": "/icons/icon56x56.png",
+    "112": "/icons/icon112x112.png"
+  },
+  "categories": [
+    "utilities"
+  ],
+  "developer": {
+    "name": "arma7x",
+    "url": "https://github.com/arma7x/kaios-web-suite"
+  },
+  "origin": "app://kaios-web-suite.arma7x.com",
+  "type": "certified",
+  "permissions": {
+    "systemXHR": {
+      "description": "Required to load remote content"
+    },
+    "sms": {
+      "description": "WebSMS permission"
+    },
+    "contacts": {
+      "access": "readwrite",
+      "description": "Manage KaiOS contact list"
+    },
+    "settings": {
+      "access": "readonly",
+      "description": "ril.sms.encoding_mode"
+    },
+    "mobileconnection": {
+      "description": "Get ICCID for SMS"
+    },
+    "telephony": {
+      "description": "Use IMEI as device id"
+    },
+    "desktop-notification": {
+      "description": "Required for display notification"
+    }
+  },
+  "messages": [
+    { "serviceworker-notification": "/index.html" },
+    { "sms-received": "/index.html" },
+    { "sms-sent": "/index.html" }
+  ],
+  "locales": {
+    "en-US": {
+      "name": "KaiOS Web Suite",
+      "subtitle": "PC Suite for KaiOS",
+      "description": "PC Suite for KaiOS"
+    }
+  },
+  "default_locale": "en"
+}
