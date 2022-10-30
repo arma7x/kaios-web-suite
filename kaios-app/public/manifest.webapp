@@ -47,6 +47,9 @@
     },
     "desktop-notification": {
       "description": "Required for display notification"
+    },
+    "video-capture": {
+      "description": "Required for qr-code reader"
     }
   },
   "messages": [
