@@ -1,6 +1,11 @@
 <script lang="ts">
-
     import { onMount, onDestroy } from 'svelte';
+    import QRCode from 'qr-image-generator';
+    import { Peer, type DataConnection } from "peerjs";
+
+    let status: bool = false;
+    let peer: Peer;
+    let conn: DataConnection;
 
     function onMessage(request, sender, sendResponse) {
         switch (request.type) {
@@ -13,6 +18,7 @@
     }
 
     onMount(() => {
+        peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
         chrome.runtime.onMessage.addListener(onMessage);
         chrome.runtime.sendMessage({ type: 0 }).catch(err => console.log(err));
     });

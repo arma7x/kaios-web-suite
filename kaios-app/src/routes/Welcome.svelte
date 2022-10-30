@@ -2,7 +2,7 @@
   import { Route, navigate as goto } from "svelte-navigator";
   import { createKaiNavigator } from '../utils/navigation';
   import { onMount, onDestroy } from 'svelte';
-  import { Peer } from "peerjs";
+  import { Peer, type DataConnection } from "peerjs";
 
   export let location: any;
   export let navigate: any;
@@ -11,7 +11,7 @@
   let name: string = 'Welcome';
 
   let peer: Peer;
-  let conn: any;
+  let conn: DataConnection;
 
   let navOptions = {
     verticalNavClass: 'vertClass',

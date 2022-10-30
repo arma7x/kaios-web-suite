@@ -1,6 +1,6 @@
 <script lang="ts">
-
     import { onMount, onDestroy } from 'svelte';
+    import QRCode from 'qr-image-generator';
 
     let status: bool = false;
 
