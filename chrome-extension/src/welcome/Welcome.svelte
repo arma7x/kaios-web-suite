@@ -127,10 +127,10 @@
         {:else}
             <div class="container">
                 <div class="row">
-                    <button class="column column-25 button button-outline" style="margin:0.1em;">SMS</button>
-                    <button class="column column-25 button button-outline" style="margin:0.1em;">Contacts</button>
-                    <button class="column column-25 button button-outline" style="margin:0.1em;">Foo</button>
-                    <button class="column column-25 button button-outline" style="margin:0.1em;">Bar</button>
+                    <button class="column column-25 button button-outline">SMS</button>
+                    <button class="column column-25 button button-outline">Contacts</button>
+                    <button class="column column-25 button button-outline">File Manager</button>
+                    <button class="column column-25 button button-outline">TODO</button>
                 </div>
             </div>
         {/if}
@@ -156,5 +156,6 @@
     .container.container-center  > .container > .row > button {
         font-weight: bold;
         font-size: 1.5em;
+        margin: 0.1em;
     }
 </style>
