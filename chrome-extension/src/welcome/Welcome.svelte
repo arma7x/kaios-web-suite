@@ -32,6 +32,7 @@
             dataConnectionID = id;
             console.log("[MASTER] open", dataConnectionID, dataConnectionStatus);
             broadcastConnectionStatus();
+            generateQrCode();
         });
         // SLAVE CONNECTED TO MASTER
         peer.on("connection", (conn) => {
@@ -51,6 +52,7 @@
                 console.log("[MASTER] close"); // SLAVE DC
                 isKaiOSDeviceConnected = false;
                 broadcastConnectionStatus();
+                generateQrCode();
             });
             dataConnection.on("error", (err) => {
                 console.log("[MASTER] error", err);
@@ -77,6 +79,22 @@
         .catch(err => console.log(err));
     }
 
+    function generateQrCode() {
+        const opts = {
+          errorCorrectionLevel: 'H',
+          type: 'image/jpeg',
+          quality: 1,
+          margin: 1,
+          width: 300
+        }
+        setTimeout(() => {
+            const canvas = document.getElementById('canvas');
+            QRCode.toCanvas(canvas, dataConnectionID, opts, (error) => {
+              if (error) console.error(error)
+            });
+        }, 100);
+    }
+
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
         broadcastConnectionStatus();
@@ -100,20 +118,43 @@
 
 </script>
 
-<div class="container {!isKaiOSDeviceConnected ? 'container-disconnect' : ''}">
-    <h2>KaiOS Web Suite: {dataConnectionID}</h2>
+<div class="container container-center">
+    <h2 class="container-header">KaiOS Web Suite</h2>
+    {#if dataConnectionID}
+        {#if !isKaiOSDeviceConnected}
+            <h4>{dataConnectionID}</h4>
+            <canvas id="canvas"></canvas>
+        {:else}
+            <div class="container">
+                <div class="row">
+                    <button class="column column-25 button button-outline" style="margin:0.1em;">SMS</button>
+                    <button class="column column-25 button button-outline" style="margin:0.1em;">Contacts</button>
+                    <button class="column column-25 button button-outline" style="margin:0.1em;">Foo</button>
+                    <button class="column column-25 button button-outline" style="margin:0.1em;">Bar</button>
+                </div>
+            </div>
+        {/if}
+    {:else}
+        <h4>Generating QR-Code</h4>
+    {/if}
 </div>
 
 <style>
-    .container {
-        max-width: unset;
-    }
-    .container-disconnect {
+    .container.container-center {
         height: 100vh;
         padding: 0;
         margin: 0;
         display: flex;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
+        align-items: center;
+        max-width: unset;
+    }
+    .container.container-center  > .container-header {
+        text-align: center;
+    }
+    .container.container-center  > .container > .row > button {
+        font-weight: bold;
+        font-size: 1.5em;
     }
 </style>
