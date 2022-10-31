@@ -52,15 +52,13 @@
       peer.on("connection", (_conn) => {  // SLAVE CONNECTED TO MASTER
         conn = _conn;
         console.log("[MASTER] connection");
-        setTimeout(() => {
+        conn.on("open", () => {
+          console.log("[MASTER] open");
           console.log("[MASTER] Send Ping");
           conn.send("Ping from master");
-        }, 2000);
+        });
         conn.on("data", (data) => {
           console.log("[MASTER] recv data:", data);
-        });
-        conn.on("disconnected", () => {
-          console.log("[MASTER] disconnected");
         });
         conn.on("close", () => {
           console.log("[MASTER] close"); // SLAVE DC
@@ -68,6 +66,9 @@
         conn.on("error", (err) => {
           console.log("[MASTER] error", err);
         });
+      });
+      peer.on("disconnected", () => {
+        console.log("[MASTER] disconnected");
       });
     },
     enterListener: function(evt) {
