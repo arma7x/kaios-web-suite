@@ -1,4 +1,4 @@
-import Welcome from "src/components/Welcome.svelte";
+import Welcome from "./Welcome.svelte";
 
 const target = document.getElementById("app");
 
