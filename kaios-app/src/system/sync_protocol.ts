@@ -1,0 +1,8 @@
+export enum SyncProtocol {
+  PING,
+  PONG,
+  SMS_SYNC,
+  SMS_SEND_MESSAGE,
+  SMS_DELETE_MESSAGE,
+  SMS_READ_MESSAGE
+}

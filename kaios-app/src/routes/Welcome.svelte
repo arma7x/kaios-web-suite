@@ -4,6 +4,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { Peer, type DataConnection } from "peerjs";
   import QRScanner from '../widgets/QRScanner.svelte';
+  import SMSSyncHub from '../system/sms_sync_hub';
+  import { SyncProtocol } from '../system/sync_protocol';
 
   export let location: any;
   export let navigate: any;
@@ -15,6 +17,8 @@
   let dataConnection: DataConnection;
   let dataConnectionStatus: bool = false;
   let qrScanner: QRScanner;
+  let smsSyncHub: SMSSyncHub;
+  let connectionLastPing: any;
 
   let navOptions = {
     verticalNavClass: 'vertClass',
@@ -23,7 +27,7 @@
       console.log('softkeyLeftListener', name);
     },
     softkeyRightListener: function(evt) {
-      if (dataConnectionStatus && dataConnectionStatus.open) {
+      if (dataConnectionStatus) {
         return;
       }
       qrScanner = new QRScanner({
@@ -67,14 +71,26 @@
     dataConnection = peer.connect(id, { reliable: true });
     dataConnection.on("open", () => {
       dataConnectionStatus = true;
-      console.log("[SLAVE] open"); // SLAVE CONNECTED TO MASTER
+      console.log("[SLAVE] open", dataConnectionStatus, dataConnection.open); // SLAVE CONNECTED TO MASTER
+      if (dataConnectionStatus && dataConnection && dataConnection.open) {
+        dataConnection.send({ type: SyncProtocol.PING });
+      }
     });
     dataConnection.on("data", (data) => {
       console.log("[SLAVE] recv data:", data);
-      setTimeout(() => {
-        console.log("[SLAVE] Send Ping");
-        dataConnection.send("Ping from slave");
-      }, 2000);
+      try {
+        if (data && data.type == SyncProtocol.PONG) {
+          connectionLastPing = new Date().getTime();
+          setTimeout(() => {
+            if (dataConnectionStatus && dataConnection && dataConnection.open) {
+              dataConnection.send({ type: SyncProtocol.PING });
+            }
+          }, 3000);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+      smsSyncHub.filterEvent(data);
     });
     dataConnection.on("disconnected", () => {
       dataConnectionStatus = false;
@@ -86,8 +102,13 @@
     });
     dataConnection.on("error", (err) => {
       console.log("[SLAVE] error", err);
-      alert(err.toString());
     });
+  }
+
+  const broadcastCallback = (data) => {
+    if (dataConnectionStatus && dataConnection && dataConnection.open) {
+      dataConnection.send(data);
+    }
   }
 
   onMount(() => {
@@ -97,6 +118,18 @@
     softwareKey.setText({ left: 'LSK', center: 'DEMO', right: 'Scan' });
     navInstance.attachListener();
     peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
+    peer.on("disconnected", () => {
+      dataConnectionStatus = false;
+      console.log("[peer.SLAVE] disconnected");
+    });
+    peer.on("close", () => {
+      dataConnectionStatus = false;
+      console.log("[peer.SLAVE] close");
+    });
+    peer.on("error", (err) => {
+      console.log("[peer.SLAVE] error", error.toString());
+    });
+    smsSyncHub = new SMSSyncHub(broadcastCallback);
   });
 
   onDestroy(() => {

@@ -5,6 +5,7 @@
     import QRCode from 'qr-image-generator';
     import { Peer, type DataConnection } from 'peerjs';
     import { RequestSystemStatus } from '../types/system';
+    import { SyncProtocol } from '../../../kaios-app/src/system/sync_protocol';
 
     let peer: Peer;
     let dataConnection: DataConnection;
@@ -40,13 +41,15 @@
             dataConnection = conn;
             dataConnection.on("open", () => {
                 console.log("[MASTER] open");
-                console.log("[MASTER] Send Ping");
-                dataConnection.send("Ping from master");
                 isKaiOSDeviceConnected = true;
                 broadcastConnectionStatus();
+                dataConnection.send({ type: SyncProtocol.SMS_SYNC });
             });
             dataConnection.on("data", (data) => {
                 console.log("[MASTER] recv data:", data);
+                if (data && data.type == SyncProtocol.PING && dataConnectionStatus && dataConnection && dataConnection.open) {
+                    dataConnection.send({ type: SyncProtocol.PONG });
+                }
             });
             dataConnection.on("close", () => {
                 console.log("[MASTER] close"); // SLAVE DC
