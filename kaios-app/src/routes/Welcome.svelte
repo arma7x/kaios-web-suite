@@ -23,9 +23,7 @@
   let navOptions = {
     verticalNavClass: 'vertClass',
     horizontalNavClass: 'horzClass',
-    softkeyLeftListener: function(evt) {
-      console.log('softkeyLeftListener', name);
-    },
+    softkeyLeftListener: function(evt) {},
     softkeyRightListener: function(evt) {
       if (dataConnectionStatus) {
         return;
@@ -54,12 +52,9 @@
       });
     },
     enterListener: function(evt) {
-      console.log('enterListener', name);
       goto('demo');
     },
-    backspaceListener: function(evt) {
-      console.log('backspaceListener', name);
-    }
+    backspaceListener: function(evt) {}
   };
 
   let navInstance = createKaiNavigator(navOptions);
@@ -71,16 +66,17 @@
     dataConnection = peer.connect(id, { reliable: true });
     dataConnection.on("open", () => {
       dataConnectionStatus = true;
-      console.log("[SLAVE] open", dataConnectionStatus, dataConnection.open); // SLAVE CONNECTED TO MASTER
+      // console.log("[SLAVE] open", dataConnectionStatus, dataConnection.open); // SLAVE CONNECTED TO MASTER
       if (dataConnectionStatus && dataConnection && dataConnection.open) {
         dataConnection.send({ type: SyncProtocol.PING });
       }
     });
     dataConnection.on("data", (data) => {
-      console.log("[SLAVE] recv data:", data);
+      // console.log("[SLAVE] recv data:", data);
       try {
         if (data && data.type == SyncProtocol.PONG) {
           connectionLastPing = new Date().getTime();
+          console.log('connectionLastPing:', connectionLastPing);
           setTimeout(() => {
             if (dataConnectionStatus && dataConnection && dataConnection.open) {
               dataConnection.send({ type: SyncProtocol.PING });
@@ -94,11 +90,11 @@
     });
     dataConnection.on("disconnected", () => {
       dataConnectionStatus = false;
-      console.log("[SLAVE] disconnected");
+      // console.log("[SLAVE] disconnected");
     });
     dataConnection.on("close", () => {
       dataConnectionStatus = false;
-      console.log("[SLAVE] close"); // MASTER DC
+      // console.log("[SLAVE] close"); // MASTER DC
     });
     dataConnection.on("error", (err) => {
       console.log("[SLAVE] error", err);
@@ -112,7 +108,6 @@
   }
 
   onMount(() => {
-    console.log('onMount', name);
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
     softwareKey.setText({ left: 'LSK', center: 'DEMO', right: 'Scan' });
@@ -120,20 +115,19 @@
     peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
     peer.on("disconnected", () => {
       dataConnectionStatus = false;
-      console.log("[peer.SLAVE] disconnected");
+      // console.log("[peer.SLAVE] disconnected");
     });
     peer.on("close", () => {
       dataConnectionStatus = false;
-      console.log("[peer.SLAVE] close");
+      // console.log("[peer.SLAVE] close");
     });
     peer.on("error", (err) => {
-      console.log("[peer.SLAVE] error", error.toString());
+      console.log("[peer.SLAVE] error", error);
     });
     smsSyncHub = new SMSSyncHub(broadcastCallback);
   });
 
   onDestroy(() => {
-    console.log('onDestroy', name);
     navInstance.detachListener();
   });
 

@@ -31,28 +31,28 @@
         peer.on("open", (id) => {
             dataConnectionStatus = true;
             dataConnectionID = id;
-            console.log("[MASTER] open", dataConnectionID, dataConnectionStatus);
+            // console.log("[MASTER] open", dataConnectionID, dataConnectionStatus);
             broadcastConnectionStatus();
             generateQrCode();
         });
         // SLAVE CONNECTED TO MASTER
         peer.on("connection", (conn) => {
-            console.log("[MASTER] connection");
+            // console.log("[MASTER] connection");
             dataConnection = conn;
             dataConnection.on("open", () => {
-                console.log("[MASTER] open");
+                // console.log("[MASTER] open");
                 isKaiOSDeviceConnected = true;
                 broadcastConnectionStatus();
                 dataConnection.send({ type: SyncProtocol.SMS_SYNC });
             });
             dataConnection.on("data", (data) => {
-                console.log("[MASTER] recv data:", data);
+                // console.log("[MASTER] recv data:", data);
                 if (data && data.type == SyncProtocol.PING && dataConnectionStatus && dataConnection && dataConnection.open) {
                     dataConnection.send({ type: SyncProtocol.PONG });
                 }
             });
             dataConnection.on("close", () => {
-                console.log("[MASTER] close"); // SLAVE DC
+                // console.log("[MASTER] close"); // SLAVE DC
                 isKaiOSDeviceConnected = false;
                 broadcastConnectionStatus();
                 generateQrCode();
@@ -62,7 +62,7 @@
             });
         });
         peer.on("disconnected", () => {
-            console.log("[MASTER] disconnected");
+            // console.log("[MASTER] disconnected");
             dataConnectionID = null;
             dataConnectionStatus = false;
             isKaiOSDeviceConnected = false;
