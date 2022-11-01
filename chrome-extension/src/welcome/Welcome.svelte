@@ -129,8 +129,8 @@
                 <div class="row">
                     <button class="column column-25 button button-outline">SMS</button>
                     <button class="column column-25 button button-outline">Contacts</button>
+                    <button class="column column-25 button button-outline">Calendar</button>
                     <button class="column column-25 button button-outline">File Manager</button>
-                    <button class="column column-25 button button-outline">TODO</button>
                 </div>
             </div>
         {/if}
