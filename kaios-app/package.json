@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@zerodevx/svelte-toast": "^0.6.3",
+    "jsqr": "^1.4.0",
     "peerjs": "^1.4.7",
     "sirv-cli": "^1.0.0",
     "sprintf-js": "^1.1.2",

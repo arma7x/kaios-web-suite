@@ -3,6 +3,7 @@
   import { createKaiNavigator } from '../utils/navigation';
   import { onMount, onDestroy } from 'svelte';
   import { Peer, type DataConnection } from "peerjs";
+  import QRScanner from '../widgets/QRScanner.svelte';
 
   export let location: any;
   export let navigate: any;
@@ -11,64 +12,41 @@
   let name: string = 'Welcome';
 
   let peer: Peer;
-  let conn: DataConnection;
+  let dataConnection: DataConnection;
+  let dataConnectionStatus: bool = false;
+  let qrScanner: QRScanner;
 
   let navOptions = {
     verticalNavClass: 'vertClass',
     horizontalNavClass: 'horzClass',
     softkeyLeftListener: function(evt) {
       console.log('softkeyLeftListener', name);
-      let id = prompt('Enter id');
-      if (conn) {
-        conn.close();
-      }
-      conn = peer.connect(id, { reliable: true });
-      conn.on("open", () => {
-        console.log("[SLAVE] open"); // SLAVE CONNECTED TO MASTER
-      });
-      conn.on("data", (data) => {
-        console.log("[SLAVE] recv data:", data);
-        setTimeout(() => {
-          console.log("[SLAVE] Send Ping");
-          conn.send("Ping from slave");
-        }, 2000);
-      });
-      conn.on("disconnected", () => {
-        console.log("[SLAVE] disconnected");
-      });
-      conn.on("close", () => {
-        console.log("[SLAVE] close"); // MASTER DC
-      });
-      conn.on("error", (err) => {
-        console.log("[SLAVE] error", err);
-      });
     },
     softkeyRightListener: function(evt) {
-      console.log('softkeyRightListener', name);
-      peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
-      peer.on("open", (id) => {
-        console.log("[MASTER] open", id);
-      });
-      peer.on("connection", (_conn) => {  // SLAVE CONNECTED TO MASTER
-        conn = _conn;
-        console.log("[MASTER] connection");
-        conn.on("open", () => {
-          console.log("[MASTER] open");
-          console.log("[MASTER] Send Ping");
-          conn.send("Ping from master");
-        });
-        conn.on("data", (data) => {
-          console.log("[MASTER] recv data:", data);
-        });
-        conn.on("close", () => {
-          console.log("[MASTER] close"); // SLAVE DC
-        });
-        conn.on("error", (err) => {
-          console.log("[MASTER] error", err);
-        });
-      });
-      peer.on("disconnected", () => {
-        console.log("[MASTER] disconnected");
+      if (dataConnectionStatus && dataConnectionStatus.open) {
+        return;
+      }
+      qrScanner = new QRScanner({
+        target: document.body,
+        props: {
+          title: 'Scan QR Code',
+          onBackspace: (evt) => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            qrScanner.$destroy();
+          },
+          onOpened: () => {
+            navInstance.detachListener();
+          },
+          onClosed: () => {
+            navInstance.attachListener();
+            qrScanner = null;
+          },
+          callback: (token) => {
+            qrScanner.$destroy();
+            setupPeer(token.data);
+          }
+        }
       });
     },
     enterListener: function(evt) {
@@ -82,11 +60,41 @@
 
   let navInstance = createKaiNavigator(navOptions);
 
+  function setupPeer(id: string) {
+    if (dataConnection) {
+      dataConnection.close();
+    }
+    dataConnection = peer.connect(id, { reliable: true });
+    dataConnection.on("open", () => {
+      dataConnectionStatus = true;
+      console.log("[SLAVE] open"); // SLAVE CONNECTED TO MASTER
+    });
+    dataConnection.on("data", (data) => {
+      console.log("[SLAVE] recv data:", data);
+      setTimeout(() => {
+        console.log("[SLAVE] Send Ping");
+        dataConnection.send("Ping from slave");
+      }, 2000);
+    });
+    dataConnection.on("disconnected", () => {
+      dataConnectionStatus = false;
+      console.log("[SLAVE] disconnected");
+    });
+    dataConnection.on("close", () => {
+      dataConnectionStatus = false;
+      console.log("[SLAVE] close"); // MASTER DC
+    });
+    dataConnection.on("error", (err) => {
+      console.log("[SLAVE] error", err);
+      alert(err.toString());
+    });
+  }
+
   onMount(() => {
     console.log('onMount', name);
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
-    softwareKey.setText({ left: 'SLAVE', center: 'DEMO', right: 'MASTER' });
+    softwareKey.setText({ left: 'LSK', center: 'DEMO', right: 'Scan' });
     navInstance.attachListener();
     peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
   });
