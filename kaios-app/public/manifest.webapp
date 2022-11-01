@@ -25,9 +25,6 @@
   "origin": "app://kaios-web-suite.arma7x.com",
   "type": "certified",
   "permissions": {
-    "systemXHR": {
-      "description": "Required to load remote content"
-    },
     "sms": {
       "description": "WebSMS permission"
     },
@@ -50,6 +47,9 @@
     },
     "video-capture": {
       "description": "Required for qr-code reader"
+    },
+    "device-storage:sdcard":{
+      "access": "readwrite"
     }
   },
   "messages": [
