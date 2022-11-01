@@ -13,16 +13,17 @@
 
   let name: string = 'Welcome';
 
+  const PING_INTERVAL = 3000;
+
   let peer: Peer;
   let dataConnection: DataConnection;
   let dataConnectionStatus: bool = false;
   let qrScanner: QRScanner;
   let smsSyncHub: SMSSyncHub;
-  let connectionLastPing: any;
+  let connectionLastPing: any = 0;
+  let connectionPingInterval: any;
 
   let navOptions = {
-    verticalNavClass: 'vertClass',
-    horizontalNavClass: 'horzClass',
     softkeyLeftListener: function(evt) {},
     softkeyRightListener: function(evt) {
       if (dataConnectionStatus) {
@@ -69,6 +70,23 @@
       // console.log("[SLAVE] open", dataConnectionStatus, dataConnection.open); // SLAVE CONNECTED TO MASTER
       if (dataConnectionStatus && dataConnection && dataConnection.open) {
         dataConnection.send({ type: SyncProtocol.PING });
+        connectionPingInterval = setInterval(() => {
+          const diff = new Date().getTime() - connectionLastPing;
+          if (diff > PING_INTERVAL + 57000) {
+            clearInterval(connectionPingInterval);
+            dataConnectionStatus = false;
+            try {
+              if (dataConnection && dataConnection.open) {
+                dataConnection.close();
+              }
+            } catch (err) {}
+            peer.destroy();
+            peer.disconnect();
+            dataConnection = null;
+            initPeer();
+            alert(diff);
+          }
+        }, PING_INTERVAL);
       }
     });
     dataConnection.on("data", (data) => {
@@ -76,12 +94,11 @@
       try {
         if (data && data.type == SyncProtocol.PONG) {
           connectionLastPing = new Date().getTime();
-          console.log('connectionLastPing:', connectionLastPing);
           setTimeout(() => {
             if (dataConnectionStatus && dataConnection && dataConnection.open) {
               dataConnection.send({ type: SyncProtocol.PING });
             }
-          }, 3000);
+          }, PING_INTERVAL);
         }
       } catch (err) {
         console.log(err);
@@ -90,14 +107,41 @@
     });
     dataConnection.on("disconnected", () => {
       dataConnectionStatus = false;
+      if (connectionPingInterval) {
+        clearInterval(connectionPingInterval);
+      }
       // console.log("[SLAVE] disconnected");
     });
     dataConnection.on("close", () => {
       dataConnectionStatus = false;
+      if (connectionPingInterval) {
+        clearInterval(connectionPingInterval);
+      }
       // console.log("[SLAVE] close"); // MASTER DC
     });
     dataConnection.on("error", (err) => {
       console.log("[SLAVE] error", err);
+    });
+  }
+
+  function initPeer() {
+    peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
+    peer.on("disconnected", () => {
+      dataConnectionStatus = false;
+      if (connectionPingInterval) {
+        clearInterval(connectionPingInterval);
+      }
+      // console.log("[peer.SLAVE] disconnected");
+    });
+    peer.on("close", () => {
+      dataConnectionStatus = false;
+      if (connectionPingInterval) {
+        clearInterval(connectionPingInterval);
+      }
+      // console.log("[peer.SLAVE] close");
+    });
+    peer.on("error", (err) => {
+      console.log("[peer.SLAVE] error", error);
     });
   }
 
@@ -112,18 +156,7 @@
     appBar.setTitleText(name);
     softwareKey.setText({ left: 'LSK', center: 'DEMO', right: 'Scan' });
     navInstance.attachListener();
-    peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
-    peer.on("disconnected", () => {
-      dataConnectionStatus = false;
-      // console.log("[peer.SLAVE] disconnected");
-    });
-    peer.on("close", () => {
-      dataConnectionStatus = false;
-      // console.log("[peer.SLAVE] close");
-    });
-    peer.on("error", (err) => {
-      console.log("[peer.SLAVE] error", error);
-    });
+    initPeer();
     smsSyncHub = new SMSSyncHub(broadcastCallback);
   });
 
@@ -135,38 +168,12 @@
 
 <main id="welcome-screen" data-pad-top="28" data-pad-bottom="30">
   <h1>Hello {name}!</h1>
-  <div class="vertical">
-    <div class="vertClass">Vertical 1</div>
-    <div class="vertClass">Vertical 2</div>
-  </div>
-  <div class="horizontal">
-    <div style="flex:1;" class="horzClass">Horizontal 1</div>
-    <div style="flex:1;" class="horzClass">Horizontal 2</div>
-  </div>
+  <h4>Status: {#if dataConnectionStatus}Connected{:else}Disconnected{/if}</h4>
 </main>
 
 <style>
   #welcome-screen {
     overflow: scroll;
     width: 100%;
-  }
-  #welcome-screen > .vertical {
-    display:flex;
-    flex-direction:column;
-  }
-  #welcome-screen > .horizontal {
-    width:100%;
-    display:flex;
-    flex-direction:row;
-  }
-  :global(#welcome-screen > .vertical > .vertClass)
-  :global(#welcome-screen > .vertical > .horizontal) {
-    background-color: #ffffff;
-    color: #000000;
-  }
-  :global(#welcome-screen > .vertical > .vertClass.focus),
-  :global(#welcome-screen > .horizontal > .horzClass.focus) {
-    background-color: red!important;
-    color: #fff!important;
   }
 </style>
