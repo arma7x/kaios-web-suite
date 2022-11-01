@@ -109,7 +109,7 @@
     onDestroy(() => {
         chrome.runtime.onMessage.removeListener(onMessage);
         if (peer) {
-            if (dataConnection) {
+            if (dataConnection && dataConnection.open) {
                 dataConnection.close();
                 dataConnection = null;
             }
