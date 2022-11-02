@@ -44,8 +44,19 @@ class SMSSyncHub {
         break;
       case SyncProtocol.SMS_READ_MESSAGE:
         if (event.data.id != null) {
+          let len = event.data.id.length;
           event.data.id.forEach(id => {
-            navigator.mozMobileMessage.markMessageRead(id, true);
+            const req = navigator.mozMobileMessage.markMessageRead(id, true);
+            req.onsuccess = () => {
+              len--;
+              if (len == 0)
+                this.syncThread();
+            }
+            req.onerror = () => {
+              len--;
+              if (i == 0)
+                this.syncThread();
+            }
           })
         }
         break;

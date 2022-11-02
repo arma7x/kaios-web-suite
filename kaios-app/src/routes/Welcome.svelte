@@ -13,14 +13,14 @@
 
   let name: string = 'Welcome';
 
-  const PING_INTERVAL = 3000;
+  const PING_INTERVAL = 1000;
 
   let peer: Peer;
   let dataConnection: DataConnection;
   let dataConnectionStatus: bool = false;
   let qrScanner: QRScanner;
   let smsSyncHub: SMSSyncHub;
-  let connectionLastPing: any = 0;
+  let connectionPingTimestamp: number = 0;
   let connectionPingInterval: any;
 
   let navOptions = {
@@ -71,8 +71,8 @@
       if (dataConnectionStatus && dataConnection && dataConnection.open) {
         dataConnection.send({ type: SyncProtocol.PING });
         connectionPingInterval = setInterval(() => {
-          const diff = new Date().getTime() - connectionLastPing;
-          if (diff > PING_INTERVAL + 57000) {
+          const LATENCY = new Date().getTime() - connectionPingTimestamp;
+          if (LATENCY > 10000) {
             clearInterval(connectionPingInterval);
             dataConnectionStatus = false;
             try {
@@ -84,24 +84,20 @@
             peer.disconnect();
             dataConnection = null;
             initPeer();
-            alert(diff);
+            alert(LATENCY);
           }
-        }, PING_INTERVAL);
+        }, PING_INTERVAL + 2000);
       }
     });
     dataConnection.on("data", (data) => {
       // console.log("[SLAVE] recv data:", data);
-      try {
-        if (data && data.type == SyncProtocol.PONG) {
-          connectionLastPing = new Date().getTime();
-          setTimeout(() => {
-            if (dataConnectionStatus && dataConnection && dataConnection.open) {
-              dataConnection.send({ type: SyncProtocol.PING });
-            }
-          }, PING_INTERVAL);
-        }
-      } catch (err) {
-        console.log(err);
+      if (data && data.type == SyncProtocol.PONG) {
+        connectionPingTimestamp = data.data.time;
+        setTimeout(() => {
+          if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            dataConnection.send({ type: SyncProtocol.PING });
+          }
+        }, PING_INTERVAL);
       }
       smsSyncHub.filterEvent(data);
     });

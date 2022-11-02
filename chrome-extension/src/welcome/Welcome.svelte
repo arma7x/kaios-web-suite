@@ -13,6 +13,9 @@
     let dataConnectionStatus: bool = false;
     let isKaiOSDeviceConnected: bool = false;
 
+    let threads: any = {};
+    let messages: any = {};
+
     function onMessage(request, sender, sendResponse) {
         switch (request.type) {
             case 0:
@@ -47,8 +50,19 @@
             });
             dataConnection.on("data", (data) => {
                 // console.log("[MASTER] recv data:", data);
-                if (data && data.type == SyncProtocol.PING && dataConnectionStatus && dataConnection && dataConnection.open) {
-                    dataConnection.send({ type: SyncProtocol.PONG });
+                switch (data.type) {
+                    case SyncProtocol.PING:
+                        if (dataConnectionStatus && dataConnection && dataConnection.open) {
+                            dataConnection.send({ type: SyncProtocol.PONG, data: { time: new Date().getTime() } });
+                        }
+                        break;
+                    case SyncProtocol.SMS_SYNC:
+                        threads = data.data.threads;
+                        messages = data.data.messages;
+                        console.log(threads, messages);
+                        break;
+                    default:
+                        console.log("Unknown Type:", data.type);
                 }
             });
             dataConnection.on("close", () => {
@@ -98,6 +112,83 @@
         }, 100);
     }
 
+    function sendSMSMessage(receivers: string[], message: string, iccId: string) {
+        if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            dataConnection.send({
+                type: SyncProtocol.SMS_SEND_MESSAGE,
+                data: { receivers, message, iccId }
+            });
+        }
+    }
+
+    function testSendSMSMessage() {
+        sendSMSMessage(["20505"], "HELP", "");
+    }
+
+    function readSMSMessage(id: Array<string|number>) {
+        if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            dataConnection.send({
+                type: SyncProtocol.SMS_READ_MESSAGE,
+                data: { id }
+            });
+        }
+    }
+
+    function testReadSMSMessage() {
+        const id = prompt("Enter message id").trim();
+        if (id && id != '') {
+            readSMSMessage([id]);
+        } else {
+            console.log("Invalid Message ID");
+        }
+    }
+
+    function testReadSMSMessageThreads() {
+        const id = prompt("Enter thread id").trim();
+        if (id && id != '' && messages[id]) {
+            let ids = [];
+            messages[id].forEach(msg => {
+                ids.push(msg.id);
+            });
+            console.log(ids);
+            readSMSMessage(ids);
+        } else {
+            console.log("Invalid Thread ID");
+        }
+    }
+
+    function deleteSMSMessage(id: Array<string|number>) {
+        if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            dataConnection.send({
+                type: SyncProtocol.SMS_DELETE_MESSAGE,
+                data: { id }
+            });
+        }
+    }
+
+    function testDeleteSMSMessage() {
+        const id = prompt("Enter message id").trim();
+        if (id && id != '') {
+            deleteSMSMessage([id]);
+        } else {
+            console.log("Invalid Message ID");
+        }
+    }
+
+    function testDeleteSMSMessageThreads() {
+        const id = prompt("Enter thread id").trim();
+        if (id && id != '' && messages[id]) {
+            let ids = [];
+            messages[id].forEach(msg => {
+                ids.push(msg.id);
+            });
+            console.log(ids);
+            deleteSMSMessage(ids);
+        } else {
+            console.log("Invalid Thread ID");
+        }
+    }
+
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
         broadcastConnectionStatus();
@@ -134,6 +225,13 @@
                     <button class="column column-25 button button-outline">Contacts</button>
                     <button class="column column-25 button button-outline">Calendar</button>
                     <button class="column column-25 button button-outline">File Manager</button>
+                </div>
+                <div class="row">
+                    <button class="column column-25 button button-outline" on:click={testSendSMSMessage}>TEST SEND SMS</button>
+                    <button class="column column-25 button button-outline" on:click={testReadSMSMessage}>TEST READ SMS</button>
+                    <button class="column column-25 button button-outline" on:click={testReadSMSMessageThreads}>TEST READ THREAD</button>
+                    <button class="column column-25 button button-outline" on:click={testDeleteSMSMessage}>TEST DELETE SMS</button>
+                    <button class="column column-25 button button-outline" on:click={testDeleteSMSMessageThreads}>TEST DELETE THREAD</button>
                 </div>
             </div>
         {/if}
