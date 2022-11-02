@@ -1,8 +1,6 @@
 declare var navigator:any;
 
-type BroadcastCallback = (data: any) => void;
-
-import { SyncProtocol } from './sync_protocol';
+import { SyncProtocol, BroadcastCallback } from './sync_protocol';
 
 class SMSSyncHub {
 

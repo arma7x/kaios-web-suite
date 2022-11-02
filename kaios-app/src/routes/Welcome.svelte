@@ -5,6 +5,7 @@
   import { Peer, type DataConnection } from "peerjs";
   import QRScanner from '../widgets/QRScanner.svelte';
   import SMSSyncHub from '../system/sms_sync_hub';
+  import ContactSyncHub from '../system/contact_sync_hub';
   import { SyncProtocol } from '../system/sync_protocol';
 
   export let location: any;
