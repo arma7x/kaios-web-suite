@@ -123,7 +123,7 @@ class ContactSyncHub {
     }
   }
 
-  findContact(filter: FilterContactParameter, toJSON: bool = false): Promise<any> {
+  findContact(filter: FilterContactOption, toJSON: bool = false): Promise<any> {
     return new Promise((resolve, reject) => {
       var request = window.navigator.mozContacts.find(filter || {});
       request.onsuccess = function() {

@@ -19,7 +19,7 @@ export enum SyncProtocol {
 
 export type BroadcastCallback = (data: any) => void;
 
-export interface FilterContactParameter {
+export interface FilterContactOption {
   filterBy: Array<string>,
   filterValue: string,
   filterOp: string,
