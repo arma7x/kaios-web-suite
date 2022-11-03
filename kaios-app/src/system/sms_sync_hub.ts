@@ -43,11 +43,13 @@ class SMSSyncHub {
         break;
       case SyncProtocol.SMS_DELETE_MESSAGE:
         const req = navigator.mozMobileMessage.delete(event.data.id);
-        req.onsuccess = () => {
+        req.onsuccess = (result) => {
+          let response = typeof result.target.result == 'object' ? result.target.result : [result.target.result ? 1 : 0];
+          this.broadcastCallback({ type: SyncProtocol.SMS_DELETE_MESSAGE, data: { request: event.data.id, response: response } });
           this.syncThread();
         }
         req.onerror = () => {
-          this.syncThread();
+          console.warn(err);
         }
         break;
       case SyncProtocol.SMS_READ_MESSAGE:

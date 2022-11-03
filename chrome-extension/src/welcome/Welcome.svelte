@@ -61,6 +61,9 @@
                     case SyncProtocol.SMS_GET_MESSAGES:
                         console.log(data.data.messages);
                         break;
+                    case SyncProtocol.SMS_DELETE_MESSAGE:
+                        console.log(data.data);
+                        break;
                     default:
                         console.log("Unknown :", data);
                 }
@@ -174,7 +177,7 @@
     function testDeleteSMSMessage() {
         const id = prompt("Enter message id").trim();
         if (id && id != '') {
-            deleteSMSMessage([id]);
+            deleteSMSMessage(id.split(','));
         } else {
             console.log("Invalid Message ID");
         }
