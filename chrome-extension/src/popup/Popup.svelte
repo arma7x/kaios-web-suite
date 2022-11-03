@@ -35,7 +35,7 @@
         chrome.runtime.onMessage.addListener(onMessage);
         chrome.runtime.sendMessage({ type: RequestSystemStatus.ConnectionStatus }).catch(err => console.log(err));
         chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-            buttonVisibility = tabs[0].url !== chrome.runtime.getURL('src/welcome/welcome.html');
+            buttonVisibility = tabs[0].url.indexOf(chrome.runtime.getURL('src/welcome/welcome.html')) < 0;
         });
     });
 
