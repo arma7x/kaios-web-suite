@@ -21,6 +21,7 @@
   let dataConnectionStatus: bool = false;
   let qrScanner: QRScanner;
   let smsSyncHub: SMSSyncHub;
+  let contactSyncHub: ContactSyncHub;
   let connectionPingTimestamp: number = 0;
   let connectionPingInterval: any;
 
@@ -101,6 +102,7 @@
         }, PING_INTERVAL);
       }
       smsSyncHub.filterEvent(data);
+      contactSyncHub.filterEvent(data);
     });
     dataConnection.on("disconnected", () => {
       dataConnectionStatus = false;
@@ -155,6 +157,7 @@
     navInstance.attachListener();
     initPeer();
     smsSyncHub = new SMSSyncHub(broadcastCallback);
+    contactSyncHub = new ContactSyncHub(broadcastCallback);
   });
 
   onDestroy(() => {
