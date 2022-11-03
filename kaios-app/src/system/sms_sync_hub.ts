@@ -88,14 +88,14 @@ class SMSSyncHub {
       this.syncThread();
     } else {
       let content = segments.pop();
-      this.sendMessage(receivers, content, sendOpts);
+      this.sendSMS(receivers, content, sendOpts);
       .finally(() => {
         this.processMessageSegments(receivers, segments, sendOpts);
       });
     }
   }
 
-  sendMessage(receivers, content, sendOpts): Promise<Error|void> {
+  sendSMS(receivers, content, sendOpts): Promise<Error|void> {
     return new Promise((resolve, reject) => {
       let req = navigator.mozSettings.createLock().get('ril.sms.encoding_mode');
       req.onsuccess = ()=> {
@@ -122,6 +122,11 @@ class SMSSyncHub {
         reject(err);
       }
     })
+  }
+
+  // https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozMobileMessageManager/sendMMS.html
+  sendMMS() {
+
   }
 
   syncThread() {
