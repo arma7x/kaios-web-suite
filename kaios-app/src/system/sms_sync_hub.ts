@@ -17,6 +17,7 @@ class SMSSyncHub {
   }
 
   filterEvent(event: any) {
+    // console.log('SMSSyncHub.filterEvent: ', event.type);
     switch (event.type) {
       case SyncProtocol.SMS_SYNC:
         this.syncThread();
@@ -58,8 +59,6 @@ class SMSSyncHub {
           })
         }
         break;
-      default:
-        console.log("Unknown Type:", data.type);
     }
   }
 

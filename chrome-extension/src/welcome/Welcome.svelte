@@ -49,7 +49,6 @@
                 dataConnection.send({ type: SyncProtocol.SMS_SYNC });
             });
             dataConnection.on("data", (data) => {
-                // console.log("[MASTER] recv data:", data);
                 switch (data.type) {
                     case SyncProtocol.PING:
                         if (dataConnectionStatus && dataConnection && dataConnection.open) {
@@ -62,7 +61,7 @@
                         console.log(threads, messages);
                         break;
                     default:
-                        console.log("Unknown Type:", data.type);
+                        console.log("Unknown :", data);
                 }
             });
             dataConnection.on("close", () => {
@@ -189,6 +188,22 @@
         }
     }
 
+    function testContact() {
+        if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            console.log("run testContact");
+            const filter = {
+              filterBy: ['id'],
+              filterValue: 'f4f790cbc5c5498d8f845d031dd8d567',
+              filterOp: 'match',
+              filterLimit: 1
+            };
+            dataConnection.send({ type: SyncProtocol.CONTACT_FIND, data: { filter } });
+            dataConnection.send({ type: SyncProtocol.CONTACT_GET_ALL });
+            dataConnection.send({ type: SyncProtocol.CONTACT_GET_COUNT });
+            dataConnection.send({ type: SyncProtocol.CONTACT_GET_REVISION });
+        }
+    }
+
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
         broadcastConnectionStatus();
@@ -232,6 +247,7 @@
                     <button class="column column-25 button button-outline" on:click={testReadSMSMessageThreads}>TEST READ THREAD</button>
                     <button class="column column-25 button button-outline" on:click={testDeleteSMSMessage}>TEST DELETE SMS</button>
                     <button class="column column-25 button button-outline" on:click={testDeleteSMSMessageThreads}>TEST DELETE THREAD</button>
+                    <button class="column column-25 button button-outline" on:click={testContact}>TEST CONTACT</button>
                 </div>
             </div>
         {/if}

@@ -11,91 +11,119 @@ class ContactSyncHub {
   }
 
   filterEvent(event: any) {
+    // console.log('ContactSyncHub.filterEvent: ', event.type);
+    var _self = this;
     switch (event.type) {
       case SyncProtocol.CONTACT_CLEAR:
-        var request = window.navigator.mozContacts.clear();
-        request.onsuccess = function () {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_CLEAR, data: true });
-        }
-        request.onerror = function (error) {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_CLEAR, error: error.toString() });
+        try {
+          var request = window.navigator.mozContacts.clear();
+          request.onsuccess = function () {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_CLEAR, data: true });
+          }
+          request.onerror = function (err) {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_CLEAR, error: err.toString() });
+          }
+        } catch (err) {
+          _self.broadcastCallback({ type: SyncProtocol.CONTACT_CLEAR, error: err.toString() });
         }
         break;
       case SyncProtocol.CONTACT_FIND:
-        this.findContact(event.data.filter, true)
-        .then(contacts => {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_FIND, data: { contacts } });
-        })
-        .catch(err => {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_FIND, error: error.toString() });
-        });
+        try {
+          _self.findContact(event.data ? event.data.filter : {} || {}, true)
+          .then(contacts => {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_FIND, data: { contacts } });
+          })
+          .catch(err => {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_FIND, error: err.toString() });
+          });
+        } catch(err) {
+          _self.broadcastCallback({ type: SyncProtocol.CONTACT_FIND, error: err.toString() });
+        }
         break;
       case SyncProtocol.CONTACT_GET_ALL:
-        var contacts = [];
-        var count = 0;
-        var request = window.navigator.mozContacts.getAll(event.data.filter || {});
-        request.onsuccess = function() {
-          if(this.result) {
-            count++;
-            contacts.push(this.result.toJSON());
-            this.continue();
-          } else {
-            this.broadcastCallback({ type: SyncProtocol.CONTACT_GET_ALL, data: { contacts, count } });
+        try {
+          var contacts = [];
+          var count = 0;
+          var request = window.navigator.mozContacts.getAll(event.data ? event.data.filter : {} || {});
+          request.onsuccess = function() {
+            if(this.result) {
+              count++;
+              contacts.push(this.result.toJSON());
+              this.continue();
+            } else {
+              _self.broadcastCallback({ type: SyncProtocol.CONTACT_GET_ALL, data: { contacts, count } });
+            }
           }
-        }
-        request.onerror = function() {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_GET_ALL, error: error.toString() });
+          request.onerror = function(err) {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_GET_ALL, error: err.toString() });
+          }
+        } catch(err) {
+          _self.broadcastCallback({ type: SyncProtocol.CONTACT_GET_ALL, error: err.toString() });
         }
         break;
       case SyncProtocol.CONTACT_GET_COUNT:
-        var request = window.navigator.mozContacts.getCount();
-        request.onsuccess = function () {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_GET_COUNT, data: this.result });
-        }
-        request.onerror = function () {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_GET_COUNT, error: error.toString() });
+        try {
+          var request = window.navigator.mozContacts.getCount();
+          request.onsuccess = function () {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_GET_COUNT, data: this.result });
+          }
+          request.onerror = function (err) {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_GET_COUNT, error: err.toString() });
+          }
+        } catch (err) {
+          _self.broadcastCallback({ type: SyncProtocol.CONTACT_GET_COUNT, error: err.toString() });
         }
         break;
       case SyncProtocol.CONTACT_GET_REVISION:
-        var request = window.navigator.mozContacts.getRevision();
-        request.onsuccess = function () {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_GET_REVISION, data: this.result });
-        }
-        request.onerror = function () {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_GET_REVISION, error: error.toString() });
+        try {
+          var request = window.navigator.mozContacts.getRevision();
+          request.onsuccess = function () {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_GET_REVISION, data: this.result });
+          }
+          request.onerror = function (err) {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_GET_REVISION, error: err.toString() });
+          }
+        } catch (err) {
+          _self.broadcastCallback({ type: SyncProtocol.CONTACT_GET_REVISION, error: err.toString() });
         }
         break;
       case SyncProtocol.CONTACT_REMOVE:
-        this.findContact(event.data.filter, false)
-        .then(contacts => {
-          if (contacts.length == 0)
-            return Promise.reject("No contacts was found!");
-          else
-            return this.removeContact(contacts[0]);
-        })
-        .then(() => {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_REMOVE, data: true });
-        })
-        .catch(err => {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_REMOVE, error: error.toString() });
-        });
+        try {
+          _self.findContact(event.data.filter, false)
+          .then(contacts => {
+            if (contacts.length == 0)
+              return Promise.reject("No contacts was found!");
+            else
+              return _self.removeContact(contacts[0]);
+          })
+          .then(() => {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_REMOVE, data: true });
+          })
+          .catch(err => {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_REMOVE, error: err.toString() });
+          });
+        } catch (err) {
+          _self.broadcastCallback({ type: SyncProtocol.CONTACT_REMOVE, error: err.toString() });
+        }
         break;
       case SyncProtocol.CONTACT_SAVE:
-        var contact = new mozContact(event.data.contact);
-        var request = window.navigator.mozContacts.save(contact);
-        request.onsuccess = function () {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_SAVE, data: true });
-        }
-        request.onerror = function () {
-          this.broadcastCallback({ type: SyncProtocol.CONTACT_SAVE, error: error.toString() });
+        try {
+          var contact = new mozContact(event.data.contact);
+          var request = window.navigator.mozContacts.save(contact);
+          request.onsuccess = function () {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_SAVE, data: true });
+          }
+          request.onerror = function (err) {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_SAVE, error: err.toString() });
+          }
+        } catch (err) {
+          _self.broadcastCallback({ type: SyncProtocol.CONTACT_SAVE, error: err.toString() });
         }
         break;
-      default:
-        console.log("Unknown Type:", data.type);
     }
   }
 
-  function findContact(filter: FilterContactParameter, toJSON: bool = false): Promise<any> {
+  findContact(filter: FilterContactParameter, toJSON: bool = false): Promise<any> {
     return new Promise((resolve, reject) => {
       var request = window.navigator.mozContacts.find(filter || {});
       request.onsuccess = function() {
@@ -115,7 +143,7 @@ class ContactSyncHub {
     });
   }
 
-  function removeContact(contact): Promise<any> {
+  removeContact(contact): Promise<any> {
     return new Promise((resolve, reject) => {
       var request = window.navigator.mozContacts.remove(contact);
       request.onsuccess = function () {

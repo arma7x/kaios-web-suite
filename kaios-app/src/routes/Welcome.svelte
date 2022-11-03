@@ -86,7 +86,6 @@
             peer.disconnect();
             dataConnection = null;
             initPeer();
-            alert(LATENCY);
           }
         }, PING_INTERVAL + 2000);
       }
@@ -100,9 +99,11 @@
             dataConnection.send({ type: SyncProtocol.PING });
           }
         }, PING_INTERVAL);
+      } else {
+        // console.log("[SLAVE] recv data:", data.type, data);
+        smsSyncHub.filterEvent(data);
+        contactSyncHub.filterEvent(data);
       }
-      smsSyncHub.filterEvent(data);
-      contactSyncHub.filterEvent(data);
     });
     dataConnection.on("disconnected", () => {
       dataConnectionStatus = false;
