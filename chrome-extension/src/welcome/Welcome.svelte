@@ -246,6 +246,8 @@
                     <button class="column column-25 button button-outline" on:click={testReadSMSMessage}>TEST READ SMS</button>
                     <button class="column column-25 button button-outline" on:click={testReadSMSMessageThreads}>TEST READ THREAD</button>
                     <button class="column column-25 button button-outline" on:click={testDeleteSMSMessage}>TEST DELETE SMS</button>
+                </div>
+                <div class="row">
                     <button class="column column-25 button button-outline" on:click={testDeleteSMSMessageThreads}>TEST DELETE THREAD</button>
                     <button class="column column-25 button button-outline" on:click={testContact}>TEST CONTACT</button>
                 </div>
