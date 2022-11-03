@@ -15,3 +15,10 @@ export enum SyncProtocol {
 }
 
 export type BroadcastCallback = (data: any) => void;
+
+export interface FilterContactParameter {
+  filterBy: Array<string>,
+  filterValue: string,
+  filterOp: string,
+  filterLimit: number,
+}
