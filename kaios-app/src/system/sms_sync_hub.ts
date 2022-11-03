@@ -31,7 +31,7 @@ class SMSSyncHub {
           console.warn(err);
         })
         break;
-      case SyncProtocol.SMS_SEND_MESSAGE:
+      case SyncProtocol.SMS_SEND_MESSAGE_SMS:
         let sendOpts = getSIMServiceId(event.data.iccId);
         getMessageSegments(event.data.message)
         .then((segments) => {
@@ -69,6 +69,16 @@ class SMSSyncHub {
             }
           })
         }
+        break;
+      case SyncProtocol.SMS_SMSC_ADDRESS:
+        navigator.mozMobileMessage.getSmscAddress()
+        .then(result => {
+          console.log(result);
+          this.broadcastCallback({ type: SyncProtocol.SMS_DELETE_MESSAGE, data: { result } });
+        })
+        .catch(err => {
+          console.warn(err);
+        });
         break;
     }
   }

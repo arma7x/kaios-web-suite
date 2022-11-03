@@ -64,6 +64,8 @@
                     case SyncProtocol.SMS_DELETE_MESSAGE:
                         console.log(data.data);
                         break;
+                    case SyncProtocol.SMS_SMSC_ADDRESS:
+                        console.log(data.data);
                     default:
                         console.log("Unknown :", data);
                 }
@@ -137,7 +139,7 @@
     function sendSMSMessage(receivers: string[], message: string, iccId: string) {
         if (dataConnectionStatus && dataConnection && dataConnection.open) {
             dataConnection.send({
-                type: SyncProtocol.SMS_SEND_MESSAGE,
+                type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
                 data: { receivers, message, iccId }
             });
         }
@@ -183,20 +185,6 @@
         }
     }
 
-    function testDeleteSMSMessageThreads() {
-        const id = prompt("Enter thread id").trim();
-        if (id && id != '' && messages[id]) {
-            let ids = [];
-            messages[id].forEach(msg => {
-                ids.push(msg.id);
-            });
-            console.log(ids);
-            deleteSMSMessage(ids);
-        } else {
-            console.log("Invalid Thread ID");
-        }
-    }
-
     function testContact() {
         if (dataConnectionStatus && dataConnection && dataConnection.open) {
             console.log("run testContact");
@@ -210,6 +198,14 @@
             dataConnection.send({ type: SyncProtocol.CONTACT_GET_ALL });
             dataConnection.send({ type: SyncProtocol.CONTACT_GET_COUNT });
             dataConnection.send({ type: SyncProtocol.CONTACT_GET_REVISION });
+        }
+    }
+
+    function getSmscAddress() {
+        if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            dataConnection.send({
+                type: SyncProtocol.SMS_SMSC_ADDRESS
+            });
         }
     }
 
@@ -257,8 +253,8 @@
                     <button class="column column-25 button button-outline" on:click={testDeleteSMSMessage}>TEST DELETE SMS</button>
                 </div>
                 <div class="row">
-                    <button class="column column-25 button button-outline" on:click={testDeleteSMSMessageThreads}>TEST DELETE THREAD</button>
                     <button class="column column-25 button button-outline" on:click={testContact}>TEST CONTACT</button>
+                    <button class="column column-25 button button-outline" on:click={getSmscAddress}>TEST SMSC ADDRESS</button>
                 </div>
             </div>
         {/if}
