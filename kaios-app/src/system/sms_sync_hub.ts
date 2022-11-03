@@ -19,8 +19,17 @@ class SMSSyncHub {
   filterEvent(event: any) {
     // console.log('SMSSyncHub.filterEvent: ', event.type);
     switch (event.type) {
-      case SyncProtocol.SMS_SYNC:
+      case SyncProtocol.SMS_GET_THREAD:
         this.syncThread();
+        break;
+      case SyncProtocol.SMS_GET_MESSAGES:
+        this.getMessages(event.data.threadId)
+        .then(messages => {
+          this.broadcastCallback({ type: SyncProtocol.SMS_GET_MESSAGES, data: { messages } });
+        })
+        .catch(err => {
+          console.warn(err);
+        })
         break;
       case SyncProtocol.SMS_SEND_MESSAGE:
         let sendOpts = getSIMServiceId(event.data.iccId);
@@ -105,8 +114,8 @@ class SMSSyncHub {
 
   syncThread() {
     this.getThreads()
-    .then(result => {
-      this.broadcastCallback({ type: SyncProtocol.SMS_SYNC, data: result });
+    .then(threads => {
+      this.broadcastCallback({ type: SyncProtocol.SMS_GET_THREAD, data: { threads } });
     })
     .catch(err => {
       console.warn(err);
@@ -115,39 +124,42 @@ class SMSSyncHub {
 
   getThreads() {
     return new Promise((resolve, reject) => {
-      let threads = {};
-      let messages = {};
-      let cursorThread = navigator.mozMobileMessage.getThreads();
-      cursorThread.onsuccess = function() {
-        if (!cursorThread.done) {
-          if(cursorThread.result !== null) {
-            threads[cursorThread.result.id] = clone(cursorThread.result);
-            messages[cursorThread.result.id] = [];
-            let cursorMessage = navigator.mozMobileMessage.getMessages({ threadId: cursorThread.result.id }, false);
-            cursorMessage.onsuccess = function() {
-              if (!cursorMessage.done) {
-                if (cursorMessage.result !== null && cursorMessage.result.type == 'sms') {
-                  messages[cursorThread.result.id].push(clone(cursorMessage.result));
-                  cursorMessage.continue();
-                }
-              } else if (cursorMessage.done) {
-                cursorThread.continue();
-              }
-            }
-            cursorMessage.onerror = (err) => {
-              console.warn(err)
-              cursorThread.continue();
-            }
+      let threads = [];
+      let request = navigator.mozMobileMessage.getThreads();
+      request.onsuccess = function() {
+        if (!request.done) {
+          if(request.result !== null) {
+            threads.push(clone(request.result));
+            request.continue();
           }
-        } else if (cursorThread.done) {
-          resolve({threads, messages});
+        } else if (request.done) {
+          resolve(threads);
         }
       }
-      cursorThread.onerror = (err) => {
-        console.warn(err);
-        reject(reject);
+      request.onerror = (err) => {
+        reject(err);
       }
     })
+  }
+
+  getMessages(threadId: string|number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let messages = [];
+      let request = navigator.mozMobileMessage.getMessages({ threadId: threadId }, false);
+      request.onsuccess = function() {
+        if (!request.done) {
+          if (request.result !== null) {
+            messages.push(clone(request.result));
+            request.continue();
+          }
+        } else if (request.done) {
+          resolve(messages);
+        }
+      }
+      request.onerror = (err) => {
+        reject(err);
+      }
+    });
   }
 }
 
