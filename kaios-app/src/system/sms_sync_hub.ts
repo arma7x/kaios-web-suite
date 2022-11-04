@@ -7,13 +7,35 @@ class SMSSyncHub {
   broadcastCallback: BroadcastCallback;
 
   constructor(callback: BroadcastCallback) {
-    navigator.mozSetMessageHandler('sms-received', () => {
-      this.syncThread();
-    });
-    navigator.mozSetMessageHandler('sms-sent', () => {
-      this.syncThread();
-    });
     this.broadcastCallback = callback;
+    navigator.mozMobileMessage.ondeliveryerror = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_DELIVERY_ERROR, data: { message: clone(evt.message) } });
+      this.syncThread();
+    }
+    navigator.mozMobileMessage.ondeliverysuccess = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_DELIVERY_SUCCESS, data: { message: clone(evt.message) } });
+      this.syncThread();
+    }
+    navigator.mozMobileMessage.onreceived = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_RECEIVED, data: { message: clone(evt.message) } });
+      this.syncThread();
+    }
+    navigator.mozMobileMessage.onretrieving = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_RETRIEVING, data: { message: clone(evt.message) } });
+      this.syncThread();
+    }
+    navigator.mozMobileMessage.onsent = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_SENT, data: { message: clone(evt.message) } });
+      this.syncThread();
+    }
+    navigator.mozMobileMessage.onsending = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_SENDING, data: { message: clone(evt.message) } });
+      this.syncThread();
+    }
+    navigator.mozMobileMessage.onfailed = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_FAILED, data: { message: clone(evt.message) } });
+      this.syncThread();
+    }
   }
 
   filterEvent(event: any) {

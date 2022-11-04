@@ -56,16 +56,16 @@
                         break;
                     case SyncProtocol.SMS_GET_THREAD:
                         threads = data.data.threads;
-                        console.log(threads);
+                        console.log(data.type, threads);
                         break;
                     case SyncProtocol.SMS_GET_MESSAGES:
-                        console.log(data.data.messages);
+                        console.log(data.type, data.data.messages);
                         break;
                     case SyncProtocol.SMS_DELETE_MESSAGE:
-                        console.log(data.data);
+                        console.log(data.type, data.data);
                         break;
                     case SyncProtocol.SMS_SMSC_ADDRESS:
-                        console.log(data.data);
+                        console.log(data.type, data.data);
                     default:
                         console.log("Unknown :", data);
                 }
