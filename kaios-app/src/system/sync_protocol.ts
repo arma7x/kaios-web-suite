@@ -1,4 +1,6 @@
 export enum SyncProtocol {
+  STREAM_PARENT           = "STREAM_PARENT",
+  STREAM_CHILD            = "STREAM_CHILD",
   PING                    = "PING",
   PONG                    = "PONG",
   SMS_GET_THREAD          = "SMS_GET_THREAD",
