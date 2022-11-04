@@ -2,10 +2,16 @@
     import "normalize.css";
     import "purecss";
     import { onMount, onDestroy } from 'svelte';
+    import Router, { push, pop, replace } from 'svelte-spa-router';
     import QRCode from 'qr-image-generator';
     import { Peer, type DataConnection } from 'peerjs';
     import { RequestSystemStatus } from '../types/system';
     import { SyncProtocol } from '../../../kaios-app/src/system/sync_protocol';
+
+    import SMS from './routes/SMS.svelte';
+    import Contacts from './routes/Contacts.svelte';
+    import Calendar from './routes/Calendar.svelte';
+    import FileManager from './routes/FileManager.svelte';
 
     let peer: Peer;
     let dataConnection: DataConnection;
@@ -13,7 +19,12 @@
     let dataConnectionStatus: bool = false;
     let isKaiOSDeviceConnected: bool = false;
 
-    let threads: any = [];
+    const routes = {
+        '/sms': SMS,
+        '/contacts': Contacts,
+        '/calendar': Calendar,
+        '/filemanager': FileManager,
+    }
 
     function onMessage(request, sender, sendResponse) {
         switch (request.type) {
@@ -45,29 +56,16 @@
                 // console.log("[MASTER] open");
                 isKaiOSDeviceConnected = true;
                 broadcastConnectionStatus();
-                dataConnection.send({ type: SyncProtocol.SMS_GET_THREAD });
+                push("#/sms");
             });
             dataConnection.on("data", (data) => {
-                switch (data.type) {
-                    case SyncProtocol.PING:
-                        if (dataConnectionStatus && dataConnection && dataConnection.open) {
-                            dataConnection.send({ type: SyncProtocol.PONG, data: { time: new Date().getTime() } });
-                        }
-                        break;
-                    case SyncProtocol.SMS_GET_THREAD:
-                        threads = data.data.threads;
-                        console.log(data.type, threads);
-                        break;
-                    case SyncProtocol.SMS_GET_MESSAGES:
-                        console.log(data.type, data.data.messages);
-                        break;
-                    case SyncProtocol.SMS_DELETE_MESSAGE:
-                        console.log(data.type, data.data);
-                        break;
-                    case SyncProtocol.SMS_SMSC_ADDRESS:
-                        console.log(data.type, data.data);
-                    default:
-                        console.log("Unknown :", data);
+                if (data.type !== SyncProtocol.PING) {
+                    const evt = new CustomEvent(SyncProtocol.STREAM_CHILD, { detail: data });
+                    window.dispatchEvent(evt);
+                } else {
+                    if (dataConnectionStatus && dataConnection && dataConnection.open) {
+                        dataConnection.send({ type: SyncProtocol.PONG, data: { time: new Date().getTime() } });
+                    }
                 }
             });
             dataConnection.on("close", () => {
@@ -75,6 +73,7 @@
                 isKaiOSDeviceConnected = false;
                 broadcastConnectionStatus();
                 generateQrCode();
+                document.location.href = chrome.runtime.getURL('src/welcome/welcome.html');
             });
             dataConnection.on("error", (err) => {
                 console.log("[MASTER] error", err);
@@ -86,6 +85,7 @@
             dataConnectionStatus = false;
             isKaiOSDeviceConnected = false;
             broadcastConnectionStatus();
+            document.location.href = chrome.runtime.getURL('src/welcome/welcome.html');
         });
     }
 
@@ -117,97 +117,49 @@
         }, 100);
     }
 
+    //function getSMSMessages(threadId: string|number) {
+        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            //dataConnection.send({
+                //type: SyncProtocol.SMS_GET_MESSAGES,
+                //data: { threadId }
+            //});
+        //}
+    //}
 
-    function getSMSMessages(threadId: string|number) {
-        if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            dataConnection.send({
-                type: SyncProtocol.SMS_GET_MESSAGES,
-                data: { threadId }
-            });
-        }
-    }
+    //function sendSMSMessage(receivers: string[], message: string, iccId: string) {
+        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            //dataConnection.send({
+                //type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
+                //data: { receivers, message, iccId }
+            //});
+        //}
+    //}
 
-    function testGetSMSMessages() {
-        const id = prompt("Enter thread id").trim();
-        if (id && id != '') {
-            getSMSMessages(id);
-        } else {
-            console.log("Invalid Thread ID");
-        }
-    }
+    //function readSMSMessage(id: Array<string|number>) {
+        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            //dataConnection.send({
+                //type: SyncProtocol.SMS_READ_MESSAGE,
+                //data: { id }
+            //});
+        //}
+    //}
 
-    function sendSMSMessage(receivers: string[], message: string, iccId: string) {
-        if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            dataConnection.send({
-                type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
-                data: { receivers, message, iccId }
-            });
-        }
-    }
+    //function deleteSMSMessage(id: Array<string|number>) {
+        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            //dataConnection.send({
+                //type: SyncProtocol.SMS_DELETE_MESSAGE,
+                //data: { id }
+            //});
+        //}
+    //}
 
-    function testSendSMSMessage() {
-        sendSMSMessage(["20505"], "HELP", "");
-    }
-
-    function readSMSMessage(id: Array<string|number>) {
-        if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            dataConnection.send({
-                type: SyncProtocol.SMS_READ_MESSAGE,
-                data: { id }
-            });
-        }
-    }
-
-    function testReadSMSMessage() {
-        const id = prompt("Enter message id").trim();
-        if (id && id != '') {
-            readSMSMessage([id]);
-        } else {
-            console.log("Invalid Message ID");
-        }
-    }
-
-    function deleteSMSMessage(id: Array<string|number>) {
-        if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            dataConnection.send({
-                type: SyncProtocol.SMS_DELETE_MESSAGE,
-                data: { id }
-            });
-        }
-    }
-
-    function testDeleteSMSMessage() {
-        const id = prompt("Enter message id").trim();
-        if (id && id != '') {
-            deleteSMSMessage(id.split(','));
-        } else {
-            console.log("Invalid Message ID");
-        }
-    }
-
-    function testContact() {
-        if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            console.log("run testContact");
-            const filter = {
-              filterBy: ['id'],
-              filterValue: 'f4f790cbc5c5498d8f845d031dd8d567',
-              filterOp: 'match',
-              filterLimit: 1
-            };
-            dataConnection.send({ type: SyncProtocol.CONTACT_FIND, data: { filter } });
-            dataConnection.send({ type: SyncProtocol.CONTACT_GET_ALL });
-            dataConnection.send({ type: SyncProtocol.CONTACT_GET_COUNT });
-            dataConnection.send({ type: SyncProtocol.CONTACT_GET_REVISION });
-        }
-    }
-
-    function getSmscAddress() {
-        if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            dataConnection.send({
-                type: SyncProtocol.SMS_SMSC_ADDRESS
-            });
-        }
-    }
+    //function getSmscAddress() {
+        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            //dataConnection.send({
+                //type: SyncProtocol.SMS_SMSC_ADDRESS
+            //});
+        //}
+    //}
 
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
@@ -215,6 +167,13 @@
         if (dataConnectionStatus == false) {
             setupPeer();
         }
+        if (document.location.href !== chrome.runtime.getURL('src/welcome/welcome.html'))
+            document.location.href = chrome.runtime.getURL('src/welcome/welcome.html');
+        window.addEventListener(SyncProtocol.STREAM_PARENT, (evt) => {
+            if (dataConnectionStatus && dataConnection && dataConnection.open) {
+                dataConnection.send(evt.detail);
+            }
+        });
     });
 
     onDestroy(() => {
@@ -232,34 +191,31 @@
 
 </script>
 
-<div class="pure-g container-center">
-    <h1 class="container-header">KaiOS Web Suite</h1>
-    {#if dataConnectionID}
-        {#if !isKaiOSDeviceConnected}
+<div class="pure-g { isKaiOSDeviceConnected ? 'container-normal' : 'container-center' }">
+    {#if !isKaiOSDeviceConnected}
+        {#if dataConnectionID}
+            <h1 class="container-header">KaiOS Web Suite</h1>
             <canvas id="canvas"></canvas>
         {:else}
-            <div class="pure-g">
-                <div class="pure-g pure-u-24-24">
-                    <button class="pure-button pure-button-primary">SMS</button>
-                    <button class="pure-button pure-button-disabled">Contacts</button>
-                    <button class="pure-button pure-button-disabled">Calendar</button>
-                    <button class="pure-button pure-button-disabled">File Manager</button>
-                </div>
-                <div class="pure-g pure-u-24-24">
-                    <button class="pure-button pure-button-primary" on:click={testGetSMSMessages}>TEST GET MESSAGES</button>
-                    <button class="pure-button pure-button-primary" on:click={testSendSMSMessage}>TEST SEND SMS</button>
-                    <button class="pure-button pure-button-primary" on:click={testReadSMSMessage}>TEST READ SMS</button>
-                    <button class="pure-button pure-button-primary" on:click={testDeleteSMSMessage}>TEST DELETE SMS</button>
-                </div>
-                <div class="pure-g pure-u-24-24">
-                    <button class="pure-button pure-button-primary" on:click={testContact}>TEST CONTACT</button>
-                    <button class="pure-button pure-button-primary" on:click={getSmscAddress}>TEST SMSC ADDRESS</button>
-                </div>
-            </div>
+            <h1 class="container-header">KaiOS Web Suite</h1>
+            <h4>Generating QR-Code</h4>
         {/if}
-    {:else}
-        <h4>Generating QR-Code</h4>
     {/if}
+    <div class="pure-g" style="width:80%;">
+        {#if isKaiOSDeviceConnected}
+        <div class="pure-u-1-5">
+            <div style="width:70%;">
+                <a href="#/sms" class="pure-button pure-button-primary menu">SMS</a>
+                <a href="#/contacts" class="pure-button pure-button-primary menu">Contacts</a>
+                <a href="#/calendar" class="pure-button pure-button-primary menu">Calendar</a>
+                <a href="#/filemanager" class="pure-button pure-button-primary menu">File Manager</a>
+            </div>
+        </div>
+        {/if}
+        <div class="pure-u-4-5">
+            <Router {routes}/>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -275,9 +231,22 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-
     }
-    .container-center  > .container-header {
+    .container-normal {
+        width: 100vw;
+        padding: 0;
+        margin: 0;
+        justify-content: center;
+        margin-top: 5em;
+    }
+    .container-center  > .container-header,
+    .container-normal  > .container-header {
         text-align: center;
+    }
+    .menu {
+        height: 100px;
+        width: 100%;
+        font-size: 2em;
+        margin-bottom: 0.5em;
     }
 </style>

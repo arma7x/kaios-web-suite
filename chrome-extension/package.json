@@ -23,6 +23,7 @@
         "normalize.css": "^8.0.1",
         "peerjs": "^1.4.7",
         "purecss": "^3.0.0",
-        "qr-image-generator": "^1.5.1"
+        "qr-image-generator": "^1.5.1",
+        "svelte-spa-router": "^3.3.0"
     }
 }
