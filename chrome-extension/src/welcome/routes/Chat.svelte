@@ -3,21 +3,25 @@
     import "purecss";
 
     import { onMount, onDestroy } from 'svelte';
+    import { location } from 'svelte-spa-router';
     import { SyncProtocol } from '../../../../kaios-app/src/system/sync_protocol';
 
-    let threads: Array<SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage> = [];
+    export let params = {};
+
+    let messages: Array<SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage> = [];
 
     function streamEvent(evt) {
-        if (evt.detail.type === SyncProtocol.SMS_GET_THREAD) {
-            threads = evt.detail.data.threads;
+        if (evt.detail.type === SyncProtocol.SMS_GET_MESSAGES && evt.detail.data.threadId === params.threadId) {
+            messages = evt.detail.data.messages;
         }
     }
 
     onMount(() => {
-        console.log('onMount SMS');
+        console.log('onMount CHAT', params);
         const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
             detail: {
-              type: SyncProtocol.SMS_GET_THREAD
+              type: SyncProtocol.SMS_GET_MESSAGES,
+              data: { threadId: params.threadId }
             }
         });
         window.dispatchEvent(evt);
@@ -25,19 +29,15 @@
     });
 
     onDestroy(() => {
-        console.log('onDestroy SMS');
+        console.log('onDestroy CHAT');
         window.removeEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
     });
 
 </script>
 
 <div>
-    <h2>SMS</h2>
-    <ul>
-        {#each threads as thread}
-            <li>
-                <a href="#/chat/{thread.id}">{ JSON.stringify(thread) }</a>
-            </li>
-        {/each}
-    </ul>
+    <h2>Thread {params.threadId}</h2>
+    <p>
+        { JSON.stringify(messages) }
+    </p>
 </div>

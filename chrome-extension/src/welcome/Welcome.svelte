@@ -9,6 +9,7 @@
     import { SyncProtocol } from '../../../kaios-app/src/system/sync_protocol';
 
     import SMS from './routes/SMS.svelte';
+    import Chat from './routes/Chat.svelte';
     import Contacts from './routes/Contacts.svelte';
     import Calendar from './routes/Calendar.svelte';
     import FileManager from './routes/FileManager.svelte';
@@ -21,6 +22,7 @@
 
     const routes = {
         '/sms': SMS,
+        '/chat/:threadId': Chat,
         '/contacts': Contacts,
         '/calendar': Calendar,
         '/filemanager': FileManager,

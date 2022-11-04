@@ -47,7 +47,7 @@ class SMSSyncHub {
       case SyncProtocol.SMS_GET_MESSAGES:
         this.getMessages(event.data.threadId)
         .then(messages => {
-          this.broadcastCallback({ type: SyncProtocol.SMS_GET_MESSAGES, data: { messages } });
+          this.broadcastCallback({ type: SyncProtocol.SMS_GET_MESSAGES, data: { messages, threadId: event.data.threadId } });
         })
         .catch(err => {
           console.warn(err);
