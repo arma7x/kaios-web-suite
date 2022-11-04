@@ -239,21 +239,21 @@
             <canvas id="canvas"></canvas>
         {:else}
             <div class="pure-g">
-                <div class="row">
-                    <button class="pure-button">SMS</button>
-                    <button class="pure-button">Contacts</button>
-                    <button class="pure-button">Calendar</button>
-                    <button class="pure-button">File Manager</button>
+                <div class="pure-g pure-u-24-24">
+                    <button class="pure-button pure-button-primary">SMS</button>
+                    <button class="pure-button pure-button-disabled">Contacts</button>
+                    <button class="pure-button pure-button-disabled">Calendar</button>
+                    <button class="pure-button pure-button-disabled">File Manager</button>
                 </div>
-                <div class="row">
-                    <button class="pure-button" on:click={testGetSMSMessages}>TEST GET MESSAGES</button>
-                    <button class="pure-button" on:click={testSendSMSMessage}>TEST SEND SMS</button>
-                    <button class="pure-button" on:click={testReadSMSMessage}>TEST READ SMS</button>
-                    <button class="pure-button" on:click={testDeleteSMSMessage}>TEST DELETE SMS</button>
+                <div class="pure-g pure-u-24-24">
+                    <button class="pure-button pure-button-primary" on:click={testGetSMSMessages}>TEST GET MESSAGES</button>
+                    <button class="pure-button pure-button-primary" on:click={testSendSMSMessage}>TEST SEND SMS</button>
+                    <button class="pure-button pure-button-primary" on:click={testReadSMSMessage}>TEST READ SMS</button>
+                    <button class="pure-button pure-button-primary" on:click={testDeleteSMSMessage}>TEST DELETE SMS</button>
                 </div>
-                <div class="row">
-                    <button class="pure-button" on:click={testContact}>TEST CONTACT</button>
-                    <button class="pure-button" on:click={getSmscAddress}>TEST SMSC ADDRESS</button>
+                <div class="pure-g pure-u-24-24">
+                    <button class="pure-button pure-button-primary" on:click={testContact}>TEST CONTACT</button>
+                    <button class="pure-button pure-button-primary" on:click={getSmscAddress}>TEST SMSC ADDRESS</button>
                 </div>
             </div>
         {/if}
@@ -279,10 +279,5 @@
     }
     .container-center  > .container-header {
         text-align: center;
-    }
-    .container-center  > .pure-g > .row > button {
-        font-weight: bold;
-        font-size: 1.5em;
-        margin: 0.1em;
     }
 </style>
