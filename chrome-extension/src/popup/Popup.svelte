@@ -1,6 +1,6 @@
 <script lang="ts">
     import "normalize.css";
-    import "milligram";
+    import "purecss";
     import { onMount, onDestroy } from 'svelte';
     import QRCode from 'qr-image-generator';
     import { RequestSystemStatus } from '../types/system';
@@ -45,32 +45,38 @@
 
 </script>
 
-<div class="container column">
-    <h3 style="text-align:center;margin-bottom:0.1em;">KaiOS Web Suite</h3>
-    <div style="display:flex;flex-direction:row;justify-content:space-between;">
+<div class="pure-g container">
+    <div class="pure-u">
+        <h1 style="text-align:center;margin:0em;">KaiOS Web Suite</h1>
+    </div>
+    <div class="pure-u" style="display:flex;flex-direction:row;justify-content:space-between;">
         <div>Network Status:</div>
         <div><b>{ dataConnectionStatus ? 'Connected' : 'Disconnected' }</b></div>
     </div>
     {#if isKaiOSDeviceConnected}
-        <blockquote>
-            <p><em>Show stats</em></p>
-        </blockquote>
+        <div class="pure-u">
+            <blockquote>
+                <p><em>Show stats</em></p>
+            </blockquote>
+        </div>
     {:else}
-        <div style="display:flex;flex-direction:row;justify-content:space-between;">
+        <div class="pure-u" style="display:flex;flex-direction:row;justify-content:space-between;">
             <div>KaiOS Device:</div>
             <div><b>{ isKaiOSDeviceConnected ? 'Connected' : 'Disconnected' }</b></div>
         </div>
     {/if}
     {#if buttonVisibility}
-    <div style="display:flex;justify-content:space-around;margin-top:0.1em;">
-        <button style="width:100%;" on:click={openWelcome}>Open KaiOS Web Suite</button>
+    <div class="pure-u" style="display:flex;justify-content:space-around;">
+        <button class="pure-button pure-button-primary" style="width:100%;" on:click={openWelcome}>Open KaiOS Web Suite</button>
     </div>
     {/if}
 </div>
 
 <style>
     .container {
-        margin: 1em 0;
-        width: 280px;
+        margin: 1em;
+        min-width: 200px;
+        display: flex;
+        flex-direction: column;
     }
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
     import "normalize.css";
-    import "milligram";
+    import "purecss";
     import { onMount, onDestroy } from 'svelte';
     import QRCode from 'qr-image-generator';
     import { Peer, type DataConnection } from 'peerjs';
@@ -232,29 +232,28 @@
 
 </script>
 
-<div class="container container-center">
-    <h2 class="container-header">KaiOS Web Suite</h2>
+<div class="pure-g container-center">
+    <h1 class="container-header">KaiOS Web Suite</h1>
     {#if dataConnectionID}
         {#if !isKaiOSDeviceConnected}
-            <h4>{dataConnectionID}</h4>
             <canvas id="canvas"></canvas>
         {:else}
-            <div class="container">
+            <div class="pure-g">
                 <div class="row">
-                    <button class="column column-25 button button-outline">SMS</button>
-                    <button class="column column-25 button button-outline">Contacts</button>
-                    <button class="column column-25 button button-outline">Calendar</button>
-                    <button class="column column-25 button button-outline">File Manager</button>
+                    <button class="pure-button">SMS</button>
+                    <button class="pure-button">Contacts</button>
+                    <button class="pure-button">Calendar</button>
+                    <button class="pure-button">File Manager</button>
                 </div>
                 <div class="row">
-                    <button class="column column-25 button button-outline" on:click={testGetSMSMessages}>TEST GET MESSAGES</button>
-                    <button class="column column-25 button button-outline" on:click={testSendSMSMessage}>TEST SEND SMS</button>
-                    <button class="column column-25 button button-outline" on:click={testReadSMSMessage}>TEST READ SMS</button>
-                    <button class="column column-25 button button-outline" on:click={testDeleteSMSMessage}>TEST DELETE SMS</button>
+                    <button class="pure-button" on:click={testGetSMSMessages}>TEST GET MESSAGES</button>
+                    <button class="pure-button" on:click={testSendSMSMessage}>TEST SEND SMS</button>
+                    <button class="pure-button" on:click={testReadSMSMessage}>TEST READ SMS</button>
+                    <button class="pure-button" on:click={testDeleteSMSMessage}>TEST DELETE SMS</button>
                 </div>
                 <div class="row">
-                    <button class="column column-25 button button-outline" on:click={testContact}>TEST CONTACT</button>
-                    <button class="column column-25 button button-outline" on:click={getSmscAddress}>TEST SMSC ADDRESS</button>
+                    <button class="pure-button" on:click={testContact}>TEST CONTACT</button>
+                    <button class="pure-button" on:click={getSmscAddress}>TEST SMSC ADDRESS</button>
                 </div>
             </div>
         {/if}
@@ -264,20 +263,24 @@
 </div>
 
 <style>
-    .container.container-center {
+    .container-center {
+        max-width: unset;
+        flex-flow: unset;
+        align-content: unset;
         height: 100vh;
+        width: 100vw;
         padding: 0;
         margin: 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        max-width: unset;
+
     }
-    .container.container-center  > .container-header {
+    .container-center  > .container-header {
         text-align: center;
     }
-    .container.container-center  > .container > .row > button {
+    .container-center  > .pure-g > .row > button {
         font-weight: bold;
         font-size: 1.5em;
         margin: 0.1em;
