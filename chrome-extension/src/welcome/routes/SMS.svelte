@@ -5,7 +5,7 @@
     import { onMount, onDestroy } from 'svelte';
     import { SyncProtocol } from '../../../../kaios-app/src/system/sync_protocol';
 
-    let threads: Array<SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage> = [];
+    let threads: Array<SyncProtocol.MozMobileMessageThread> = [];
 
     function streamEvent(evt) {
         if (evt.detail.type === SyncProtocol.SMS_GET_THREAD) {

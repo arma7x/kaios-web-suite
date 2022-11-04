@@ -71,6 +71,16 @@ export interface MmsAttachment {
   content: Blob,
 }
 
+// https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozMobileMessageThread.html
+export interface MozMobileMessageThread {
+  id: number,
+  body: string,
+  unreadCount: number,
+  participants: Array<string>,
+  timestamp: Date,
+  lastMessageType: MessageType,
+}
+
 // https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozSmsMessage.html
 export interface MozSmsMessage {
   type: MessageType,          // a string with the value sms.
