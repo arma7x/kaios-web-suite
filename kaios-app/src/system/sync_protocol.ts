@@ -102,3 +102,40 @@ export interface MozMmsMessage {
   sender: string,                    // a DOMString with the name of the sender.
   timestamp: Date,                   // a Date object with the timestamp of the message.
 }
+
+export interface MozContactTel {
+  type: Array<string>,
+  value: string,
+}
+export interface MozContactGeneric {
+  [key: string]: any
+}
+
+// https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozContact.html
+export interface MozContact {
+  id : string,
+  published: Date,
+  updated: Date,
+  name: Array<string>,
+  honorificPrefix: Array<string>,
+  givenName: Array<string>,
+  additionalName: Array<string>,
+  familyName: Array<string>,
+  honorificSuffix: Array<string>,
+  nickname: Array<string>,
+  email: Array<MozContactGeneric>,
+  photo: Blob,
+  url: Array<MozContactGeneric>,
+  category: Array<string>,
+  adr: Array<MozContactGeneric>,
+  tel: Array<MozContactTel>,
+  org: Array<string>,
+  jobTitle: Array<string>,
+  bday: Date,
+  note: Array<string>,
+  impp: Array<MozContactGeneric>,
+  anniversary: Date,
+  sex: string,
+  genderIdentity: string,
+  key: Array<MozContactGeneric>,
+}
