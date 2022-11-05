@@ -13,6 +13,7 @@
       message: SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage,
     }
 
+    let thread: SyncProtocol.MozMobileMessageThread;
     let messages: Array<SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage> = [];
     let messageIndex: {[key: string|number]: MessageIndex;} = {};
 
@@ -20,20 +21,26 @@
         switch (evt.detail.type) {
             case SyncProtocol.SMS_GET_MESSAGES:
                 if (evt.detail.data.threadId == params.threadId) {
+                    let id = [];
                     evt.detail.data.messages.forEach((message, index) => {
                         messageIndex[message.id] = { index, message };
+                        id.push(message.id);
                     });
                     messages = evt.detail.data.messages;
+                    readSMSMessage(id);
                 }
                 break;
             case SyncProtocol.SMS_ON_DELIVERY_ERROR:
             case SyncProtocol.SMS_ON_DELIVERY_SUCCESS:
             case SyncProtocol.SMS_ON_RECEIVED:
-            // case SyncProtocol.SMS_ON_RETRIEVING:
-            // case SyncProtocol.SMS_ON_SENT:
-            // case SyncProtocol.SMS_ON_SENDING:
-            // case SyncProtocol.SMS_ON_FAILED:
+            case SyncProtocol.SMS_ON_RETRIEVING:
+            case SyncProtocol.SMS_ON_SENT:
+            case SyncProtocol.SMS_ON_SENDING:
+            case SyncProtocol.SMS_ON_FAILED:
                 if (evt.detail.data.message.threadId == params.threadId) {
+                    if (evt.detail.type === SyncProtocol.SMS_ON_RECEIVED) {
+                        readSMSMessage([message.id]);
+                    }
                     const message = evt.detail.data.message;
                     if (messageIndex[message.id] == null) {
                         messages.push(message);
@@ -48,12 +55,54 @@
                 evt.detail.data.request.forEach((messageId, idx) => {
                     if (messageIndex[messageId] && evt.detail.data.response[idx] == 1) {
                         const index = messageIndex[messageId].index;
-                        delete messageIndex[messageId];
                         messages.splice(index, 1);
+                        delete messageIndex[messageId];
+                        messages = [...messages];
+                        messageIndex = {...messageIndex};
                     }
                 });
                 break;
         }
+    }
+
+    function sendSMSMessage() {
+        let text = prompt("Please enter text") || 'HELP';
+        const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
+            detail: {
+              type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
+              data: { receivers: thread.participants, message: text, iccId: messages[messages.length - 1].iccId }
+            }
+        });
+        window.dispatchEvent(evt);
+    }
+
+    function deleteSMSMessage(id: string|number) {
+        const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
+            detail: {
+              type: SyncProtocol.SMS_DELETE_MESSAGE,
+              data: { id: [id] }
+            }
+        });
+        window.dispatchEvent(evt);
+    }
+
+    function readSMSMessage(id: Array<string|number>) {
+        const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
+            detail: {
+              type: SyncProtocol.SMS_READ_MESSAGE,
+              data: { id  }
+            }
+        });
+        window.dispatchEvent(evt);
+    }
+
+    function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
 
     onMount(() => {
@@ -66,6 +115,8 @@
         });
         window.dispatchEvent(evt);
         window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
+        thread = JSON.parse(getParameterByName('data'));
+        console.log(thread);
     });
 
     onDestroy(() => {
@@ -77,9 +128,10 @@
 
 <div>
     <h2>Thread {params.threadId}</h2>
+    <button on:click={sendSMSMessage}>SEND SMS</button>
     <ul>
         {#each messages as message}
-            <li>{ JSON.stringify(message) }</li>
+            <li><button on:click={() => deleteSMSMessage(message.id)}>DELETE</button> { JSON.stringify(message) }</li>
         {/each}
     </ul>
     <p>

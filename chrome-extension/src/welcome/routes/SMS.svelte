@@ -36,7 +36,7 @@
     <ul>
         {#each threads as thread}
             <li>
-                <a href="#/chat/{thread.id}">{ JSON.stringify(thread) }</a>
+                <a href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}">{ JSON.stringify(thread) }</a>
             </li>
         {/each}
     </ul>
