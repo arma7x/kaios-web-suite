@@ -119,50 +119,6 @@
         }, 100);
     }
 
-    //function getSMSMessages(threadId: string|number) {
-        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            //dataConnection.send({
-                //type: SyncProtocol.SMS_GET_MESSAGES,
-                //data: { threadId }
-            //});
-        //}
-    //}
-
-    //function sendSMSMessage(receivers: string[], message: string, iccId: string) {
-        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            //dataConnection.send({
-                //type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
-                //data: { receivers, message, iccId }
-            //});
-        //}
-    //}
-
-    //function readSMSMessage(id: Array<string|number>) {
-        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            //dataConnection.send({
-                //type: SyncProtocol.SMS_READ_MESSAGE,
-                //data: { id }
-            //});
-        //}
-    //}
-
-    //function deleteSMSMessage(id: Array<string|number>) {
-        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            //dataConnection.send({
-                //type: SyncProtocol.SMS_DELETE_MESSAGE,
-                //data: { id }
-            //});
-        //}
-    //}
-
-    //function getSmscAddress() {
-        //if (dataConnectionStatus && dataConnection && dataConnection.open) {
-            //dataConnection.send({
-                //type: SyncProtocol.SMS_SMSC_ADDRESS
-            //});
-        //}
-    //}
-
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
         broadcastConnectionStatus();
