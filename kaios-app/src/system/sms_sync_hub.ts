@@ -96,10 +96,11 @@ class SMSSyncHub {
         navigator.mozMobileMessage.getSmscAddress()
         .then(result => {
           console.log(result);
-          this.broadcastCallback({ type: SyncProtocol.SMS_SMSC_ADDRESS, data: { result } });
+          this.broadcastCallback({ type: SyncProtocol.SMS_SMSC_ADDRESS, data: result });
         })
         .catch(err => {
           console.warn(err);
+          this.broadcastCallback({ type: SyncProtocol.SMS_SMSC_ADDRESS, data: err });
         });
         break;
     }
