@@ -29,10 +29,10 @@
             case SyncProtocol.SMS_ON_DELIVERY_ERROR:
             case SyncProtocol.SMS_ON_DELIVERY_SUCCESS:
             case SyncProtocol.SMS_ON_RECEIVED:
-            case SyncProtocol.SMS_ON_RETRIEVING:
-            case SyncProtocol.SMS_ON_SENT:
-            case SyncProtocol.SMS_ON_SENDING:
-            case SyncProtocol.SMS_ON_FAILED:
+            // case SyncProtocol.SMS_ON_RETRIEVING:
+            // case SyncProtocol.SMS_ON_SENT:
+            // case SyncProtocol.SMS_ON_SENDING:
+            // case SyncProtocol.SMS_ON_FAILED:
                 if (evt.detail.data.message.threadId == params.threadId) {
                     const message = evt.detail.data.message;
                     if (messageIndex[message.id] == null) {
