@@ -96,7 +96,7 @@ class SMSSyncHub {
         navigator.mozMobileMessage.getSmscAddress()
         .then(result => {
           console.log(result);
-          this.broadcastCallback({ type: SyncProtocol.SMS_DELETE_MESSAGE, data: { result } });
+          this.broadcastCallback({ type: SyncProtocol.SMS_SMSC_ADDRESS, data: { result } });
         })
         .catch(err => {
           console.warn(err);
