@@ -83,6 +83,7 @@ export interface MozMobileMessageThread {
 
 // https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozSmsMessage.html
 export interface MozSmsMessage {
+  iccId: string|number,
   type: MessageType,          // a string with the value sms.
   id: string|number,          // a number representing the id of the message.
   threadId: string|number,    // a number representing the id of the thread the message is part of.
@@ -98,6 +99,7 @@ export interface MozSmsMessage {
 
 // https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozMmsMessage.html
 export interface MozMmsMessage {
+  iccId: string|number,
   type: MessageType,                 // a string with the value mms.
   id: string|number,                 // a number representing the id of the message.
   threadId: string|number,           // a number representing the id of the thread the message is part of.
