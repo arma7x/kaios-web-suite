@@ -15,7 +15,7 @@
     import Chat from './routes/Chat.svelte';
     import Contacts from './routes/Contacts.svelte';
     import Calendar from './routes/Calendar.svelte';
-    import FileManager from './routes/FileManager.svelte';
+    import FileTransfer from './routes/FileTransfer.svelte';
 
     let peer: Peer;
     let dataConnection: DataConnection;
@@ -28,7 +28,7 @@
         '/chat/:threadId': Chat,
         '/contacts': Contacts,
         '/calendar': Calendar,
-        '/filemanager': FileManager,
+        '/filetransfer': FileTransfer,
     }
 
     function onMessage(request, sender, sendResponse) {
@@ -185,7 +185,7 @@
                 <a href="#/sms" class="pure-button pure-button-primary menu">SMS</a>
                 <a href="#/contacts" class="pure-button pure-button-primary menu">Contacts</a>
                 <a href="#/calendar" class="pure-button pure-button-primary menu">Calendar</a>
-                <a href="#/filemanager" class="pure-button pure-button-primary menu">File Manager</a>
+                <a href="#/filetransfer" class="pure-button pure-button-primary menu">FileTransfer</a>
             </div>
         </div>
         {/if}
