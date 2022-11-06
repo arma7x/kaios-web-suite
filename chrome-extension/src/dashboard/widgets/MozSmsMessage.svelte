@@ -17,9 +17,7 @@
         console.log('onDestroy MozSmsMessage');
     });
 
-    beforeUpdate(() => {
-      console.log('beforeUpdate:', message);
-    });
+    beforeUpdate(() => {});
 
 </script>
 

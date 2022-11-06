@@ -13,10 +13,7 @@
 
     onDestroy(() => {});
 
-    beforeUpdate(() => {
-      console.log('beforeUpdate:', message);
-    });
-
+    beforeUpdate(() => {});
 
 </script>
 
