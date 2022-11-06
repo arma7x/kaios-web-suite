@@ -14,6 +14,7 @@
       message: SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage,
     }
 
+    let title: string = null;
     let thread: SyncProtocol.MozMobileMessageThread;
     let messages: Array<SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage> = [];
     let messageIndex: {[key: string|number]: MessageIndex;} = {};
@@ -118,6 +119,7 @@
         window.dispatchEvent(evt);
         window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
         thread = JSON.parse(getParameterByName('data'));
+        title = getParameterByName('title');
     });
 
     onDestroy(() => {
@@ -127,23 +129,42 @@
 </script>
 
 <div>
-    <h1>Thread {params.threadId}</h1>
-    <button on:click={replySMS}>Reply SMS</button>
-    <div style="display:flex;flex-direction:column;width:100%;">
+    <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;margin-bottom:1em;">
+        <h1>{ title || 'Thread: ' + params.threadId }</h1>
+        <button on:click={replySMS}>Reply SMS</button>
+    </div>
+    <div style="display:flex;flex-direction:column;width:100%;height:70vh;overflow-y:scroll;">
         {#each messages as message}
             {#if message.sender == "" }
                 <div style="margin-bottom:1em;display:flex;flex-direction:row-reverse;width:100%;">
-                    <div style="width:95%;text-align:right;">
-                        <button on:click={() => deleteSMSMessage(message.id)}>DELETE</button> { JSON.stringify(message) }
+                    <div class="pure-button" style="max-width:95%;">
+                        <p>{ message.body }</p>
+                        <div style="display:flex;flex-direction:row;">
+                            <p>{ message.delivery == "error" ? "Error" : "" }</p>
+                            <small>{new Date(thread.timestamp).toLocaleString()}</small>
+                            <button on:click={() => deleteSMSMessage(message.id)}>DELETE</button>
+                        </div>
                     </div>
                 </div>
             {:else}
                 <div style="margin-bottom:1em;display:flex;flex-direction:row;width:100%;">
-                    <div style="width:95%;">
-                        <button on:click={() => deleteSMSMessage(message.id)}>DELETE</button> { JSON.stringify(message) }
+                    <div class="pure-button" style="max-width:95%;">
+                        <p>{ message.sender }</p>
+                        <p>{ message.body }</p>
+                        <div style="display:flex;flex-direction:row;">
+                            <p>{ message.delivery == "error" ? "Error" : "" }</p>
+                            <small>{new Date(thread.timestamp).toLocaleString()}</small>
+                            <button on:click={() => deleteSMSMessage(message.id)}>DELETE</button>
+                        </div>
                     </div>
                 </div>
             {/if}
         {/each}
     </div>
 </div>
+
+<style>
+    .pure-button {
+        text-align: unset;
+    }
+</style>

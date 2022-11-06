@@ -70,7 +70,7 @@
     <div>
         {#each threads as thread}
             <div class="thread">
-                <a class="pure-button" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}">
+                <a class="pure-button" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={thread.lastMessageSubject != "" ? thread.lastMessageSubject : (contactTelHash[thread.participants[0]] ? contactIdHash[contactTelHash[thread.participants[0]]].name[0] : thread.participants[0])}">
                     <b>{thread.lastMessageSubject != "" ? thread.lastMessageSubject : (contactTelHash[thread.participants[0]] ? contactIdHash[contactTelHash[thread.participants[0]]].name[0] : thread.participants[0])}</b>
                     <p>{thread.body}</p>
                     <small>{new Date(thread.timestamp).toLocaleString()}</small>
