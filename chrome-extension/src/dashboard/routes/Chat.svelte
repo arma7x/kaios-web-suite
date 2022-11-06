@@ -69,6 +69,9 @@
                         messages.splice(index, 1);
                         delete messageIndex[messageId];
                         messages = [...messages];
+                        messages.forEach((message, index) => {
+                            messageIndex[message.id] = { index, message };
+                        });
                         messageIndex = {...messageIndex};
                     }
                 });
