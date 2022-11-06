@@ -12,7 +12,7 @@ export default defineConfig({
         sourcemap: true,
         rollupOptions: {
           input: {
-                welcome: resolve(__dirname, 'src/welcome/welcome.html'),
+                dashboard: resolve(__dirname, 'src/dashboard/dashboard.html'),
           },
         },
     },

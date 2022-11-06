@@ -11,7 +11,7 @@
     let isKaiOSDeviceConnected: bool = false;
 
     function openWelcome() {
-        const optionsUrl = chrome.runtime.getURL('src/welcome/welcome.html');
+        const optionsUrl = chrome.runtime.getURL('src/dashboard/dashboard.html');
         chrome.tabs.query({url: optionsUrl}, (tabs) => {
             if (tabs.length) {
                 chrome.tabs.update(tabs[0].id, {active: true});
@@ -35,7 +35,7 @@
         chrome.runtime.onMessage.addListener(onMessage);
         chrome.runtime.sendMessage({ type: RequestSystemStatus.ConnectionStatus }).catch(err => console.log(err));
         chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-            buttonVisibility = tabs[0].url.indexOf(chrome.runtime.getURL('src/welcome/welcome.html')) < 0;
+            buttonVisibility = tabs[0].url.indexOf(chrome.runtime.getURL('src/dashboard/dashboard.html')) < 0;
         });
     });
 

@@ -29,7 +29,7 @@ chrome.runtime.onInstalled.addListener(() => {
     //const { menuItemId } = info
 
     //if (menuItemId === 'welcome') {
-        //const optionsUrl = chrome.runtime.getURL('src/welcome/welcome.html');
+        //const optionsUrl = chrome.runtime.getURL('src/dashboard/dashboard.html');
         //chrome.tabs.query({url: optionsUrl}, (tabs) => {
             //if (tabs.length) {
                 //chrome.tabs.update(tabs[0].id, {active: true});

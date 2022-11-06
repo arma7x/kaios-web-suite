@@ -92,7 +92,7 @@
                 isKaiOSDeviceConnected = false;
                 broadcastConnectionStatus();
                 generateQrCode();
-                document.location.href = chrome.runtime.getURL('src/welcome/welcome.html');
+                document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
             });
             dataConnection.on("error", (err) => {
                 console.log("[MASTER] error", err);
@@ -104,7 +104,7 @@
             dataConnectionStatus = false;
             isKaiOSDeviceConnected = false;
             broadcastConnectionStatus();
-            document.location.href = chrome.runtime.getURL('src/welcome/welcome.html');
+            document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
         });
     }
 
@@ -142,8 +142,8 @@
         if (dataConnectionStatus == false) {
             setupPeer();
         }
-        if (document.location.href !== chrome.runtime.getURL('src/welcome/welcome.html'))
-            document.location.href = chrome.runtime.getURL('src/welcome/welcome.html');
+        if (document.location.href !== chrome.runtime.getURL('src/dashboard/dashboard.html'))
+            document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
         window.addEventListener(SyncProtocol.STREAM_PARENT, (evt) => {
             if (dataConnectionStatus && dataConnection && dataConnection.open) {
                 dataConnection.send(evt.detail);
