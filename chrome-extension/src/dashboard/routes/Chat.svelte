@@ -5,9 +5,10 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { location } from 'svelte-spa-router';
-    import { SyncProtocol } from '../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, MessageType } from '../../../../kaios-app/src/system/sync_protocol';
     import MozSmsMessage from '../widgets/MozSmsMessage.svelte';
     import MozMmsMessage from '../widgets/MozMmsMessage.svelte';
+    import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
 
     export let params = {};
 
@@ -20,6 +21,10 @@
     let thread: SyncProtocol.MozMobileMessageThread;
     let messages: Array<SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage> = [];
     let messageIndex: {[key: string|number]: MessageIndex;} = {};
+
+    let contactsUnsubscribe: any;
+    let contactHash: {[key: string|number]: SyncProtocol.MozContact;} = {};
+    let contactTelHash: {[key: string|number]: string|number;} = {};
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -112,10 +117,17 @@
     }
 
     function resolveMessageWidget(msg: SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage) {
-        if (msg.type == SyncProtocol.SMS) {
+        if (msg.type == MessageType.SMS) {
             return MozSmsMessage;
         }
         return MozMmsMessage;
+    }
+
+    function indexContact(contactStore: SyncProtocol.ContactStore = {}) {
+        if (contactStore.contactHash)
+            contactHash = {...contactStore.contactHash};
+        if (contactStore.contactTelHash)
+            contactTelHash = {...contactStore.contactTelHash};
     }
 
     onMount(() => {
@@ -129,10 +141,16 @@
         window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
         thread = JSON.parse(getParameterByName('data'));
         title = getParameterByName('title');
+        indexContact(getContactsDataStore());
+        contactsUnsubscribe = contactsDataStore.subscribe((contactStore: SyncProtocol.ContactStore = {}) => {
+            indexContact(contactStore);
+        });
     });
 
     onDestroy(() => {
         window.removeEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
+        if (contactsUnsubscribe)
+            contactsUnsubscribe();
     });
 
 </script>
@@ -146,26 +164,11 @@
         {#each messages as message}
             {#if message.sender == "" }
                 <div style="margin-bottom:1em;display:flex;flex-direction:row-reverse;width:100%;">
-                    <div class="pure-button" style="max-width:95%;">
-                        <p>{ message.body }</p>
-                        <div style="display:flex;flex-direction:row;">
-                            <p>{ message.delivery == "error" ? "Error" : "" }</p>
-                            <small>{new Date(thread.timestamp).toLocaleString()}</small>
-                            <button on:click={() => deleteSMSMessage(message.id)}>DELETE</button>
-                        </div>
-                    </div>
+                    <svelte:component this={resolveMessageWidget(message)} showSender={false} senderName="" message={message} deleteCallback={deleteSMSMessage} />
                 </div>
             {:else}
                 <div style="margin-bottom:1em;display:flex;flex-direction:row;width:100%;">
-                    <div class="pure-button" style="max-width:95%;">
-                        <p>{ message.sender }</p>
-                        <p>{ message.body }</p>
-                        <div style="display:flex;flex-direction:row;">
-                            <p>{ message.delivery == "error" ? "Error" : "" }</p>
-                            <small>{new Date(thread.timestamp).toLocaleString()}</small>
-                            <button on:click={() => deleteSMSMessage(message.id)}>DELETE</button>
-                        </div>
-                    </div>
+                    <svelte:component this={resolveMessageWidget(message)} showSender={thread.participants.length > 1} senderName={contactTelHash[message.sender] ? contactHash[contactTelHash[message.sender]].name[0] : message.sender} message={message} deleteCallback={deleteSMSMessage} />
                 </div>
             {/if}
         {/each}
@@ -173,7 +176,4 @@
 </div>
 
 <style>
-    .pure-button {
-        text-align: unset;
-    }
 </style>

@@ -1,21 +1,46 @@
 <script lang="ts">
-    import { onMount, onDestroy } from 'svelte';
+    import "../../system/global.css";
+
+    import { onMount, onDestroy, beforeUpdate } from 'svelte';
+    import { MozSmsMessage } from '../../../../kaios-app/src/system/sync_protocol';
+
+    export let showSender: bool = false;
+    export let senderName: string = "";
+    export let message: MozSmsMessage;
+    export let deleteCallback: Function = (id) => {};
 
     onMount(() => {
-        console.log('onMount Calendar');
+        console.log('onMount MozSmsMessage');
     });
 
     onDestroy(() => {
-        console.log('onDestroy Calendar');
+        console.log('onDestroy MozSmsMessage');
     });
+
+    beforeUpdate(() => {
+      console.log('beforeUpdate:', message);
+    });
+
 </script>
 
-<div>
-    <h1>Calendar</h1>
-    <p>
-        This sample shows how to dynamically import components. These are modules imported on-demand with the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import"><code>import()</code> method</a>.<br/>
-        Bundlers like Rollup and Webpack support automatic code splitting when you use dynamic imports, so after compiling this sample, in the <code>dist/</code> folder you'll see a bunch of different JavaScript files. At runtime, the browser requests them only when you first navigate to the route (and then they're cached).
-    </p>
-    <p>This is the Home component, which contains markup only.</p>
-    <p><em>Hint:</em> Try navigating with the links below, then use your browser's back and forward buttons.</p>
+<div class="pure-button wrapword" style="max-width:95%;">
+  {#if showSender}
+    <p>{senderName}</p>
+  {/if}
+  <p class="wrapword">{ message.body }</p>
+  <div style="display:flex;flex-direction:row;align-items:center;">
+      <small>{@html message.delivery == "error" ? "&#9888;" : "" }</small>
+      <small>{new Date(message.timestamp).toLocaleString()}</small>
+      <button on:click={() => deleteCallback(message.id)} class="button-danger pure-button">DELETE</button>
+  </div>
 </div>
+
+<style>
+    .pure-button {
+        text-align: unset;
+    }
+    .button-danger {
+        background: rgb(202, 60, 60);
+        margin-left: 0.5em;
+    }
+</style>

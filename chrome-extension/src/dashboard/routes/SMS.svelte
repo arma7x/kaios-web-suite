@@ -8,6 +8,7 @@
     import { SyncProtocol } from '../../../../kaios-app/src/system/sync_protocol';
 
     let threads: Array<SyncProtocol.MozMobileMessageThread> = [];
+    let contactsUnsubscribe: any;
     let contacts: Array<SyncProtocol.MozContact> = [];
     let contactHash: {[key: string|number]: SyncProtocol.MozContact;} = {};
     let contactTelHash: {[key: string|number]: string|number;} = {};
@@ -54,13 +55,15 @@
         window.dispatchEvent(evt);
         window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
         indexContact(getContactsDataStore());
-        contactsDataStore.subscribe((contactStore: SyncProtocol.ContactStore = {}) => {
+        contactsUnsubscribe = contactsDataStore.subscribe((contactStore: SyncProtocol.ContactStore = {}) => {
             indexContact(contactStore);
         });
     });
 
     onDestroy(() => {
         window.removeEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
+        if (contactsUnsubscribe)
+            contactsUnsubscribe();
     });
 
 </script>
@@ -73,7 +76,7 @@
     <div>
         {#each threads as thread}
             <div class="thread">
-                <a class="pure-button" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={thread.lastMessageSubject != "" ? thread.lastMessageSubject : (contactTelHash[thread.participants[0]] ? contactHash[contactTelHash[thread.participants[0]]].name[0] : thread.participants[0])}">
+                <a class="pure-button wrapword" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={thread.lastMessageSubject != "" ? thread.lastMessageSubject : (contactTelHash[thread.participants[0]] ? contactHash[contactTelHash[thread.participants[0]]].name[0] : thread.participants[0])}">
                     <b>{thread.lastMessageSubject != "" ? thread.lastMessageSubject : (contactTelHash[thread.participants[0]] ? contactHash[contactTelHash[thread.participants[0]]].name[0] : thread.participants[0])}</b>
                     <p>{thread.body}</p>
                     <small>{new Date(thread.timestamp).toLocaleString()}</small>
