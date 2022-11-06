@@ -12,23 +12,26 @@
             case SyncProtocol.SMS_GET_THREAD:
                 threads = evt.detail.data.threads;
                 break;
-            case SyncProtocol.SMS_SMSC_ADDRESS:
-                console.log(SyncProtocol.SMS_SMSC_ADDRESS, evt.detail.data);
-                break;
         }
     }
 
-    function getSmscAddress() {
+    function sendSMS() {
+        let recipient = prompt("Please enter recipient");
+        if (recipient == null || recipient == '')
+            return;
+        let text = prompt("Please enter text");
+        if (text == null || text == '')
+            return;
         const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
             detail: {
-              type: SyncProtocol.SMS_SMSC_ADDRESS
+              type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
+              data: { receivers: [recipient], message: text, iccId: "" }
             }
         });
         window.dispatchEvent(evt);
     }
 
     onMount(() => {
-        console.log('onMount SMS');
         const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
             detail: {
               type: SyncProtocol.SMS_GET_THREAD
@@ -39,7 +42,6 @@
     });
 
     onDestroy(() => {
-        console.log('onDestroy SMS');
         window.removeEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
     });
 
@@ -47,7 +49,7 @@
 
 <div>
     <h2>SMS</h2>
-    <button on:click={getSmscAddress}>Get Smsc Address</button>
+    <button on:click={sendSMS}>Send SMS</button>
     <ul>
         {#each threads as thread}
             <li>

@@ -9,6 +9,7 @@ const srcDir = resolve(__dirname, "src");
 // https://vitejs.dev/config/
 export default defineConfig({
     build: {
+        sourcemap: true,
         rollupOptions: {
           input: {
                 welcome: resolve(__dirname, 'src/welcome/welcome.html'),

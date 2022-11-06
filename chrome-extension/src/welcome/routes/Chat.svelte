@@ -38,10 +38,10 @@
             case SyncProtocol.SMS_ON_SENDING:
             case SyncProtocol.SMS_ON_FAILED:
                 if (evt.detail.data.message.threadId == params.threadId) {
+                    const message = evt.detail.data.message;
                     if (evt.detail.type === SyncProtocol.SMS_ON_RECEIVED) {
                         readSMSMessage([message.id]);
                     }
-                    const message = evt.detail.data.message;
                     if (messageIndex[message.id] == null) {
                         messages.push(message);
                         messageIndex[message.id] = { index: messages.length - 1, message };
@@ -49,6 +49,8 @@
                         messageIndex[message.id].message = message;
                         messages[messageIndex[message.id].index] = messageIndex[message.id].message;
                     }
+                    messages = [...messages];
+                    messageIndex = {...messageIndex};
                 }
                 break;
             case SyncProtocol.SMS_DELETE_MESSAGE:
@@ -65,7 +67,7 @@
         }
     }
 
-    function sendSMSMessage() {
+    function replySMS() {
         let text = prompt("Please enter text") || 'HELP';
         const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
             detail: {
@@ -106,7 +108,6 @@
     }
 
     onMount(() => {
-        console.log('onMount CHAT', params);
         const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
             detail: {
               type: SyncProtocol.SMS_GET_MESSAGES,
@@ -116,11 +117,9 @@
         window.dispatchEvent(evt);
         window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
         thread = JSON.parse(getParameterByName('data'));
-        console.log(thread);
     });
 
     onDestroy(() => {
-        console.log('onDestroy CHAT');
         window.removeEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
     });
 
@@ -128,13 +127,22 @@
 
 <div>
     <h2>Thread {params.threadId}</h2>
-    <button on:click={sendSMSMessage}>SEND SMS</button>
-    <ul>
+    <button on:click={replySMS}>Reply SMS</button>
+    <div style="display:flex;flex-direction:column;width:100%;">
         {#each messages as message}
-            <li><button on:click={() => deleteSMSMessage(message.id)}>DELETE</button> { JSON.stringify(message) }</li>
+            {#if message.sender == "" }
+                <div style="margin-bottom:1em;display:flex;flex-direction:row-reverse;width:100%;">
+                    <div style="width:95%;text-align:right;">
+                        <button on:click={() => deleteSMSMessage(message.id)}>DELETE</button> { JSON.stringify(message) }
+                    </div>
+                </div>
+            {:else}
+                <div style="margin-bottom:1em;display:flex;flex-direction:row;width:100%;">
+                    <div style="width:95%;">
+                        <button on:click={() => deleteSMSMessage(message.id)}>DELETE</button> { JSON.stringify(message) }
+                    </div>
+                </div>
+            {/if}
         {/each}
-    </ul>
-    <p>
-        { JSON.stringify(messageIndex) }
-    </p>
+    </div>
 </div>
