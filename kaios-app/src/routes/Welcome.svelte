@@ -13,6 +13,7 @@
   export let getAppProp: Function;
 
   let name: string = 'Welcome';
+  let wakeLock: any;
 
   const PING_INTERVAL = 1000;
 
@@ -69,6 +70,7 @@
     dataConnection = peer.connect(id, { reliable: true });
     dataConnection.on("open", () => {
       dataConnectionStatus = true;
+      wakeLock = navigator.requestWakeLock('cpu');
       // console.log("[SLAVE] open", dataConnectionStatus, dataConnection.open); // SLAVE CONNECTED TO MASTER
       if (dataConnectionStatus && dataConnection && dataConnection.open) {
         dataConnection.send({ type: SyncProtocol.PING });
@@ -77,6 +79,10 @@
           if (LATENCY > 10000) {
             clearInterval(connectionPingInterval);
             dataConnectionStatus = false;
+            if (wakeLock) {
+              wakeLock.unlock();
+              wakeLock = null;
+            }
             try {
               if (dataConnection && dataConnection.open) {
                 dataConnection.close();
@@ -107,6 +113,10 @@
     });
     dataConnection.on("disconnected", () => {
       dataConnectionStatus = false;
+      if (wakeLock) {
+        wakeLock.unlock();
+        wakeLock = null;
+      }
       if (connectionPingInterval) {
         clearInterval(connectionPingInterval);
       }
@@ -114,6 +124,10 @@
     });
     dataConnection.on("close", () => {
       dataConnectionStatus = false;
+      if (wakeLock) {
+        wakeLock.unlock();
+        wakeLock = null;
+      }
       if (connectionPingInterval) {
         clearInterval(connectionPingInterval);
       }
@@ -128,6 +142,10 @@
     peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
     peer.on("disconnected", () => {
       dataConnectionStatus = false;
+      if (wakeLock) {
+        wakeLock.unlock();
+        wakeLock = null;
+      }
       if (connectionPingInterval) {
         clearInterval(connectionPingInterval);
       }
@@ -135,6 +153,10 @@
     });
     peer.on("close", () => {
       dataConnectionStatus = false;
+      if (wakeLock) {
+        wakeLock.unlock();
+        wakeLock = null;
+      }
       if (connectionPingInterval) {
         clearInterval(connectionPingInterval);
       }
