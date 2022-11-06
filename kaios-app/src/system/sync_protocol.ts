@@ -79,6 +79,7 @@ export interface MozMobileMessageThread {
   participants: Array<string>,
   timestamp: Date,
   lastMessageType: MessageType,
+  lastMessageSubject: string,
 }
 
 // https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozSmsMessage.html

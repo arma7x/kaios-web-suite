@@ -1,6 +1,7 @@
 <script lang="ts">
     import "normalize.css";
     import "purecss";
+    import "../../system/global.css";
 
     import { onMount, onDestroy } from 'svelte';
     import { location } from 'svelte-spa-router';
@@ -126,7 +127,7 @@
 </script>
 
 <div>
-    <h2>Thread {params.threadId}</h2>
+    <h1>Thread {params.threadId}</h1>
     <button on:click={replySMS}>Reply SMS</button>
     <div style="display:flex;flex-direction:column;width:100%;">
         {#each messages as message}

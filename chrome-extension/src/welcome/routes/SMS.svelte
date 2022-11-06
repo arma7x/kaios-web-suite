@@ -1,6 +1,7 @@
 <script lang="ts">
     import "normalize.css";
     import "purecss";
+    import "../../system/global.css";
 
     import { onMount, onDestroy } from 'svelte';
     import { contacts } from '../../system/stores';
@@ -36,11 +37,11 @@
 
     onMount(() => {
         const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
-            detail: {
-              type: SyncProtocol.SMS_GET_THREAD
-            }
-        });
-        window.dispatchEvent(evt);
+                detail: {
+                  type: SyncProtocol.SMS_GET_THREAD
+                }
+            });
+            window.dispatchEvent(evt);
         window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
         contacts.subscribe((list: Array<SyncProtocol.MozContact>) => {
             list.forEach(contact => {
@@ -62,13 +63,28 @@
 </script>
 
 <div>
-    <h2>SMS</h2>
-    <button on:click={sendSMS}>Send SMS</button>
-    <ul>
+    <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;margin-bottom:1em;">
+        <h1>SMS</h1>
+        <button on:click={sendSMS}>Send SMS</button>
+    </div>
+    <div>
         {#each threads as thread}
-            <li>
-                <a href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}">{ JSON.stringify(thread) }</a>
-            </li>
+            <div class="thread">
+                <a class="pure-button" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}">
+                    <b>{thread.lastMessageSubject != "" ? thread.lastMessageSubject : (contactTelHash[thread.participants[0]] ? contactIdHash[contactTelHash[thread.participants[0]]].name[0] : thread.participants[0])}</b>
+                    <p>{thread.body}</p>
+                    <small>{new Date(thread.timestamp).toLocaleString()}</small>
+                </a>
+            </div>
         {/each}
-    </ul>
+    </div>
 </div>
+
+<style>
+    .thread {
+        margin-bottom: 1em;
+    }
+    .pure-button {
+        text-align: unset;
+    }
+</style>

@@ -1,6 +1,8 @@
 <script lang="ts">
     import "normalize.css";
     import "purecss";
+    import "../system/global.css";
+
     import { onMount, onDestroy } from 'svelte';
     import Router, { push, pop, replace } from 'svelte-spa-router';
     import QRCode from 'qr-image-generator';
@@ -177,7 +179,7 @@
     <div class="pure-g" style="width:80%;">
         {#if isKaiOSDeviceConnected}
         <div class="pure-u-1-5">
-            <div style="width:70%;">
+            <div style="width:90%;">
                 <a href="#/sms" class="pure-button pure-button-primary menu">SMS</a>
                 <a href="#/contacts" class="pure-button pure-button-primary menu">Contacts</a>
                 <a href="#/calendar" class="pure-button pure-button-primary menu">Calendar</a>
