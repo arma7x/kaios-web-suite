@@ -3,7 +3,7 @@
     import "purecss";
     import { onMount, onDestroy } from 'svelte';
     import QRCode from 'qr-image-generator';
-    import { RequestSystemStatus } from '../types/system';
+    import { RequestSystemStatus } from '../system/protocol';
 
     let buttonVisibility: bool = false;
     let dataConnectionID: string;

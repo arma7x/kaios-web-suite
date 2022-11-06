@@ -5,7 +5,7 @@
     import Router, { push, pop, replace } from 'svelte-spa-router';
     import QRCode from 'qr-image-generator';
     import { Peer, type DataConnection } from 'peerjs';
-    import { RequestSystemStatus } from '../types/system';
+    import { RequestSystemStatus } from '../system/protocol';
     import { SyncProtocol } from '../../../kaios-app/src/system/sync_protocol';
 
     import SMS from './routes/SMS.svelte';
