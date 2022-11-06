@@ -3,9 +3,12 @@
     import "purecss";
 
     import { onMount, onDestroy } from 'svelte';
+    import { contacts } from '../../system/stores';
     import { SyncProtocol } from '../../../../kaios-app/src/system/sync_protocol';
 
     let threads: Array<SyncProtocol.MozMobileMessageThread> = [];
+    let contactIdHash: {[key: string|number]: SyncProtocol.MozContact;} = {};
+    let contactTelHash: {[key: string|number]: string|number;} = {};
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -39,6 +42,17 @@
         });
         window.dispatchEvent(evt);
         window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
+        contacts.subscribe((list: Array<SyncProtocol.MozContact>) => {
+            list.forEach(contact => {
+                contactIdHash[contact.id] = contact;
+                contact.tel.forEach(number => {
+                    contactTelHash[number.value.replaceAll(" ", "")] = contact.id;
+                    contactTelHash[number.value] = contact.id;
+                })
+            });
+        });
+        contactIdHash = {...contactIdHash};
+        contactTelHash = {...contactTelHash};
     });
 
     onDestroy(() => {

@@ -6,6 +6,7 @@
     import QRCode from 'qr-image-generator';
     import { Peer, type DataConnection } from 'peerjs';
     import { RequestSystemStatus } from '../system/protocol';
+    import { contacts, getContacts } from '../system/stores';
     import { SyncProtocol } from '../../../kaios-app/src/system/sync_protocol';
 
     import SMS from './routes/SMS.svelte';
@@ -26,6 +27,17 @@
         '/contacts': Contacts,
         '/calendar': Calendar,
         '/filemanager': FileManager,
+    }
+
+    if (!String.prototype.replaceAll) {
+      String.prototype.replaceAll = function(str, newStr) {
+        // If a regex pattern
+        if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
+          return this.replace(str, newStr);
+        }
+        // If a string
+        return this.replace(new RegExp(str, 'g'), newStr);
+      };
     }
 
     function onMessage(request, sender, sendResponse) {
@@ -58,10 +70,13 @@
                 // console.log("[MASTER] open");
                 isKaiOSDeviceConnected = true;
                 broadcastConnectionStatus();
+                dataConnection.send({ type: SyncProtocol.CONTACT_GET_ALL, data: { filter: {} } });
                 push("#/sms");
             });
             dataConnection.on("data", (data) => {
-                if (data.type !== SyncProtocol.PING) {
+                if (data.type === SyncProtocol.CONTACT_GET_ALL) {
+                    contacts.set(data.data.contacts);
+                } else if (data.type !== SyncProtocol.PING) {
                     const evt = new CustomEvent(SyncProtocol.STREAM_CHILD, { detail: data });
                     window.dispatchEvent(evt);
                 } else {
