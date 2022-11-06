@@ -152,3 +152,9 @@ export interface MozContact {
   genderIdentity: string,
   key: Array<MozContactGeneric>,
 }
+
+export interface ContactStore {
+  contacts: Array<MozContact>,
+  contactHash: {[key: string|number]: MozContact;},
+  contactTelHash: {[key: string|number]: string|number;},
+}

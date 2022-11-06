@@ -31,17 +31,6 @@
         '/filemanager': FileManager,
     }
 
-    if (!String.prototype.replaceAll) {
-      String.prototype.replaceAll = function(str, newStr) {
-        // If a regex pattern
-        if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
-          return this.replace(str, newStr);
-        }
-        // If a string
-        return this.replace(new RegExp(str, 'g'), newStr);
-      };
-    }
-
     function onMessage(request, sender, sendResponse) {
         switch (request.type) {
             case 0:
@@ -77,7 +66,20 @@
             });
             dataConnection.on("data", (data) => {
                 if (data.type === SyncProtocol.CONTACT_GET_ALL) {
-                    contacts.set(data.data.contacts);
+                    let contactStore: SyncProtocol.ContactStore = {
+                        contacts: [],
+                        contactHash: {},
+                        contactTelHash: {},
+                    };
+                    contactStore.contacts = [...data.data.contacts];
+                    data.data.contacts.forEach(contact => {
+                        contactStore.contactHash[contact.id] = contact;
+                        contact.tel.forEach(number => {
+                            contactStore.contactTelHash[number.value.replaceAll(" ", "")] = contact.id;
+                            contactStore.contactTelHash[number.value] = contact.id;
+                        })
+                    });
+                    contacts.set(contactStore);
                 } else if (data.type !== SyncProtocol.PING) {
                     const evt = new CustomEvent(SyncProtocol.STREAM_CHILD, { detail: data });
                     window.dispatchEvent(evt);

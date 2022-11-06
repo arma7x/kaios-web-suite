@@ -6,6 +6,8 @@
     import { onMount, onDestroy } from 'svelte';
     import { location } from 'svelte-spa-router';
     import { SyncProtocol } from '../../../../kaios-app/src/system/sync_protocol';
+    import MozSmsMessage from '../widgets/MozSmsMessage.svelte';
+    import MozMmsMessage from '../widgets/MozMmsMessage.svelte';
 
     export let params = {};
 
@@ -107,6 +109,13 @@
         if (!results) return null;
         if (!results[2]) return '';
         return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    function resolveMessageWidget(msg: SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage) {
+        if (msg.type == SyncProtocol.SMS) {
+            return MozSmsMessage;
+        }
+        return MozMmsMessage;
     }
 
     onMount(() => {
