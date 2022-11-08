@@ -9,7 +9,7 @@
     import { Peer, type DataConnection } from 'peerjs';
     import { RequestSystemStatus } from '../system/protocol';
     import { contacts, getContacts } from '../system/stores';
-    import { SyncProtocol } from '../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, type ContactStore } from '../../../kaios-app/src/system/sync_protocol';
 
     import SMS from './routes/SMS.svelte';
     import Chat from './routes/Chat.svelte';
@@ -66,7 +66,7 @@
             });
             dataConnection.on("data", (data) => {
                 if (data.type === SyncProtocol.CONTACT_GET_ALL) {
-                    let contactStore: SyncProtocol.ContactStore = {
+                    let contactStore: ContactStore = {
                         contacts: [],
                         contactHash: {},
                         contactTelHash: {},

@@ -5,25 +5,26 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { location } from 'svelte-spa-router';
-    import { SyncProtocol, MessageType } from '../../../../kaios-app/src/system/sync_protocol';
-    import MozSmsMessage from '../widgets/MozSmsMessage.svelte';
-    import MozMmsMessage from '../widgets/MozMmsMessage.svelte';
+    import { SyncProtocol, type MessageType, type MozSmsMessage, type MozMmsMessage, type MozMobileMessageThread, type MozContact, type ContactStore } from '../../../../kaios-app/src/system/sync_protocol';
+    import MozSmsMessageWidget from '../widgets/MozSmsMessage.svelte';
+    import MozMmsMessageWidget from '../widgets/MozMmsMessage.svelte';
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
+    import SMIL from '../../system/smil';
 
     export let params = {};
 
     export interface MessageIndex {
       index: number,
-      message: SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage,
+      message: MozSmsMessage|MozMmsMessage,
     }
 
     let title: string = null;
-    let thread: SyncProtocol.MozMobileMessageThread;
-    let messages: Array<SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage> = [];
+    let thread: MozMobileMessageThread;
+    let messages: Array<MozSmsMessage|MozMmsMessage> = [];
     let messageIndex: {[key: string|number]: MessageIndex;} = {};
 
     let contactsUnsubscribe: any;
-    let contactHash: {[key: string|number]: SyncProtocol.MozContact;} = {};
+    let contactHash: {[key: string|number]: MozContact;} = {};
     let contactTelHash: {[key: string|number]: string|number;} = {};
 
     function streamEvent(evt) {
@@ -119,14 +120,14 @@
         return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
 
-    function resolveMessageWidget(msg: SyncProtocol.MozSmsMessage|SyncProtocol.MozMmsMessage) {
+    function resolveMessageWidget(msg: MozSmsMessage|MozMmsMessage) {
         if (msg.type == MessageType.SMS) {
-            return MozSmsMessage;
+            return MozSmsMessageWidget;
         }
-        return MozMmsMessage;
+        return MozMmsMessageWidget;
     }
 
-    function indexContact(contactStore: SyncProtocol.ContactStore = {}) {
+    function indexContact(contactStore: ContactStore = {}) {
         if (contactStore.contactHash)
             contactHash = {...contactStore.contactHash};
         if (contactStore.contactTelHash)
@@ -145,7 +146,7 @@
         thread = JSON.parse(getParameterByName('data'));
         title = getParameterByName('title');
         indexContact(getContactsDataStore());
-        contactsUnsubscribe = contactsDataStore.subscribe((contactStore: SyncProtocol.ContactStore = {}) => {
+        contactsUnsubscribe = contactsDataStore.subscribe((contactStore: ContactStore = {}) => {
             indexContact(contactStore);
         });
     });

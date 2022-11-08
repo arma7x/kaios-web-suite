@@ -427,3 +427,22 @@ const getMessageSegments = (msg): Promise<any> => {
     });
   });
 }
+
+const thui_generateSmilSlides = (slides, content) => {
+  let length = slides.length;
+  if (typeof content === 'string') {
+    if (!length || slides[length - 1].text) {
+      slides.push({
+        text: content
+      });
+    } else {
+      slides[length - 1].text = content;
+    }
+  } else {
+    slides.push({
+      blob: content.blob,
+      name: content.name
+    });
+  }
+  return slides;
+}

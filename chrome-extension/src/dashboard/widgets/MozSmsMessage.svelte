@@ -2,7 +2,7 @@
     import "../../system/global.css";
 
     import { onMount, onDestroy, beforeUpdate } from 'svelte';
-    import { MozSmsMessage } from '../../../../kaios-app/src/system/sync_protocol';
+    import { type MozSmsMessage } from '../../../../kaios-app/src/system/sync_protocol';
 
     export let showSender: bool = false;
     export let senderName: string = "";

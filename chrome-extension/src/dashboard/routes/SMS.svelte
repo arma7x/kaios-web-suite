@@ -5,12 +5,13 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
-    import { SyncProtocol } from '../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, type MozMobileMessageThread, type MozContact, type ContactStore } from '../../../../kaios-app/src/system/sync_protocol';
+    import SMIL from '../../system/smil';
 
-    let threads: Array<SyncProtocol.MozMobileMessageThread> = [];
+    let threads: Array<MozMobileMessageThread> = [];
     let contactsUnsubscribe: any;
-    let contacts: Array<SyncProtocol.MozContact> = [];
-    let contactHash: {[key: string|number]: SyncProtocol.MozContact;} = {};
+    let contacts: Array<MozContact> = [];
+    let contactHash: {[key: string|number]: MozContact;} = {};
     let contactTelHash: {[key: string|number]: string|number;} = {};
 
     function streamEvent(evt) {
@@ -37,7 +38,7 @@
         window.dispatchEvent(evt);
     }
 
-    function indexContact(contactStore: SyncProtocol.ContactStore = {}) {
+    function indexContact(contactStore: ContactStore = {}) {
         if (contactStore.contacts)
             contacts = [...contactStore.contacts];
         if (contactStore.contactHash)
@@ -55,7 +56,7 @@
         window.dispatchEvent(evt);
         window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
         indexContact(getContactsDataStore());
-        contactsUnsubscribe = contactsDataStore.subscribe((contactStore: SyncProtocol.ContactStore = {}) => {
+        contactsUnsubscribe = contactsDataStore.subscribe((contactStore: ContactStore = {}) => {
             indexContact(contactStore);
         });
     });

@@ -71,6 +71,14 @@ export interface MmsAttachment {
   content: Blob,
 }
 
+// https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozMobileMessageManager/sendMMS.html
+export interface MmsParameters {
+  receivers: Array<string>,
+  subject: string,
+  smil: string,
+  attachments: Array<MmsAttachment>
+}
+
 // https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozMobileMessageThread.html
 export interface MozMobileMessageThread {
   id: number,
