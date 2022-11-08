@@ -29,7 +29,7 @@
         let text = prompt("Please enter text");
         if (text == null || text == '')
             return;
-        const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
               type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
               data: { receivers: [recipient], message: text, iccId: "" }
@@ -48,13 +48,13 @@
     }
 
     onMount(() => {
-        const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
               type: SyncProtocol.SMS_GET_THREAD
             }
         });
         window.dispatchEvent(evt);
-        window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
+        window.addEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         indexContact(getContactsDataStore());
         contactsUnsubscribe = contactsDataStore.subscribe((contactStore: ContactStore = {}) => {
             indexContact(contactStore);
@@ -62,7 +62,7 @@
     });
 
     onDestroy(() => {
-        window.removeEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
+        window.removeEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         if (contactsUnsubscribe)
             contactsUnsubscribe();
     });

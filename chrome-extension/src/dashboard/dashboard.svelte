@@ -81,7 +81,7 @@
                     });
                     contacts.set(contactStore);
                 } else if (data.type !== SyncProtocol.PING) {
-                    const evt = new CustomEvent(SyncProtocol.STREAM_CHILD, { detail: data });
+                    const evt = new CustomEvent(SyncProtocol.STREAM_DOWN, { detail: data });
                     window.dispatchEvent(evt);
                 } else {
                     if (dataConnectionStatus && dataConnection && dataConnection.open) {
@@ -146,7 +146,7 @@
         }
         if (document.location.href !== chrome.runtime.getURL('src/dashboard/dashboard.html'))
             document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
-        window.addEventListener(SyncProtocol.STREAM_PARENT, (evt) => {
+        window.addEventListener(SyncProtocol.STREAM_UP, (evt) => {
             if (dataConnectionStatus && dataConnection && dataConnection.open) {
                 dataConnection.send(evt.detail);
             }

@@ -82,7 +82,7 @@
 
     function replySMS() {
         let text = prompt("Please enter text") || 'HELP';
-        const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
               type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
               data: { receivers: thread.participants, message: text, iccId: messages[messages.length - 1].iccId }
@@ -92,7 +92,7 @@
     }
 
     function deleteSMSMessage(id: string|number) {
-        const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
               type: SyncProtocol.SMS_DELETE_MESSAGE,
               data: { id: [id] }
@@ -102,7 +102,7 @@
     }
 
     function readSMSMessage(id: Array<string|number>) {
-        const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
               type: SyncProtocol.SMS_READ_MESSAGE,
               data: { id  }
@@ -135,14 +135,14 @@
     }
 
     onMount(() => {
-        const evt = new CustomEvent(SyncProtocol.STREAM_PARENT, {
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
               type: SyncProtocol.SMS_GET_MESSAGES,
               data: { threadId: params.threadId }
             }
         });
         window.dispatchEvent(evt);
-        window.addEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
+        window.addEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         thread = JSON.parse(getParameterByName('data'));
         title = getParameterByName('title');
         indexContact(getContactsDataStore());
@@ -152,7 +152,7 @@
     });
 
     onDestroy(() => {
-        window.removeEventListener(SyncProtocol.STREAM_CHILD, streamEvent);
+        window.removeEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         if (contactsUnsubscribe)
             contactsUnsubscribe();
     });
