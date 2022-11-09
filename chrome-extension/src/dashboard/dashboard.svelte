@@ -10,6 +10,7 @@
     import { RequestSystemStatus } from '../system/protocol';
     import { contacts, getContacts } from '../system/stores';
     import { SyncProtocol, type ContactStore } from '../../../kaios-app/src/system/sync_protocol';
+    import { Modals } from 'svelte-modals';
 
     import SMS from './routes/SMS.svelte';
     import Chat from './routes/Chat.svelte';
@@ -193,9 +194,20 @@
             <Router {routes}/>
         </div>
     </div>
+    <Modals>
+      <div slot="backdrop" class="backdrop" />
+    </Modals>
 </div>
 
 <style>
+      .backdrop {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        background: rgba(0,0,0,0.50)
+      }
     .container-center {
         max-width: unset;
         flex-flow: unset;

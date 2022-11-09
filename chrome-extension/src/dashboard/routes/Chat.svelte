@@ -5,11 +5,13 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { location } from 'svelte-spa-router';
-    import { SyncProtocol, type MessageType, type MozSmsMessage, type MozMmsMessage, type MozMobileMessageThread, type MozContact, type ContactStore } from '../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, MessageType, type MozSmsMessage, type MozMmsMessage, type MozMobileMessageThread, type MozContact, type ContactStore } from '../../../../kaios-app/src/system/sync_protocol';
     import MozSmsMessageWidget from '../widgets/MozSmsMessage.svelte';
     import MozMmsMessageWidget from '../widgets/MozMmsMessage.svelte';
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
     import SMIL from '../../system/smil';
+    import { openModal } from 'svelte-modals';
+    import SendMessageWidget from '../widgets/SendMessage.svelte';
 
     export let params = {};
 
@@ -81,14 +83,19 @@
     }
 
     function replySMS() {
-        let text = prompt("Please enter text") || 'HELP';
-        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-            detail: {
-              type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
-              data: { receivers: thread.participants, message: text, iccId: messages[messages.length - 1].iccId }
-            }
-        });
-        window.dispatchEvent(evt);
+        try {
+            openModal(SendMessageWidget, { title: 'Alert' });
+        } catch (err) {
+            console.log(err);
+        }
+        //let text = prompt("Please enter text") || 'HELP';
+        //const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+            //detail: {
+              //type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
+              //data: { receivers: thread.participants, message: text, iccId: messages[messages.length - 1].iccId }
+            //}
+        //});
+        //window.dispatchEvent(evt);
     }
 
     function deleteSMSMessage(id: string|number) {

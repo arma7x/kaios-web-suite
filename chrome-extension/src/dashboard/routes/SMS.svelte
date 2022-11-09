@@ -7,6 +7,8 @@
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
     import { SyncProtocol, type MozMobileMessageThread, type MozContact, type ContactStore } from '../../../../kaios-app/src/system/sync_protocol';
     import SMIL from '../../system/smil';
+    import { openModal } from 'svelte-modals';
+    import SendMessageWidget from '../widgets/SendMessage.svelte';
 
     let threads: Array<MozMobileMessageThread> = [];
     let contactsUnsubscribe: any;
@@ -23,19 +25,24 @@
     }
 
     function sendSMS() {
-        let recipient = prompt("Please enter recipient");
-        if (recipient == null || recipient == '')
-            return;
-        let text = prompt("Please enter text");
-        if (text == null || text == '')
-            return;
-        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-            detail: {
-              type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
-              data: { receivers: [recipient], message: text, iccId: "" }
-            }
-        });
-        window.dispatchEvent(evt);
+        try {
+            openModal(SendMessageWidget, { title: 'New Message' });
+        } catch (err) {
+            console.log(err);
+        }
+        //let recipient = prompt("Please enter recipient");
+        //if (recipient == null || recipient == '')
+            //return;
+        //let text = prompt("Please enter text");
+        //if (text == null || text == '')
+            //return;
+        //const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+            //detail: {
+              //type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
+              //data: { receivers: [recipient], message: text, iccId: "" }
+            //}
+        //});
+        //window.dispatchEvent(evt);
     }
 
     function indexContact(contactStore: ContactStore = {}) {
