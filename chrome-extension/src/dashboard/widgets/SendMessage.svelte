@@ -64,27 +64,29 @@
 
     function processSuggestion() {
         suggestionTimeout = setTimeout(() => {
-            let temp = contacts.filter((contact) => {
-                let found = false;
-                if (contact.name) {
-                    for (let i in contact.name) {
-                        if (contact.name[i].toLowerCase().indexOf(inputRef.value.toLowerCase()) > -1)
-                            found = contact;
+            if (inputRef.value && inputRef.value != '') {
+                let temp = contacts.filter((contact) => {
+                    let found = false;
+                    if (contact.name) {
+                        for (let i in contact.name) {
+                            if (contact.name[i].toLowerCase().indexOf(inputRef.value.toLowerCase()) > -1)
+                                found = contact;
+                        }
+                        if (found)
+                            return found;
                     }
-                    if (found)
-                        return found;
-                }
-                if (contact.tel) {
-                    for (let i in contact.tel) {
-                        if (contact.tel[i].value.indexOf(inputRef.value) > -1 || contact.tel[i].value.replaceAll(" ", "").indexOf(inputRef.value) > -1)
-                            found = contact;
+                    if (contact.tel) {
+                        for (let i in contact.tel) {
+                            if (contact.tel[i].value.indexOf(inputRef.value) > -1 || contact.tel[i].value.replaceAll(" ", "").indexOf(inputRef.value) > -1)
+                                found = contact;
+                        }
+                        if (found)
+                            return found;
                     }
-                    if (found)
-                        return found;
-                }
-                return found;
-            });
-            suggestions = [...temp];
+                    return found;
+                });
+                suggestions = [...temp];
+            }
         }, 300)
     }
 
