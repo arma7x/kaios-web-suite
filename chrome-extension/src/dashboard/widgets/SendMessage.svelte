@@ -202,11 +202,13 @@
             {/if}
             </div>
             <div class="actions">
-                {#if (type == MessageType.MMS) }
+                {#if type == MessageType.MMS }
                     <button class="pure-button" on:click={()=>{fileRef.click()}}>Add Attachment</button>
                 {/if}
                 <button class="pure-button" on:click={toggleMessageType}>Mode: {type.toUpperCase()}</button>
-                <button class="pure-button" on:click={sendMessage}>Send</button>
+                {#if receivers.length > 0 && (type == MessageType.SMS ? message != "" : (message != "" || attachments.length > 0)) }
+                    <button class="pure-button" on:click={sendMessage}>Send</button>
+                {/if}
                 <button class="pure-button" on:click={closeModal}>Cancel</button>
             </div>
         </div>
