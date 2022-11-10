@@ -54,14 +54,28 @@ class SMSSyncHub {
         })
         break;
       case SyncProtocol.SMS_SEND_MESSAGE_SMS:
-        let sendOpts = getSIMServiceId(event.data.iccId);
         getMessageSegments(event.data.message)
         .then((segments) => {
-          this.processMessageSegments(event.data.receivers, segments, sendOpts);
+          this.processMessageSegments(event.data.receivers, segments, getSIMServiceId(event.data.iccId));
         })
         .catch((err) => {
           console.warn(err);
         });
+        break;
+      case SyncProtocol.SMS_SEND_MESSAGE_MMS:
+        const params = {
+          receivers: event.data.receivers,
+          subject: event.data.subject,
+          smil: event.data.smil,
+          attachments: event.data.attachments
+        };
+        const request = navigator.mozMobileMessage.sendMMS(params, getSIMServiceId(event.data.iccId));
+        request.onsuccess = (result) => {
+          this.syncThread();
+        };
+        request.onerror = (err) => {
+          console.warn(err);
+        }
         break;
       case SyncProtocol.SMS_DELETE_MESSAGE:
         const req = navigator.mozMobileMessage.delete(event.data.id);
@@ -70,7 +84,7 @@ class SMSSyncHub {
           this.broadcastCallback({ type: SyncProtocol.SMS_DELETE_MESSAGE, data: { request: event.data.id, response: response } });
           this.syncThread();
         }
-        req.onerror = () => {
+        req.onerror = (err) => {
           console.warn(err);
         }
         break;
@@ -428,7 +442,7 @@ const getMessageSegments = (msg): Promise<any> => {
   });
 }
 
-const thui_generateSmilSlides = (slides, content) => {
+export const thui_generateSmilSlides = (slides, content) => {
   let length = slides.length;
   if (typeof content === 'string') {
     if (!length || slides[length - 1].text) {

@@ -2,12 +2,15 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { closeModal } from 'svelte-modals';
-    import { MessageType, type MozContact } from '../../../../kaios-app/src/system/sync_protocol';
+    import { MessageType, type MozContact, type MmsAttachment } from '../../../../kaios-app/src/system/sync_protocol';
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
+    import SMIL from '../../system/smil';
 
     export let isOpen; // provided by Modals
 
     export let title;
+    export let sendSMSCallback: Function = (receivers: Array<string>, message: string, iccId: string = "") => {};
+    export let sendMMSCallback: Function = (receivers: Array<string>, subject: string, smil: string, attachments: Array<MmsAttachment>, iccId: string = "") => {};
 
     interface Attachment {
         name: string,
@@ -16,6 +19,7 @@
     }
 
     let inputRef;
+    let fileRef;
 
     let contactsUnsubscribe: any;
     let contacts: Array<MozContact> = [];
@@ -23,7 +27,8 @@
     let type: MessageType = MessageType.SMS;
 
     let subject: string = "";
-    let message: string|Array<string|Attachment> = "";
+    let message: string = "";
+    let attachments: Array<Attachment> = [];
     let receivers: Array<string|MozContact> = [];
 
     let suggestions = [];
@@ -35,46 +40,52 @@
     }
 
     function toggleMessageType() {
-        console.log(type, message);
-        if (type === MessageType.SMS) {
+        if (type === MessageType.SMS)
             type = MessageType.MMS;
-            if (message != "")
-                message = [message];
-            else
-                message = [];
-        } else {
+        else
             type = MessageType.SMS;
-            if (message.length > 0)
-                message = typeof message[0] === "string" ? message[0] : (message[0].text || "");
-             else
-                message = "";
+    }
+
+    function removeAttachment(index: number) {
+        attachments.splice(index, 1);
+        attachments = [...attachments];
+    }
+
+    function onFileSelected(evt) {
+        if (evt.target.files.length > 0) {
+            const file = evt.target.files[0];
+            let text = prompt("Enter caption text for attachment(optional)") || "";
+            let attachment = { name: file.name, blob: file };
+            if (text && text != "")
+                attachment['text'] = text;
+            attachments = [...attachments, attachment];
         }
     }
 
     function processSuggestion() {
-            suggestionTimeout = setTimeout(() => {
-                let temp = contacts.filter((contact) => {
-                    let found = false;
-                    if (contact.name) {
-                        for (let i in contact.name) {
-                            if (contact.name[i].toLowerCase().indexOf(inputRef.value.toLowerCase()) > -1)
-                                found = contact;
-                        }
-                        if (found)
-                            return found;
+        suggestionTimeout = setTimeout(() => {
+            let temp = contacts.filter((contact) => {
+                let found = false;
+                if (contact.name) {
+                    for (let i in contact.name) {
+                        if (contact.name[i].toLowerCase().indexOf(inputRef.value.toLowerCase()) > -1)
+                            found = contact;
                     }
-                    if (contact.tel) {
-                        for (let i in contact.tel) {
-                            if (contact.tel[i].value.indexOf(inputRef.value) > -1 || contact.tel[i].value.replaceAll(" ", "").indexOf(inputRef.value) > -1)
-                                found = contact;
-                        }
-                        if (found)
-                            return found;
+                    if (found)
+                        return found;
+                }
+                if (contact.tel) {
+                    for (let i in contact.tel) {
+                        if (contact.tel[i].value.indexOf(inputRef.value) > -1 || contact.tel[i].value.replaceAll(" ", "").indexOf(inputRef.value) > -1)
+                            found = contact;
                     }
-                    return found;
-                });
-                suggestions = [...temp];
-            }, 300)
+                    if (found)
+                        return found;
+                }
+                return found;
+            });
+            suggestions = [...temp];
+        }, 300)
     }
 
     function onSelectSuggestion(contact) {
@@ -87,10 +98,10 @@
         if (suggestionTimeout)
                 clearTimeout(suggestionTimeout);
         if (self.code === 'Enter') {
-                clearTimeout(suggestionTimeout);
-                receivers = [...receivers, inputRef.value];
-                inputRef.value = '';
-                suggestions = [];
+            clearTimeout(suggestionTimeout);
+            receivers = [...receivers, inputRef.value];
+            inputRef.value = '';
+            suggestions = [];
         } else {
             suggestions = [];
             processSuggestion();
@@ -98,16 +109,42 @@
     }
 
     function onInput(self) {
-            suggestions = [];
-            if (!inputRef.value || inputRef.value == "")
-                    clearTimeout(suggestionTimeout);
-            else
-                    processSuggestion();
+        suggestions = [];
+        if (!inputRef.value || inputRef.value == "")
+            clearTimeout(suggestionTimeout);
+        else
+            processSuggestion();
     }
 
     function popReceiver(index) {
         receivers.splice(index, 1);
         receivers = [...receivers];
+    }
+
+    function sendMessage() {
+        let filteredReceivers = [];
+        receivers.forEach((contact) => {
+            if (typeof contact == "object" && contact.tel && contact.tel.length > 0) {
+                filteredReceivers.push(contact.tel[0].value.replaceAll(" ", ""));
+            } else if (typeof contact == "string" ) {
+                filteredReceivers.push(contact);
+            }
+        });
+        if (type === MessageType.SMS) {
+            sendSMSCallback(filteredReceivers, message, "");
+            closeModal();
+        } else {
+            let smilSlides = [];
+            if (message && message != "") {
+                smilSlides.push({ text: message });
+            }
+            if (attachments.length > 0) {
+                smilSlides = [...smilSlides, ...attachments];
+            }
+            const output = SMIL.generate(smilSlides);
+            sendMMSCallback(filteredReceivers, subject, output.smil, output.attachments, "");
+            closeModal();
+        }
     }
 
     onMount(() => {
@@ -144,24 +181,34 @@
                 </div>
             </div>
             <div class="message-container">
-            {#if (type == MessageType.SMS) }
-                <textarea placeholder="Enter your message here" bind:value={message}></textarea>
-            {:else}
-                <input type="text" placeholder="Subject(for group thread)" bind:value={subject}/>
-                <div style="width:100%;display:flex;flex-direction:column;">
-                    {JSON.stringify(message)};
+            {#if type == MessageType.MMS }
+                <input type="text" style="margin-bottom:1em;" placeholder="Subject" bind:value={subject}/>
+            {/if}
+            <textarea placeholder="Enter your message here" bind:value={message}></textarea>
+            {#if type == MessageType.MMS }
+                <div style="margin-top:1em;width:100%;display:flex;flex-direction:column;">
+                    {#each attachments as attachment, i}
+                        <div>
+                            {attachment.name}
+                            {#if attachment.text && attachment.text != ""}
+                                ({attachment.text})
+                            {/if}
+                            <button class="pure-button" on:click={() => removeAttachment(i)}>Remove</button>
+                        </div>
+                    {/each}
                 </div>
             {/if}
             </div>
             <div class="actions">
                 {#if (type == MessageType.MMS) }
-                    <button class="pure-button" on:click="{closeModal}">Add Text</button>
-                    <button class="pure-button" on:click="{closeModal}">Add Media</button>
+                    <button class="pure-button" on:click={()=>{fileRef.click()}}>Add Attachment</button>
                 {/if}
-                <button class="pure-button" on:click="{toggleMessageType}">Mode: {type.toUpperCase()}</button>
-                <button class="pure-button" on:click="{closeModal}">OK</button>
+                <button class="pure-button" on:click={toggleMessageType}>Mode: {type.toUpperCase()}</button>
+                <button class="pure-button" on:click={sendMessage}>Send</button>
+                <button class="pure-button" on:click={closeModal}>Cancel</button>
             </div>
         </div>
+        <input bind:this={fileRef} style="display:none" type="file" accept=".jpg, .jpeg, .png, .mp4" on:change={onFileSelected} />
     </div>
 {/if}
 

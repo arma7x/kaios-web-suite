@@ -5,7 +5,7 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
-    import { SyncProtocol, type MozMobileMessageThread, type MozContact, type ContactStore } from '../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, type MozMobileMessageThread, type MozContact, type ContactStore, type MmsAttachment } from '../../../../kaios-app/src/system/sync_protocol';
     import SMIL from '../../system/smil';
     import { openModal } from 'svelte-modals';
     import SendMessageWidget from '../widgets/SendMessage.svelte';
@@ -24,25 +24,28 @@
         }
     }
 
+    function sendSMSCallback(receivers: Array<string>, message: string, iccId: string = "") {
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+            detail: {
+              type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
+              data: { receivers, message, iccId }
+            }
+        });
+        window.dispatchEvent(evt);
+    }
+
+    function sendMMSCallback(receivers: Array<string>, subject: string, smil: string, attachments: Array<MmsAttachment>, iccId: string = "") {
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+            detail: {
+              type: SyncProtocol.SMS_SEND_MESSAGE_MMS,
+              data: { receivers, subject, smil, attachments, iccId }
+            }
+        });
+        window.dispatchEvent(evt);
+    }
+
     function sendSMS() {
-        try {
-            openModal(SendMessageWidget, { title: 'New Message' });
-        } catch (err) {
-            console.log(err);
-        }
-        //let recipient = prompt("Please enter recipient");
-        //if (recipient == null || recipient == '')
-            //return;
-        //let text = prompt("Please enter text");
-        //if (text == null || text == '')
-            //return;
-        //const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-            //detail: {
-              //type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
-              //data: { receivers: [recipient], message: text, iccId: "" }
-            //}
-        //});
-        //window.dispatchEvent(evt);
+        openModal(SendMessageWidget, { title: 'New Message', sendSMSCallback: sendSMSCallback, sendMMSCallback: sendMMSCallback });
     }
 
     function indexContact(contactStore: ContactStore = {}) {
