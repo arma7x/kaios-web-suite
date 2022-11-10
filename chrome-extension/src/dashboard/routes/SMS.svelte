@@ -44,7 +44,7 @@
         window.dispatchEvent(evt);
     }
 
-    function sendSMS() {
+    function sendMessage() {
         openModal(SendMessageWidget, { title: 'New Message', sendSMSCallback: sendSMSCallback, sendMMSCallback: sendMMSCallback });
     }
 
@@ -80,9 +80,9 @@
 </script>
 
 <div>
-    <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;margin-bottom:1em;">
+    <div class="header-container">
         <h1>SMS</h1>
-        <button on:click={sendSMS}>Send SMS</button>
+        <button on:click={sendMessage}>Send Message</button>
     </div>
     <div>
         {#each threads as thread}
@@ -98,6 +98,13 @@
 </div>
 
 <style>
+    .header-container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 1em;
+    }
     .thread {
         margin-bottom: 1em;
     }
