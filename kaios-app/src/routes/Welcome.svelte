@@ -7,7 +7,6 @@
   import SMSSyncHub from '../system/sms_sync_hub';
   import ContactSyncHub from '../system/contact_sync_hub';
   import { SyncProtocol } from '../system/sync_protocol';
-  import { serverConfig } from '../system/config';
 
   export let location: any;
   export let navigate: any;
@@ -28,7 +27,9 @@
   let connectionPingInterval: any;
 
   let navOptions = {
-    softkeyLeftListener: function(evt) {},
+    softkeyLeftListener: function(evt) {
+      window.close();
+    },
     softkeyRightListener: function(evt) {
       if (dataConnectionStatus) {
         return;
@@ -57,7 +58,7 @@
       });
     },
     enterListener: function(evt) {
-      goto('demo');
+      // goto('demo');
     },
     backspaceListener: function(evt) {}
   };
@@ -140,7 +141,7 @@
   }
 
   function initPeer() {
-    peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin", config: serverConfig });
+    peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
     peer.on("disconnected", () => {
       dataConnectionStatus = false;
       if (wakeLock) {
@@ -177,7 +178,7 @@
   onMount(() => {
     const { appBar, softwareKey } = getAppProp();
     appBar.setTitleText(name);
-    softwareKey.setText({ left: 'LSK', center: 'DEMO', right: 'Scan' });
+    softwareKey.setText({ left: 'Exit', center: '', right: 'Scan' });
     navInstance.attachListener();
     initPeer();
     smsSyncHub = new SMSSyncHub(broadcastCallback);
