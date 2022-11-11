@@ -64,6 +64,12 @@ export enum MessageClass {
   CLASS_3 = "class-3",
 }
 
+export interface FileAttachment {
+  name: string,
+  blob: Blob,
+  text: string,
+}
+
 // Objects contain an id, a location, and a content which is a Blob.
 export interface MmsAttachment {
   id: string|number,

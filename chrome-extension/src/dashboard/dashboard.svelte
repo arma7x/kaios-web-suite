@@ -10,6 +10,7 @@
     import { RequestSystemStatus } from '../system/protocol';
     import { contacts, getContacts } from '../system/stores';
     import { SyncProtocol, type ContactStore } from '../../../kaios-app/src/system/sync_protocol';
+    import { serverConfig } from '../../../kaios-app/src/system/config';
     import { Modals } from 'svelte-modals';
 
     import SMS from './routes/SMS.svelte';
@@ -46,7 +47,7 @@
     }
 
     function setupPeer() {
-        peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
+        peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin", config: serverConfig });
         peer.on("open", (id) => {
             dataConnectionStatus = true;
             dataConnectionID = id;

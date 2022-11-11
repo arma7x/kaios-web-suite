@@ -100,15 +100,39 @@
     }
 
     function replyMessage() {
-        return;
-        let text = prompt("Please enter text") || 'HELP';
-        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-            detail: {
-              type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
-              data: { receivers: thread.participants, message: text, iccId: messages[messages.length - 1].iccId }
+        const iccId = messages[messages.length - 1].iccId;
+        if (thread.participants.length > 1) {
+            type === MessageType.MMS;
+            subject = subject || thread.lastMessageSubject || new Date().toUTCString();
+        }
+        if (type === MessageType.SMS) {
+            const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+                detail: {
+                  type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
+                  data: { receivers: thread.participants, message, iccId: iccId }
+                }
+            });
+            window.dispatchEvent(evt);
+        } else {
+            let smilSlides = [];
+            if (message && message != "") {
+                smilSlides.push({ text: message });
             }
-        });
-        window.dispatchEvent(evt);
+            if (attachments.length > 0) {
+                smilSlides = [...smilSlides, ...attachments];
+            }
+            const generatedSMIL = SMIL.generate(smilSlides);
+            const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+                detail: {
+                  type: SyncProtocol.SMS_SEND_MESSAGE_MMS,
+                  data: { receivers: thread.participants, subject, smil: generatedSMIL.smil, attachments: generatedSMIL.attachments, iccId: iccId }
+                }
+            });
+            window.dispatchEvent(evt);
+        }
+        subject = "";
+        message = "";
+        attachments = <FileAttachment>[];
     }
 
     function deleteSMSMessage(id: string|number) {

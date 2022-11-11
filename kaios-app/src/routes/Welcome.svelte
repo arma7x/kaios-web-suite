@@ -7,6 +7,7 @@
   import SMSSyncHub from '../system/sms_sync_hub';
   import ContactSyncHub from '../system/contact_sync_hub';
   import { SyncProtocol } from '../system/sync_protocol';
+  import { serverConfig } from '../system/config';
 
   export let location: any;
   export let navigate: any;
@@ -139,7 +140,7 @@
   }
 
   function initPeer() {
-    peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
+    peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin", config: serverConfig });
     peer.on("disconnected", () => {
       dataConnectionStatus = false;
       if (wakeLock) {
