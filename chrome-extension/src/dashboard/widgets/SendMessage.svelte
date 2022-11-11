@@ -2,15 +2,9 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { closeModal } from 'svelte-modals';
-    import { SyncProtocol, MessageType, type MozContact, type MmsAttachment } from '../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, MessageType, type MozContact, type MmsAttachment, type FileAttachment } from '../../../../kaios-app/src/system/sync_protocol';
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
     import SMIL from '../../system/smil';
-
-    interface Attachment {
-        name: string,
-        blob: Blob,
-        text: string,
-    }
 
     export let isOpen; // provided by Modals
 
@@ -26,7 +20,7 @@
 
     let subject: string = "";
     let message: string = "";
-    let attachments: Array<Attachment> = [];
+    let attachments: Array<FileAttachment> = [];
     let receivers: Array<string|MozContact> = [];
 
     let suggestions = [];

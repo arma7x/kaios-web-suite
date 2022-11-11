@@ -5,7 +5,7 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { location } from 'svelte-spa-router';
-    import { SyncProtocol, MessageType, type MozSmsMessage, type MozMmsMessage, type MozMobileMessageThread, type MozContact, type ContactStore } from '../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, MessageType, type MozSmsMessage, type MozMmsMessage, type MozMobileMessageThread, type MozContact, type ContactStore, type FileAttachment } from '../../../../kaios-app/src/system/sync_protocol';
     import MozSmsMessageWidget from '../widgets/MozSmsMessage.svelte';
     import MozMmsMessageWidget from '../widgets/MozMmsMessage.svelte';
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
@@ -20,6 +20,7 @@
       message: MozSmsMessage|MozMmsMessage,
     }
 
+    let chatContainerRef: any;
     let title: string = null;
     let thread: MozMobileMessageThread;
     let messages: Array<MozSmsMessage|MozMmsMessage> = [];
@@ -28,6 +29,12 @@
     let contactsUnsubscribe: any;
     let contactHash: {[key: string|number]: MozContact;} = {};
     let contactTelHash: {[key: string|number]: string|number;} = {};
+
+    let type: MessageType = MessageType.SMS;
+
+    let subject: string = "";
+    let message: string = "";
+    let attachments: Array<FileAttachment> = [];
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -40,6 +47,7 @@
                     });
                     messages = evt.detail.data.messages;
                     readSMSMessage(id);
+                    scrollBottom();
                 }
                 break;
             case SyncProtocol.SMS_ON_DELIVERY_ERROR:
@@ -63,6 +71,7 @@
                     }
                     messages = [...messages];
                     messageIndex = {...messageIndex};
+                    scrollBottom();
                 }
                 break;
             case SyncProtocol.SMS_DELETE_MESSAGE:
@@ -82,30 +91,34 @@
         }
     }
 
-    function replySMS() {
-        try {
-            openModal(SendMessageWidget, { title: 'Alert' });
-        } catch (err) {
-            console.log(err);
-        }
-        //let text = prompt("Please enter text") || 'HELP';
-        //const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-            //detail: {
-              //type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
-              //data: { receivers: thread.participants, message: text, iccId: messages[messages.length - 1].iccId }
-            //}
-        //});
-        //window.dispatchEvent(evt);
+    function scrollBottom() {
+        setTimeout(() => {
+            chatContainerRef.scrollTop = chatContainerRef.scrollHeight;
+        }, 500);
     }
 
-    function deleteSMSMessage(id: string|number) {
+    function replyMessage() {
+        console.log(thread);
+        let text = prompt("Please enter text") || 'HELP';
         const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
-              type: SyncProtocol.SMS_DELETE_MESSAGE,
-              data: { id: [id] }
+              type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
+              data: { receivers: thread.participants, message: text, iccId: messages[messages.length - 1].iccId }
             }
         });
         window.dispatchEvent(evt);
+    }
+
+    function deleteSMSMessage(id: string|number) {
+        if (confirm("Are you sure to delete this message ?")) {
+            const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+                detail: {
+                  type: SyncProtocol.SMS_DELETE_MESSAGE,
+                  data: { id: [id] }
+                }
+            });
+            window.dispatchEvent(evt);
+        }
     }
 
     function readSMSMessage(id: Array<string|number>) {
@@ -167,18 +180,18 @@
 </script>
 
 <div>
-    <div style="display:flex;flex-direction:row;width:100%;justify-content:space-between;margin-bottom:1em;">
+    <div class="header-container">
         <h1>{ title || 'Thread: ' + params.threadId }</h1>
-        <button on:click={replySMS}>Reply SMS</button>
+        <button on:click={replyMessage}>Reply</button>
     </div>
-    <div style="display:flex;flex-direction:column;width:100%;height:70vh;overflow-y:scroll;">
+    <div bind:this={chatContainerRef} class="chat-container">
         {#each messages as message}
             {#if message.sender == "" }
-                <div style="margin-bottom:1em;display:flex;flex-direction:row-reverse;width:100%;">
+                <div class="right">
                     <svelte:component this={resolveMessageWidget(message)} showSender={false} senderName="" message={message} deleteCallback={deleteSMSMessage} />
                 </div>
             {:else}
-                <div style="margin-bottom:1em;display:flex;flex-direction:row;width:100%;">
+                <div class="left">
                     <svelte:component this={resolveMessageWidget(message)} showSender={thread.participants.length > 1} senderName={contactTelHash[message.sender] ? contactHash[contactTelHash[message.sender]].name[0] : message.sender} message={message} deleteCallback={deleteSMSMessage} />
                 </div>
             {/if}
@@ -187,4 +200,30 @@
 </div>
 
 <style>
+    .header-container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 1em;
+    }
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 70vh;
+        overflow-y: scroll;
+    }
+    .chat-container > .right {
+        margin-bottom: 1em;
+        display: flex;
+        flex-direction: row-reverse;
+        width: 100%;
+    }
+    .chat-container > .left {
+        margin-bottom: 1em;
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+    }
 </style>
