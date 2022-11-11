@@ -21,6 +21,8 @@
     }
 
     let chatContainerRef: any;
+    let fileRef;
+
     let title: string = null;
     let thread: MozMobileMessageThread;
     let messages: Array<MozSmsMessage|MozMmsMessage> = [];
@@ -98,7 +100,7 @@
     }
 
     function replyMessage() {
-        console.log(thread);
+        return;
         let text = prompt("Please enter text") || 'HELP';
         const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
@@ -154,6 +156,29 @@
             contactTelHash = {...contactStore.contactTelHash};
     }
 
+    function toggleMessageType() {
+        if (type === MessageType.SMS)
+            type = MessageType.MMS;
+        else
+            type = MessageType.SMS;
+    }
+
+    function removeAttachment(index: number) {
+        attachments.splice(index, 1);
+        attachments = [...attachments];
+    }
+
+    function onFileSelected(evt) {
+        if (evt.target.files.length > 0) {
+            const file = evt.target.files[0];
+            let text = prompt("Enter caption text for attachment(optional)") || "";
+            let attachment = { name: file.name, blob: file };
+            if (text && text != "")
+                attachment['text'] = text;
+            attachments = [...attachments, attachment];
+        }
+    }
+
     onMount(() => {
         const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
@@ -164,6 +189,8 @@
         window.dispatchEvent(evt);
         window.addEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         thread = JSON.parse(getParameterByName('data'));
+        type = thread.lastMessageType;
+        subject = thread.lastMessageSubject;
         title = getParameterByName('title');
         indexContact(getContactsDataStore());
         contactsUnsubscribe = contactsDataStore.subscribe((contactStore: ContactStore = {}) => {
@@ -182,7 +209,6 @@
 <div>
     <div class="header-container">
         <h1>{ title || 'Thread: ' + params.threadId }</h1>
-        <button on:click={replyMessage}>Reply</button>
     </div>
     <div bind:this={chatContainerRef} class="chat-container">
         {#each messages as message}
@@ -197,6 +223,41 @@
             {/if}
         {/each}
     </div>
+    <div class="reply-container">
+        {#if type == MessageType.MMS }
+            <input type="text" placeholder="Subject" bind:value={subject}/>
+        {/if}
+        <div class="bottom">
+            <div class="input">
+                <textarea placeholder="Enter your message here" bind:value={message}></textarea>
+                {#if type == MessageType.MMS }
+                    <div style="width:100%;display:flex;flex-direction:row;flex-wrap:wrap;">
+                        {#each attachments as attachment, i}
+                            <div style="margin:1em 0.5em 0 0;display:flex;flex-direction:row;align-items:center;">
+                                <div>
+                                    {attachment.name}
+                                    {#if attachment.text && attachment.text != ""}
+                                        ({attachment.text})
+                                    {/if}
+                                </div>
+                                <button class="pure-button" on:click={() => removeAttachment(i)}>Remove</button>
+                            </div>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+            <div class="toolbox">
+                <button class="pure-button" style="margin-bottom:1em;" on:click={toggleMessageType}>Mode: {type.toUpperCase()}</button>
+                {#if type == MessageType.MMS }
+                    <button class="pure-button" style="margin-bottom:1em;" on:click={()=>{fileRef.click()}}>Add Attachment</button>
+                {/if}
+                {#if thread && thread.participants.length > 0 && (type == MessageType.SMS ? message != "" : (message != "" || attachments.length > 0)) }
+                    <button class="pure-button" style="margin-bottom:1em;" on:click={replyMessage}>Send</button>
+                {/if}
+            </div>
+        </div>
+    </div>
+    <input bind:this={fileRef} style="display:none" type="file" accept=".jpg, .jpeg, .png, .mp4" on:change={onFileSelected} />
 </div>
 
 <style>
@@ -224,6 +285,33 @@
         margin-bottom: 1em;
         display: flex;
         flex-direction: row;
+    }
+    .reply-container {
+        display: flex;
+        flex-direction: column;
         width: 100%;
+        height: 20vh;
+    }
+    .reply-container > input {
+        height: 30px;
+        width: 100%;
+    }
+    .reply-container > .bottom {
+        display: flex;
+        flex-direction: row;
+        margin-top: 1em;
+    }
+    .reply-container > .bottom > .input {
+        width: 85%;
+    }
+    .reply-container > .bottom > .input > textarea {
+        width: 98%;
+        height: 60px;
+        resize: vertical;
+    }
+    .reply-container > .bottom > .toolbox {
+        width: 15%;
+        display: flex;
+        flex-direction: column;
     }
 </style>
