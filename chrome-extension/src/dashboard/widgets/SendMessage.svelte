@@ -2,21 +2,19 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { closeModal } from 'svelte-modals';
-    import { MessageType, type MozContact, type MmsAttachment } from '../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, MessageType, type MozContact, type MmsAttachment } from '../../../../kaios-app/src/system/sync_protocol';
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
     import SMIL from '../../system/smil';
-
-    export let isOpen; // provided by Modals
-
-    export let title;
-    export let sendSMSCallback: Function = (receivers: Array<string>, message: string, iccId: string = "") => {};
-    export let sendMMSCallback: Function = (receivers: Array<string>, subject: string, smil: string, attachments: Array<MmsAttachment>, iccId: string = "") => {};
 
     interface Attachment {
         name: string,
         blob: Blob,
         text: string,
     }
+
+    export let isOpen; // provided by Modals
+
+    export let title;
 
     let inputRef;
     let fileRef;
@@ -133,7 +131,13 @@
             }
         });
         if (type === MessageType.SMS) {
-            sendSMSCallback(filteredReceivers, message, "");
+            const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+                detail: {
+                  type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
+                  data: { receivers: filteredReceivers, message, iccId: "" }
+                }
+            });
+            window.dispatchEvent(evt);
             closeModal();
         } else {
             let smilSlides = [];
@@ -143,8 +147,14 @@
             if (attachments.length > 0) {
                 smilSlides = [...smilSlides, ...attachments];
             }
-            const output = SMIL.generate(smilSlides);
-            sendMMSCallback(filteredReceivers, subject, output.smil, output.attachments, "");
+            const generatedSMIL = SMIL.generate(smilSlides);
+            const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+                detail: {
+                  type: SyncProtocol.SMS_SEND_MESSAGE_MMS,
+                  data: { receivers: filteredReceivers, subject, smil: generatedSMIL.smil, attachments: generatedSMIL.attachments, iccId: "" }
+                }
+            });
+            window.dispatchEvent(evt);
             closeModal();
         }
     }

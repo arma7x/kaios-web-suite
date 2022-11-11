@@ -24,28 +24,8 @@
         }
     }
 
-    function sendSMSCallback(receivers: Array<string>, message: string, iccId: string = "") {
-        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-            detail: {
-              type: SyncProtocol.SMS_SEND_MESSAGE_SMS,
-              data: { receivers, message, iccId }
-            }
-        });
-        window.dispatchEvent(evt);
-    }
-
-    function sendMMSCallback(receivers: Array<string>, subject: string, smil: string, attachments: Array<MmsAttachment>, iccId: string = "") {
-        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-            detail: {
-              type: SyncProtocol.SMS_SEND_MESSAGE_MMS,
-              data: { receivers, subject, smil, attachments, iccId }
-            }
-        });
-        window.dispatchEvent(evt);
-    }
-
     function sendMessage() {
-        openModal(SendMessageWidget, { title: 'New Message', sendSMSCallback: sendSMSCallback, sendMMSCallback: sendMMSCallback });
+        openModal(SendMessageWidget, { title: 'New Message' });
     }
 
     function indexContact(contactStore: ContactStore = {}) {
