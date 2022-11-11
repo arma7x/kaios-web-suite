@@ -231,10 +231,10 @@
             <div class="input">
                 <textarea placeholder="Enter your message here" bind:value={message}></textarea>
                 {#if type == MessageType.MMS }
-                    <div style="width:100%;display:flex;flex-direction:row;flex-wrap:wrap;">
+                    <div class="attachment-container">
                         {#each attachments as attachment, i}
-                            <div style="margin:1em 0.5em 0 0;display:flex;flex-direction:row;align-items:center;">
-                                <div>
+                            <div class="attachment-item">
+                                <div class="attachment-label">
                                     {attachment.name}
                                     {#if attachment.text && attachment.text != ""}
                                         ({attachment.text})
@@ -308,6 +308,21 @@
         width: 98%;
         height: 60px;
         resize: vertical;
+    }
+    .reply-container > .bottom > .input > .attachment-container {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .reply-container > .bottom > .input > .attachment-container > .attachment-item {
+        margin: 1em 0.5em 0 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    .reply-container > .bottom > .input > .attachment-container > .attachment-item > .attachment-label {
+        margin-right: 0.5em;
     }
     .reply-container > .bottom > .toolbox {
         width: 15%;

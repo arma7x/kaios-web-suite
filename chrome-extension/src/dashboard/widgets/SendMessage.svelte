@@ -187,23 +187,25 @@
                 </div>
             </div>
             <div class="message-container">
-            {#if type == MessageType.MMS }
-                <input type="text" style="margin-bottom:1em;" placeholder="Subject" bind:value={subject}/>
-            {/if}
-            <textarea placeholder="Enter your message here" bind:value={message}></textarea>
-            {#if type == MessageType.MMS }
-                <div style="margin-top:1em;width:100%;display:flex;flex-direction:column;">
-                    {#each attachments as attachment, i}
-                        <div>
-                            {attachment.name}
-                            {#if attachment.text && attachment.text != ""}
-                                ({attachment.text})
-                            {/if}
-                            <button class="pure-button" on:click={() => removeAttachment(i)}>Remove</button>
-                        </div>
-                    {/each}
-                </div>
-            {/if}
+                {#if type == MessageType.MMS }
+                    <input type="text" style="margin-bottom:1em;" placeholder="Subject" bind:value={subject}/>
+                {/if}
+                <textarea placeholder="Enter your message here" bind:value={message}></textarea>
+                {#if type == MessageType.MMS }
+                    <div class="attachment-container">
+                        {#each attachments as attachment, i}
+                            <div class="attachment-item">
+                                <div class="attachment-label">
+                                    {attachment.name}
+                                    {#if attachment.text && attachment.text != ""}
+                                        ({attachment.text})
+                                    {/if}
+                                </div>
+                                <button class="pure-button" on:click={() => removeAttachment(i)}>Remove</button>
+                            </div>
+                        {/each}
+                    </div>
+                {/if}
             </div>
             <div class="actions">
                 {#if type == MessageType.MMS }
@@ -340,4 +342,23 @@
         height: 30px;
         width: 100%;
     }
+
+    .message-container > .attachment-container {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .message-container > .attachment-container > .attachment-item {
+        margin: 1em 0.5em 0 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .message-container > .attachment-container > .attachment-item > .attachment-label {
+        margin-right: 0.5em;
+    }
+
 </style>
