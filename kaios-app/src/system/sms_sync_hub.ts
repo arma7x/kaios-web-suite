@@ -47,6 +47,14 @@ class SMSSyncHub {
       case SyncProtocol.SMS_GET_MESSAGES:
         this.getMessages(event.data.threadId)
         .then(messages => {
+          messages.forEach((message, i) => {
+            if (message.attachments) {
+              message.attachments.forEach((attachment, j) => {
+                messages[i].attachments[j]['size'] = attachment.content.size;
+                messages[i].attachments[j]['type'] = attachment.content.type;
+              });
+            }
+          });
           this.broadcastCallback({ type: SyncProtocol.SMS_GET_MESSAGES, data: { messages, threadId: event.data.threadId } });
         })
         .catch(err => {
@@ -69,6 +77,11 @@ class SMSSyncHub {
           smil: event.data.smil,
           attachments: event.data.attachments
         };
+        params.attachments.forEach((attachment, i) => {
+          params.attachments[i].content = new Blob([params.attachments[i].content], {type: params.attachments[i].type});
+          delete params.attachments[i].size;
+          delete params.attachments[i].type;
+        });
         const request = navigator.mozMobileMessage.sendMMS(params, getSIMServiceId(event.data.iccId));
         request.onsuccess = (result) => {
           this.syncThread();
@@ -109,7 +122,6 @@ class SMSSyncHub {
       case SyncProtocol.SMS_SMSC_ADDRESS:
         navigator.mozMobileMessage.getSmscAddress()
         .then(result => {
-          console.log(result);
           this.broadcastCallback({ type: SyncProtocol.SMS_SMSC_ADDRESS, data: result });
         })
         .catch(err => {
@@ -448,7 +460,6 @@ export const thui_generateSmilSlides = (slides, content) => {
     if (!length || slides[length - 1].text) {
       slides.push({ text: content });
     } else {
-      console.log(slides[length - 1], content);
       if (slides[length - 1].text == null)
         slides[length - 1].text = content;
     }

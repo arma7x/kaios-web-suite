@@ -22,14 +22,22 @@
     <p>{senderName}</p>
   {/if}
   <p class="wrapword">{ message.body }</p>
-  <div style="display:flex;flex-direction:row;align-items:center;">
-      <small>{@html message.delivery == "error" ? "&#9888;" : "" }</small>
-      <small>{new Date(message.timestamp).toLocaleString()}</small>
+  <div class="detail" style="flex-direction:{senderName != "" ? 'row-reverse' : 'row'}!important;">
+      <small class="margin-right">{@html message.delivery == "error" ? "&#9888;" : "" }</small>
+      <small class="margin-right">{new Date(message.timestamp).toLocaleString()}</small>
       <button on:click={() => deleteCallback(message.id)} class="button-danger pure-button">DELETE</button>
   </div>
 </div>
 
 <style>
+    .detail {
+        display: flex;
+        flex-direction: row;
+        align-items:center;
+    }
+    .detail > .margin-right {
+        margin: 0 0.5em;
+    }
     .pure-button {
         text-align: unset;
     }

@@ -75,6 +75,8 @@ export interface MmsAttachment {
   id: string|number,
   location: string,
   content: Blob,
+  type: string,
+  size: number,
 }
 
 // https://contest-server.cs.uchicago.edu/ref/JavaScript/developer.mozilla.org/en-US/docs/Archive/B2G_OS/API/MozMobileMessageManager/sendMMS.html

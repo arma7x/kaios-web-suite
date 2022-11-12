@@ -81,7 +81,7 @@
             <div class="thread">
                 <a class="pure-button wrapword" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={encodeURIComponent(getThreadTitle(thread))}">
                     <b>{getThreadTitle(thread)}</b>
-                    <p>{thread.lastMessageType === MessageType.MMS ? MessageType.MMS : thread.body}</p>
+                    <p>{thread.lastMessageType === MessageType.MMS ? MessageType.MMS.toUpperCase() : thread.body}</p>
                     <small>{new Date(thread.timestamp).toLocaleString()}</small>
                 </a>
             </div>
