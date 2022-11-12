@@ -36,6 +36,10 @@
             contactHash = {...contactStore.contactHash};
         if (contactStore.contactTelHash)
             contactTelHash = {...contactStore.contactTelHash};
+        threadTitleCache = [];
+        threads.forEach(thread => {
+            getThreadTitle(thread);
+        });
     }
 
     function getThreadTitle(thread: MozMobileMessageThread): string {
@@ -79,8 +83,8 @@
     <div>
         {#each threads as thread}
             <div class="thread">
-                <a class="pure-button wrapword" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={encodeURIComponent(getThreadTitle(thread))}">
-                    <b>{getThreadTitle(thread)}</b>
+                <a class="pure-button wrapword" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={encodeURIComponent(threadTitleCache[thread.id] ? threadTitleCache[thread.id] : getThreadTitle(thread))}">
+                    <b>{threadTitleCache[thread.id] ? threadTitleCache[thread.id] : getThreadTitle(thread)}</b>
                     <p>{thread.lastMessageType === MessageType.MMS ? MessageType.MMS.toUpperCase() : thread.body}</p>
                     <small>{new Date(thread.timestamp).toLocaleString()}</small>
                 </a>
