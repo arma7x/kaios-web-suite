@@ -24,13 +24,14 @@
     }
 
     onMount(() => {
-        message.attachments.forEach(async (attachment) => {
-            try {
-                console.log(attachment, await getBase64(attachment));
-            } catch (err) {
-                console.log(err);
-            }
-        });
+        //message.attachments.forEach(async (attachment) => {
+            //try {
+                //console.log(attachment, await getBase64(attachment));
+            //} catch (err) {
+                //console.log(err);
+            //}
+        //});
+        console.log(message);
     });
 
     onDestroy(() => {});

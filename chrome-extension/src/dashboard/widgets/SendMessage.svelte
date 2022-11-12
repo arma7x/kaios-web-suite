@@ -257,11 +257,6 @@
         font-size: 24px;
     }
 
-    p {
-        text-align: center;
-        margin-top: 16px;
-    }
-
     .actions {
         margin-top: 32px;
         display: flex;

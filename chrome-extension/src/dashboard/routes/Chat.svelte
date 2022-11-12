@@ -300,7 +300,7 @@
         display: flex;
         flex-direction: column;
         width: 100%;
-        height: 70vh;
+        height: 67vh;
         overflow-y: scroll;
     }
     .chat-container > .right {
