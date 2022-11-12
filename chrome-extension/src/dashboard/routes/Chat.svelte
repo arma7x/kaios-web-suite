@@ -122,6 +122,10 @@
                 smilSlides = [...smilSlides, ...attachments];
             }
             const generatedSMIL = SMIL.generate(smilSlides);
+            generatedSMIL.attachments.forEach((attachment, i) => {
+              generatedSMIL.attachments[i]['size'] = attachment.content.size;
+              generatedSMIL.attachments[i]['type'] = attachment.content.type;
+            });
             const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
                 detail: {
                   type: SyncProtocol.SMS_SEND_MESSAGE_MMS,
