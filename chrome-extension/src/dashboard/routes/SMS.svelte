@@ -5,7 +5,7 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
-    import { SyncProtocol, type MozMobileMessageThread, type MozContact, type ContactStore, type MmsAttachment } from '../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, type MozMobileMessageThread, type MozContact, type ContactStore, type MmsAttachment, MessageType } from '../../../../kaios-app/src/system/sync_protocol';
     import SMIL from '../../system/smil';
     import { openModal } from 'svelte-modals';
     import SendMessageWidget from '../widgets/SendMessage.svelte';
@@ -15,6 +15,7 @@
     let contacts: Array<MozContact> = [];
     let contactHash: {[key: string|number]: MozContact;} = {};
     let contactTelHash: {[key: string|number]: string|number;} = {};
+    let threadTitleCache: {[key: string|number]: string;} = {};
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -35,6 +36,17 @@
             contactHash = {...contactStore.contactHash};
         if (contactStore.contactTelHash)
             contactTelHash = {...contactStore.contactTelHash};
+    }
+
+    function getThreadTitle(thread: MozMobileMessageThread): string {
+        if (threadTitleCache[thread.id])
+            return threadTitleCache[thread.id];
+        let participants: Array<string> = [];
+        thread.participants.forEach((participant) => {
+            participants.push(contactTelHash[participant] ? contactHash[contactTelHash[participant]].name[0] : participant);
+        });
+        threadTitleCache[thread.id] = participants.join(', ');
+        return threadTitleCache[thread.id];
     }
 
     onMount(() => {
@@ -67,9 +79,9 @@
     <div>
         {#each threads as thread}
             <div class="thread">
-                <a class="pure-button wrapword" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={thread.lastMessageSubject != "" ? thread.lastMessageSubject : (contactTelHash[thread.participants[0]] ? contactHash[contactTelHash[thread.participants[0]]].name[0] : thread.participants[0])}">
-                    <b>{thread.lastMessageSubject != "" ? thread.lastMessageSubject : (contactTelHash[thread.participants[0]] ? contactHash[contactTelHash[thread.participants[0]]].name[0] : thread.participants[0])}</b>
-                    <p>{thread.body}</p>
+                <a class="pure-button wrapword" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={encodeURIComponent(getThreadTitle(thread))}">
+                    <b>{getThreadTitle(thread)}</b>
+                    <p>{thread.lastMessageType === MessageType.MMS ? MessageType.MMS : thread.body}</p>
                     <small>{new Date(thread.timestamp).toLocaleString()}</small>
                 </a>
             </div>

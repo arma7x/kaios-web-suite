@@ -9,7 +9,9 @@
     export let message: MozSmsMessage;
     export let deleteCallback: Function = (id) => {};
 
-    onMount(() => {});
+    onMount(() => {
+        console.log(message);
+    });
 
     onDestroy(() => {});
 
