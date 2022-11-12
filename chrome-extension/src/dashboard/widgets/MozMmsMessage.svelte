@@ -9,8 +9,28 @@
     export let message: MozSmsMessage;
     export let deleteCallback: Function = (id) => {};
 
+    function getBase64(attachment): Promise<string|void> {
+        return new Promise((resolve, reject) => {
+            let reader = new FileReader();
+            let blob = new Blob([attachment.content], {type: attachment.type});
+            reader.readAsDataURL(blob);
+            reader.onloadend = function() {
+              resolve(reader.result);
+            }
+            reader.onerror = function(err) {
+              resolve(err);
+            }
+        });
+    }
+
     onMount(() => {
-        console.log(message);
+        message.attachments.forEach(async (attachment) => {
+            try {
+                console.log(attachment, await getBase64(attachment));
+            } catch (err) {
+                console.log(err);
+            }
+        });
     });
 
     onDestroy(() => {});
