@@ -54,32 +54,46 @@
         }
     }
 
+    function searchSuggestion(value: string, find: false): Array<MozContact>|MozContact {
+        let temp = contacts[find ? 'find' : 'filter']((contact) => {
+            let found = false;
+            if (contact.name) {
+                for (let i in contact.name) {
+                    let test = false;
+                    if (find)
+                        test = contact.name[i].toLowerCase() === inputRef.value.toLowerCase();
+                    else
+                        test = contact.name[i].toLowerCase().indexOf(inputRef.value.toLowerCase()) > -1;
+                    if (test)
+                        found = contact;
+                }
+                if (found)
+                    return found;
+            }
+            if (contact.tel) {
+                for (let i in contact.tel) {
+                    let test = false;
+                    if (find)
+                        test = contact.tel[i].value === inputRef.value || contact.tel[i].value.replaceAll(" ", "") === inputRef.value;
+                    else
+                        test = contact.tel[i].value.indexOf(inputRef.value) > -1 || contact.tel[i].value.replaceAll(" ", "").indexOf(inputRef.value) > -1
+                    if (test)
+                        found = contact;
+                }
+                if (found)
+                    return found;
+            }
+            return found;
+        });
+        return temp;
+    }
+
     function processSuggestion() {
         suggestionTimeout = setTimeout(() => {
             if (inputRef.value && inputRef.value != '') {
-                let temp = contacts.filter((contact) => {
-                    let found = false;
-                    if (contact.name) {
-                        for (let i in contact.name) {
-                            if (contact.name[i].toLowerCase().indexOf(inputRef.value.toLowerCase()) > -1)
-                                found = contact;
-                        }
-                        if (found)
-                            return found;
-                    }
-                    if (contact.tel) {
-                        for (let i in contact.tel) {
-                            if (contact.tel[i].value.indexOf(inputRef.value) > -1 || contact.tel[i].value.replaceAll(" ", "").indexOf(inputRef.value) > -1)
-                                found = contact;
-                        }
-                        if (found)
-                            return found;
-                    }
-                    return found;
-                });
-                suggestions = [...temp];
+                suggestions = [...searchSuggestion(inputRef.value)];
             }
-        }, 300)
+        }, 500)
     }
 
     function onSelectSuggestion(contact) {
@@ -89,16 +103,12 @@
     }
 
     function onKeydown(self) {
-        if (suggestionTimeout)
-                clearTimeout(suggestionTimeout);
         if (self.code === 'Enter') {
             clearTimeout(suggestionTimeout);
-            receivers = [...receivers, inputRef.value];
+            const contact = searchSuggestion(inputRef.value, true) || inputRef.value;
+            receivers = [...receivers, contact];
             inputRef.value = '';
             suggestions = [];
-        } else {
-            suggestions = [];
-            processSuggestion();
         }
     }
 
