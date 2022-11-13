@@ -186,7 +186,7 @@
                 <a href="#/sms" class="pure-button pure-button-primary menu">SMS</a>
                 <a href="#/contacts" class="pure-button pure-button-primary menu">Contacts</a>
                 <a href="#/calendar" class="pure-button pure-button-primary menu">Calendar</a>
-                <a href="#/filetransfer" class="pure-button pure-button-primary menu">FileTransfer</a>
+                <a href="#/filetransfer" class="pure-button pure-button-primary menu">File Transfer</a>
             </div>
         </div>
         {/if}
