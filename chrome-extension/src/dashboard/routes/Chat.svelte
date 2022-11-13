@@ -95,7 +95,9 @@
 
     function scrollBottom() {
         setTimeout(() => {
-            chatContainerRef.scrollTop = chatContainerRef.scrollHeight;
+            if (chatContainerRef.children.length > 0) {
+                chatContainerRef.scrollTo({ top: chatContainerRef.children[chatContainerRef.children.length - 1].offsetTop, behavior: 'smooth' });
+            }
         }, 500);
     }
 
