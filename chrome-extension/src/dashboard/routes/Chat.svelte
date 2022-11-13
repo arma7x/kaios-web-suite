@@ -253,7 +253,7 @@
     </div>
     <div class="reply-container">
         {#if type == MessageType.MMS }
-            <input type="text" placeholder="Subject" bind:value={subject}/>
+            <input type="text" placeholder="Subject(for group texting)" bind:value={subject}/>
         {/if}
         <div class="bottom">
             <div class="input">

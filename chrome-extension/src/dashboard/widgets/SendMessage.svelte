@@ -202,7 +202,7 @@
             </div>
             <div class="message-container">
                 {#if type == MessageType.MMS }
-                    <input type="text" style="margin-bottom:1em;" placeholder="Subject" bind:value={subject}/>
+                    <input type="text" style="margin-bottom:1em;" placeholder="Subject(for group texting)" bind:value={subject}/>
                 {/if}
                 <textarea placeholder="Enter your message here" bind:value={message}></textarea>
                 {#if type == MessageType.MMS }
