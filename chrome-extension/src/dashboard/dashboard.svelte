@@ -84,6 +84,31 @@
                 } else if (data.type !== SyncProtocol.PING) {
                     const evt = new CustomEvent(SyncProtocol.STREAM_DOWN, { detail: data });
                     window.dispatchEvent(evt);
+                    if (data.type === SyncProtocol.SMS_ON_RECEIVED) {
+                        let notification: bool = false;
+                        if (document.visibilityState === 'visible') {
+                            const hashes = document.location.hash.split('/');
+                            if (hashes[1] !== 'chat') {
+                                notification = true;
+                            } else {
+                                if (parseInt(hashes[2].substring(0, hashes[2].indexOf('?'))) != data.data.message.threadId) {
+                                    notification = true;
+                                } else {
+                                    // ding
+                                }
+                            }
+                        } else {
+                            notification = true;
+                        }
+                        if (notification) {
+                            chrome.notifications.create('', {
+                                title: data.data.message.type.toUpperCase(),
+                                message: `You have received new ${data.data.message.type}`,
+                                iconUrl: '/src/assets/icons/get_started128.png',
+                                type: 'basic'
+                            });
+                        }
+                    }
                 } else {
                     if (dataConnectionStatus && dataConnection && dataConnection.open) {
                         dataConnection.send({ type: SyncProtocol.PONG, data: { time: new Date().getTime() } });
