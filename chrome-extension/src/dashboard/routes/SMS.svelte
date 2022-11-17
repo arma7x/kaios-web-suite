@@ -92,7 +92,10 @@
         {#each threads as thread}
             <div class="thread">
                 <a class="pure-button wrapword" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={encodeURIComponent(threadTitleCache[thread.id] ? threadTitleCache[thread.id] : getThreadTitle(thread))}">
-                    <b>{threadTitleCache[thread.id] ? threadTitleCache[thread.id] : getThreadTitle(thread)}</b>
+                    <b>
+                        {#if thread.unreadCount > 0}<span class="badge">{thread.unreadCount}</span>{/if}
+                        {threadTitleCache[thread.id] ? threadTitleCache[thread.id] : getThreadTitle(thread)}
+                    </b>
                     <p>{thread.lastMessageType === MessageType.MMS ? MessageType.MMS.toUpperCase() : thread.body}</p>
                     <small>{new Date(thread.timestamp).toLocaleString()}</small>
                 </a>
@@ -121,5 +124,11 @@
     }
     .pure-button {
         text-align: unset;
+    }
+    .badge {
+        color: white;
+        background-color: red;
+        padding: 1px 2px 1px 3px;
+        border-radius: 30%;
     }
 </style>
