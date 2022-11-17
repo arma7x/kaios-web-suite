@@ -10,7 +10,7 @@
     import { RequestSystemStatus } from '../system/protocol';
     import { contacts, getContacts } from '../system/stores';
     import { SyncProtocol, type ContactStore } from '../../../kaios-app/src/system/sync_protocol';
-    import { Modals } from 'svelte-modals';
+    import { Modals, closeModal } from 'svelte-modals'
 
     import SMS from './routes/SMS.svelte';
     import Chat from './routes/Chat.svelte';
@@ -220,7 +220,7 @@
         </div>
     </div>
     <Modals>
-      <div slot="backdrop" class="backdrop" />
+      <div slot="backdrop" class="backdrop" on:click={closeModal}/>
     </Modals>
 </div>
 
