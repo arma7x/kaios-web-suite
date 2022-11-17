@@ -9,6 +9,7 @@
     import SMIL from '../../system/smil';
     import { openModal } from 'svelte-modals';
     import SendMessageWidget from '../widgets/SendMessage.svelte';
+    import SMSGuide from '../widgets/guide/SMS.svelte';
 
     let threads: Array<MozMobileMessageThread> = [];
     let contactsUnsubscribe: any;
@@ -27,6 +28,10 @@
 
     function sendMessage() {
         openModal(SendMessageWidget, { title: 'New Message' });
+    }
+
+    function openGuide() {
+        openModal(SMSGuide);
     }
 
     function indexContact(contactStore: ContactStore = {}) {
@@ -78,7 +83,10 @@
 <div>
     <div class="header-container">
         <h1>SMS</h1>
-        <button on:click={sendMessage}>Send Message</button>
+        <div class="buttons">
+            <button on:click={sendMessage}>Send Message</button>
+            <button on:click={openGuide}>Guide</button>
+        </div>
     </div>
     <div>
         {#each threads as thread}
@@ -100,6 +108,13 @@
         width: 100%;
         justify-content: space-between;
         margin-bottom: 1em;
+    }
+    .header-container > .buttons {
+        display: flex;
+        flex-direction: row;
+    }
+    .header-container > .buttons > button {
+        margin-left: 0.5em;
     }
     .thread {
         margin-bottom: 1em;
