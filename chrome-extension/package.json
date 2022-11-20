@@ -26,6 +26,7 @@
         "purecss": "^3.0.0",
         "qr-image-generator": "^1.5.1",
         "svelte-modals": "^1.2.0",
-        "svelte-spa-router": "^3.3.0"
+        "svelte-spa-router": "^3.3.0",
+        "tsdav": "^2.0.3"
     }
 }
