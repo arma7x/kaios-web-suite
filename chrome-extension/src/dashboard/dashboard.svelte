@@ -17,12 +17,14 @@
     import Contacts from './routes/Contacts.svelte';
     import Calendar from './routes/Calendar.svelte';
     import FileTransfer from './routes/FileTransfer.svelte';
+    import Settings from './routes/Settings.svelte';
 
     let peer: Peer;
     let dataConnection: DataConnection;
     let dataConnectionID: string;
     let dataConnectionStatus: bool = false;
     let isKaiOSDeviceConnected: bool = false;
+    let showQrCode: bool = true;
 
     const routes = {
         '/sms': SMS,
@@ -30,6 +32,7 @@
         '/contacts': Contacts,
         '/calendar': Calendar,
         '/filetransfer': FileTransfer,
+        '/settings': Settings,
     }
 
     function onMessage(request, sender, sendResponse) {
@@ -164,6 +167,13 @@
         }, 100);
     }
 
+    window.addEventListener('hashchange', (evt) => {
+        if (['', '#/'].indexOf(new URL(evt.newURL).hash) > -1)
+            showQrCode = true;
+        else
+            showQrCode = false;
+    });
+
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
         broadcastConnectionStatus();
@@ -194,29 +204,35 @@
 
 </script>
 
-<div class="pure-g { isKaiOSDeviceConnected ? 'container-normal' : 'container-center' }">
-    {#if !isKaiOSDeviceConnected}
-        {#if dataConnectionID}
-            <h1 class="container-header">KaiOS Web Suite</h1>
-            <canvas id="canvas"></canvas>
-        {:else}
-            <h1 class="container-header">KaiOS Web Suite</h1>
-            <h4>Generating QR-Code</h4>
-        {/if}
-    {/if}
+<div class="pure-g container">
     <div class="pure-g" style="width:80%;">
-        {#if isKaiOSDeviceConnected}
         <div class="pure-u-1-5">
             <div style="width:90%;">
-                <a href="#/sms" class="pure-button pure-button-primary menu">SMS</a>
-                <a href="#/contacts" class="pure-button pure-button-primary menu">Contacts</a>
+                {#if !isKaiOSDeviceConnected}
+                    <a href="#/" class="pure-button pure-button-primary menu">Link Device</a>
+                {:else}
+                    <a href="#/sms" class="pure-button pure-button-primary menu">SMS</a>
+                {/if}
+                <a href="#/contacts" class="pure-button pure-button-primary menu">KaiOS Contacts</a>
+                <a href="#/contacts" class="pure-button pure-button-primary menu">CardDAV Contacts</a>
+                <a href="#/contacts" class="pure-button pure-button-primary menu">Sync Contacts</a>
                 <a href="#/calendar" class="pure-button pure-button-primary menu">Calendar</a>
-                <a href="#/filetransfer" class="pure-button pure-button-primary menu">File Transfer</a>
+                {#if isKaiOSDeviceConnected}
+                    <a href="#/filetransfer" class="pure-button pure-button-primary menu">File Transfer</a>
+                {/if}
+                <a href="#/settings" class="pure-button pure-button-primary menu">Settings</a>
             </div>
         </div>
-        {/if}
         <div class="pure-u-4-5">
             <Router {routes}/>
+            <div class="qr-container" style="visibility: {showQrCode ? 'visible' : 'hidden'};">
+                <h1 class="container-header">KaiOS Web Suite</h1>
+                {#if dataConnectionID}
+                    <canvas id="canvas"></canvas>
+                {:else}
+                    <h4>Generating QR-Code</h4>
+                {/if}
+            </div>
         </div>
     </div>
     <Modals>
@@ -225,20 +241,27 @@
 </div>
 
 <style>
-      .backdrop {
+    .backdrop {
         position: fixed;
         top: 0;
         bottom: 0;
         right: 0;
         left: 0;
         background: rgba(0,0,0,0.50)
-      }
-    .container-center {
+    }
+    .container {
+        width: 100vw;
+        padding: 0;
+        margin: 0;
+        justify-content: center;
+        margin-top: 5em;
+    }
+    .qr-container {
         max-width: unset;
         flex-flow: unset;
         align-content: unset;
-        height: 100vh;
-        width: 100vw;
+        height: calc(100vh - 5em);
+        width: 100%;
         padding: 0;
         margin: 0;
         display: flex;
@@ -246,21 +269,15 @@
         justify-content: center;
         align-items: center;
     }
-    .container-normal {
-        width: 100vw;
-        padding: 0;
-        margin: 0;
-        justify-content: center;
-        margin-top: 5em;
-    }
-    .container-center  > .container-header,
-    .container-normal  > .container-header {
+    .qr-container  > .container-header {
         text-align: center;
     }
     .menu {
         height: 100px;
         width: 100%;
-        font-size: 2em;
+        font-size: 1.5em;
         margin-bottom: 0.5em;
+        vertical-align: middle;
+        line-height: calc(100px - 0.75em);
     }
 </style>
