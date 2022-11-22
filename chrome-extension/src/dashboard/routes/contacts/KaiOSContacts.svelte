@@ -3,7 +3,7 @@
     import { onMount, onDestroy } from 'svelte';
     import { RequestSystemStatus } from '../../../system/protocol';
     import { contactStorage } from '../../../system/stores';
-    import { type MozContact, type ContactStore } from '../../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, type MozContact, type ContactStore } from '../../../../../kaios-app/src/system/sync_protocol';
 
     let isKaiOSDeviceConnected: bool = false;
     let contactsUnsubscribe: any;
@@ -16,6 +16,23 @@
                 break;
         }
     }
+
+    function getContact() {
+        contactList = [];
+        setTimeout(() => {
+            const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+                detail: {
+                    type: SyncProtocol.CONTACT_GET_ALL,
+                    data: { filter: {} }
+                }
+            });
+            window.dispatchEvent(evt);
+        }, 3000);
+    }
+
+    function updateContact() {}
+
+    function deleteContact() {}
 
     onMount(() => {
         window.addEventListener(RequestSystemStatus.STREAM_DOWN, streamEvent);
@@ -43,7 +60,8 @@
 <div>
     <h1>KaiOS Contacts</h1>
     {#if isKaiOSDeviceConnected }
-        { JSON.stringify(contactList) }
+        <div><button on:click={getContact}>getContact</button></div>
+        <div>{ JSON.stringify(contactList) }</div>
     {:else}
         <h5>Not connected</h5>
     {/if}
