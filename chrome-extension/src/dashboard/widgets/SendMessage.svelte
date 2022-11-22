@@ -3,7 +3,7 @@
     import { onMount, onDestroy } from 'svelte';
     import { closeModal } from 'svelte-modals';
     import { SyncProtocol, MessageType, type MozContact, type MmsAttachment, type FileAttachment } from '../../../../kaios-app/src/system/sync_protocol';
-    import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
+    import { contactStorage, getContactStorage } from '../../system/stores';
     import SMIL from '../../system/smil';
 
     export let isOpen; // provided by Modals
@@ -168,8 +168,8 @@
     }
 
     onMount(() => {
-        updateContacts(getContactsDataStore());
-        contactsUnsubscribe = contactsDataStore.subscribe((contactStore: ContactStore = {}) => {
+        updateContacts(getContactStorage());
+        contactsUnsubscribe = contactStorage.subscribe((contactStore: ContactStore = {}) => {
             updateContacts(contactStore);
         });
     });

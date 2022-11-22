@@ -2,8 +2,12 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { RequestSystemStatus } from '../../../system/protocol';
+    import { contactStorage } from '../../../system/stores';
+    import { type MozContact, type ContactStore } from '../../../../../kaios-app/src/system/sync_protocol';
 
     let isKaiOSDeviceConnected: bool = false;
+    let contactsUnsubscribe: any;
+    let contactList: Array<MozContact> = [];
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -21,10 +25,18 @@
             }
         });
         window.dispatchEvent(evt);
+        contactsUnsubscribe = contactStorage.subscribe((contactStore: ContactStore = {}) => {
+            if (contactStore && contactStore.contacts) {
+                contactList = [...contactStore.contacts];
+                console.log('contactList:', contactList);
+            }
+        });
     });
 
     onDestroy(() => {
         window.removeEventListener(RequestSystemStatus.STREAM_DOWN, streamEvent);
+        if (contactsUnsubscribe)
+            contactsUnsubscribe();
     });
 
 </script>

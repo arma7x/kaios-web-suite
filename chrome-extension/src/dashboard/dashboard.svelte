@@ -8,7 +8,7 @@
     import QRCode from 'qr-image-generator';
     import { Peer, type DataConnection } from 'peerjs';
     import { RequestSystemStatus } from '../system/protocol';
-    import { contacts, getContacts } from '../system/stores';
+    import { contactStorage } from '../system/stores';
     import { SyncProtocol, type ContactStore } from '../../../kaios-app/src/system/sync_protocol';
     import { Modals, closeModal } from 'svelte-modals'
 
@@ -85,7 +85,7 @@
                             contactStore.contactTelHash[number.value] = contact.id;
                         })
                     });
-                    contacts.set(contactStore);
+                    contactStorage.set(contactStore);
                 } else if (data.type !== SyncProtocol.PING) {
                     const evt = new CustomEvent(SyncProtocol.STREAM_DOWN, { detail: data });
                     window.dispatchEvent(evt);

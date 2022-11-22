@@ -4,7 +4,7 @@
     import "../../system/global.css";
 
     import { onMount, onDestroy } from 'svelte';
-    import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
+    import { contactStorage, getContactStorage } from '../../system/stores';
     import { SyncProtocol, type MozMobileMessageThread, type MozContact, type ContactStore, type MmsAttachment, MessageType } from '../../../../kaios-app/src/system/sync_protocol';
     import SMIL from '../../system/smil';
     import { openModal } from 'svelte-modals';
@@ -66,8 +66,8 @@
         });
         window.dispatchEvent(evt);
         window.addEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
-        indexContact(getContactsDataStore());
-        contactsUnsubscribe = contactsDataStore.subscribe((contactStore: ContactStore = {}) => {
+        indexContact(getContactStorage());
+        contactsUnsubscribe = contactStorage.subscribe((contactStore: ContactStore = {}) => {
             indexContact(contactStore);
         });
     });

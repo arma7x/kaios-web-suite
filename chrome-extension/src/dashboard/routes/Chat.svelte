@@ -8,7 +8,7 @@
     import { SyncProtocol, MessageType, type MozSmsMessage, type MozMmsMessage, type MozMobileMessageThread, type MozContact, type ContactStore, type FileAttachment } from '../../../../kaios-app/src/system/sync_protocol';
     import MozSmsMessageWidget from '../widgets/MozSmsMessage.svelte';
     import MozMmsMessageWidget from '../widgets/MozMmsMessage.svelte';
-    import { contacts as contactsDataStore, getContacts as getContactsDataStore } from '../../system/stores';
+    import { contactStorage, getContactStorage } from '../../system/stores';
     import SMIL from '../../system/smil';
     import { openModal } from 'svelte-modals';
     import SendMessageWidget from '../widgets/SendMessage.svelte';
@@ -222,8 +222,8 @@
         type = thread.lastMessageType;
         subject = thread.lastMessageSubject;
         title = getParameterByName('title');
-        indexContact(getContactsDataStore());
-        contactsUnsubscribe = contactsDataStore.subscribe((contactStore: ContactStore = {}) => {
+        indexContact(getContactStorage());
+        contactsUnsubscribe = contactStorage.subscribe((contactStore: ContactStore = {}) => {
             indexContact(contactStore);
         });
     });
