@@ -9,6 +9,39 @@
         window.localStorage.setItem('serverUrl', serverUrl);
         window.localStorage.setItem('username', username);
         window.localStorage.setItem('password', password);
+        const rules  = {
+            addRules: [
+                {
+                    id: 9997,
+                    priority: 1,
+                    action: {
+                        type: 'modifyHeaders' as chrome.declarativeNetRequest.RuleActionType,
+                        requestHeaders: [
+                            {
+                            header: 'user-agent',
+                            operation: 'set' as chrome.declarativeNetRequest.HeaderOperation,
+                            value: `Mozilla/5.0 (Windows) mirall/3.0.1`,
+                            },
+                        ],
+                    },
+                    condition: {
+                        urlFilter: new URL(serverUrl).origin,
+                        resourceTypes: [
+                            'xmlhttprequest' as chrome.declarativeNetRequest.ResourceType,
+                        ]
+                    },
+                },
+            ],
+            removeRuleIds: [9997]
+        }
+
+        chrome.declarativeNetRequest.updateDynamicRules(rules, () => {
+            if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError)
+            } else {
+                chrome.declarativeNetRequest.getDynamicRules(rules => console.log(rules))
+            }
+        })
     }
 
     onMount(() => {

@@ -28,6 +28,9 @@
         "storage",
         "activeTab",
         "contextMenus",
-        "notifications"
-    ]
+        "notifications",
+        "declarativeNetRequest",
+        "declarativeNetRequestFeedback"
+    ],
+    "host_permissions": ["https://*/"]
 }

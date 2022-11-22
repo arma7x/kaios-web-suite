@@ -14,7 +14,7 @@
 
     import SMS from './routes/SMS.svelte';
     import Chat from './routes/Chat.svelte';
-    import Contacts from './routes/Contacts.svelte';
+    import { CardDAVContacts, KaiOSContacts, SyncContact } from './routes/contacts';
     import Calendar from './routes/Calendar.svelte';
     import FileTransfer from './routes/FileTransfer.svelte';
     import Settings from './routes/Settings.svelte';
@@ -22,14 +22,16 @@
     let peer: Peer;
     let dataConnection: DataConnection;
     let dataConnectionID: string;
-    let dataConnectionStatus: bool = false;
+    let dataCONNECTION_STATUS: bool = false;
     let isKaiOSDeviceConnected: bool = false;
     let showQrCode: bool = true;
 
     const routes = {
         '/sms': SMS,
         '/chat/:threadId': Chat,
-        '/contacts': Contacts,
+        '/card-dav-contacts': CardDAVContacts,
+        '/kaios-contacts': KaiOSContacts,
+        '/sync-contacts': SyncContact,
         '/calendar': Calendar,
         '/filetransfer': FileTransfer,
         '/settings': Settings,
@@ -37,9 +39,9 @@
 
     function onMessage(request, sender, sendResponse) {
         switch (request.type) {
-            case 0:
-                broadcastConnectionStatus();
-                if (dataConnectionStatus == false) {
+            case RequestSystemStatus.CONNECTION_STATUS:
+                broadcastCONNECTION_STATUS();
+                if (dataCONNECTION_STATUS == false) {
                     setupPeer();
                 }
                 break;
@@ -51,10 +53,10 @@
     function setupPeer() {
         peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
         peer.on("open", (id) => {
-            dataConnectionStatus = true;
+            dataCONNECTION_STATUS = true;
             dataConnectionID = id;
-            // console.log("[MASTER] open", dataConnectionID, dataConnectionStatus);
-            broadcastConnectionStatus();
+            // console.log("[MASTER] open", dataConnectionID, dataCONNECTION_STATUS);
+            broadcastCONNECTION_STATUS();
             generateQrCode();
         });
         // SLAVE CONNECTED TO MASTER
@@ -64,7 +66,7 @@
             dataConnection.on("open", () => {
                 // console.log("[MASTER] open");
                 isKaiOSDeviceConnected = true;
-                broadcastConnectionStatus();
+                broadcastCONNECTION_STATUS();
                 dataConnection.send({ type: SyncProtocol.CONTACT_GET_ALL, data: { filter: {} } });
                 push("#/sms");
             });
@@ -113,7 +115,7 @@
                         }
                     }
                 } else {
-                    if (dataConnectionStatus && dataConnection && dataConnection.open) {
+                    if (dataCONNECTION_STATUS && dataConnection && dataConnection.open) {
                         dataConnection.send({ type: SyncProtocol.PONG, data: { time: new Date().getTime() } });
                     }
                 }
@@ -121,7 +123,7 @@
             dataConnection.on("close", () => {
                 // console.log("[MASTER] close"); // SLAVE DC
                 isKaiOSDeviceConnected = false;
-                broadcastConnectionStatus();
+                broadcastCONNECTION_STATUS();
                 generateQrCode();
                 document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
             });
@@ -132,23 +134,34 @@
         peer.on("disconnected", () => {
             // console.log("[MASTER] disconnected");
             dataConnectionID = null;
-            dataConnectionStatus = false;
+            dataCONNECTION_STATUS = false;
             isKaiOSDeviceConnected = false;
-            broadcastConnectionStatus();
+            broadcastCONNECTION_STATUS();
             document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
         });
     }
 
-    function broadcastConnectionStatus() {
+    function broadcastCONNECTION_STATUS() {
         chrome.runtime.sendMessage({
-            type: RequestSystemStatus.ConnectionStatus,
+            type: RequestSystemStatus.CONNECTION_STATUS,
             data: {
                 dataConnectionID,
-                dataConnectionStatus,
+                dataCONNECTION_STATUS,
                 isKaiOSDeviceConnected
             }
         })
         .catch(err => console.log(err));
+        const evt = new CustomEvent(RequestSystemStatus.STREAM_DOWN, {
+            detail: {
+                type: RequestSystemStatus.CONNECTION_STATUS,
+                data: {
+                    dataConnectionID,
+                    dataCONNECTION_STATUS,
+                    isKaiOSDeviceConnected
+                }
+            }
+        });
+        window.dispatchEvent(evt);
     }
 
     function generateQrCode() {
@@ -176,15 +189,21 @@
 
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
-        broadcastConnectionStatus();
-        if (dataConnectionStatus == false) {
+        broadcastCONNECTION_STATUS();
+        if (dataCONNECTION_STATUS == false) {
             setupPeer();
         }
         if (document.location.href !== chrome.runtime.getURL('src/dashboard/dashboard.html'))
             document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
         window.addEventListener(SyncProtocol.STREAM_UP, (evt) => {
-            if (dataConnectionStatus && dataConnection && dataConnection.open) {
+            if (dataCONNECTION_STATUS && dataConnection && dataConnection.open) {
                 dataConnection.send(evt.detail);
+            }
+        });
+        window.addEventListener(RequestSystemStatus.STREAM_UP, (evt) => {
+            switch (evt.detail.type) {
+                case RequestSystemStatus.CONNECTION_STATUS:
+                    broadcastCONNECTION_STATUS();
             }
         });
     });
@@ -213,9 +232,9 @@
                 {:else}
                     <a href="#/sms" class="pure-button pure-button-primary menu">SMS</a>
                 {/if}
-                <a href="#/contacts" class="pure-button pure-button-primary menu">KaiOS Contacts</a>
-                <a href="#/contacts" class="pure-button pure-button-primary menu">CardDAV Contacts</a>
-                <a href="#/contacts" class="pure-button pure-button-primary menu">Sync Contacts</a>
+                <a href="#/kaios-contacts" class="pure-button pure-button-primary menu">KaiOS Contacts</a>
+                <a href="#/card-dav-contacts" class="pure-button pure-button-primary menu">CardDAV Contacts</a>
+                <a href="#/sync-contacts" class="pure-button pure-button-primary menu">Sync Contacts</a>
                 <a href="#/calendar" class="pure-button pure-button-primary menu">Calendar</a>
                 {#if isKaiOSDeviceConnected}
                     <a href="#/filetransfer" class="pure-button pure-button-primary menu">File Transfer</a>
@@ -273,11 +292,9 @@
         text-align: center;
     }
     .menu {
-        height: 100px;
         width: 100%;
         font-size: 1.5em;
         margin-bottom: 0.5em;
         vertical-align: middle;
-        line-height: calc(100px - 0.75em);
     }
 </style>
