@@ -1,6 +1,6 @@
 export enum SyncProtocol {
-  STREAM_UP               = "STREAM_UP",
-  STREAM_DOWN             = "STREAM_DOWN",
+  STREAM_UP               = "SYNC_STREAM_UP",
+  STREAM_DOWN             = "SYNC_STREAM_DOWN",
   PING                    = "PING",
   PONG                    = "PONG",
   SMS_GET_THREAD          = "SMS_GET_THREAD",
