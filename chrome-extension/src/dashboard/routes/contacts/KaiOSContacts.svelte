@@ -41,7 +41,7 @@
 </script>
 
 <div>
-    <h1>KaiOSContacts {.toString()}</h1>
+    <h1>KaiOS Contacts</h1>
     {#if isKaiOSDeviceConnected }
         { JSON.stringify(contactList) }
     {:else}
