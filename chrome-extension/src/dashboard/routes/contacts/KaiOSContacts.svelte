@@ -7,7 +7,7 @@
 
     let isKaiOSDeviceConnected: bool = false;
     let contactsUnsubscribe: any;
-    let contactList: Array<MozContact> = [];
+    let contactList: {[key: string|number]: MozContact;} = {};
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -43,9 +43,13 @@
         });
         window.dispatchEvent(evt);
         contactsUnsubscribe = contactStorage.subscribe((contactStore: ContactStore = {}) => {
+            let temp : {[key: string|number]: MozContact;} = {};
             if (contactStore && contactStore.contacts) {
-                contactList = [...contactStore.contacts];
+                contactStore.contacts.forEach(contact => {
+                    temp[contact.id] = contact;
+                });
             }
+            contactList = {...temp};
         });
     });
 
@@ -61,7 +65,11 @@
     <h1>KaiOS Contacts</h1>
     {#if isKaiOSDeviceConnected }
         <div><button on:click={getContact}>getContact</button></div>
-        <div>{ JSON.stringify(contactList) }</div>
+        <div>
+        {#each Object.entries(contactList) as [key, contact]}
+            <div style="margin-bottom:4px;">{key}: { JSON.stringify(contact) }</div>
+        {/each}
+        </div>
     {:else}
         <h5>Not connected</h5>
     {/if}
