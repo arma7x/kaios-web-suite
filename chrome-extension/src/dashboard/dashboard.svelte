@@ -133,11 +133,11 @@
         });
         peer.on("disconnected", () => {
             // console.log("[MASTER] disconnected");
-            dataConnectionID = null;
-            dataCONNECTION_STATUS = false;
-            isKaiOSDeviceConnected = false;
-            broadcastCONNECTION_STATUS();
-            document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
+            // dataConnectionID = null;
+            // dataCONNECTION_STATUS = false;
+            // isKaiOSDeviceConnected = false;
+            // broadcastCONNECTION_STATUS();
+            // document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
         });
     }
 

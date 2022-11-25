@@ -3,6 +3,7 @@
     import { onMount, onDestroy } from 'svelte';
     import { DAVClient, getBasicAuthHeaders } from 'tsdav/dist/tsdav';
     import { RequestSystemStatus } from '../../../system/protocol';
+    import vCard from 'vcf';
 
     let contactList: {[key: string|number]: any;} = {};
 
@@ -32,10 +33,11 @@
                 });
                 let temp: {[key: string|number]: any;} = {};
                 vcards.forEach(contact => {
-                    temp[contact.etag.replaceAll('"', "")] = contact;
+                    const splitURL = contact.url.split('/');
+                    temp[splitURL[splitURL.length - 1]] = contact;
+                    contact.data = new vCard().parse(contact.data);
                 });
                 contactList = {...temp};
-                console.log(contactList);
             } catch(err) {
                 console.log(err);
             }
@@ -51,7 +53,7 @@
     <h1>CardDAVContacts</h1>
     <div>
     {#each Object.entries(contactList) as [key, contact]}
-        <div style="margin-bottom:4px;">{key}: { JSON.stringify(contact) }</div>
+        <div style="margin-bottom:4px;">{key}: { contact.data.data.fn._data }, { contact.data.data.tel._data }</div>
     {/each}
     </div>
 </div>

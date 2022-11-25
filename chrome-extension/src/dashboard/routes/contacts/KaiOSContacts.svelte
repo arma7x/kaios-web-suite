@@ -67,7 +67,7 @@
         <div><button on:click={getContact}>getContact</button></div>
         <div>
         {#each Object.entries(contactList) as [key, contact]}
-            <div style="margin-bottom:4px;">{key}: { JSON.stringify(contact) }</div>
+            <div style="margin-bottom:4px;">{key}: { contact.name[0] },  { contact.tel[0].value }</div>
         {/each}
         </div>
     {:else}
