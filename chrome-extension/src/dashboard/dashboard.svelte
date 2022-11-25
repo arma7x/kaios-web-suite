@@ -244,7 +244,7 @@
         </div>
         <div class="pure-u-4-5">
             <Router {routes}/>
-            <div class="qr-container" style="visibility: {showQrCode ? 'visible' : 'hidden'};">
+            <div class="qr-container" style="display: {showQrCode ? 'flex' : 'none'}!important;">
                 <h1 class="container-header">KaiOS Web Suite</h1>
                 {#if dataConnectionID}
                     <canvas id="canvas"></canvas>
