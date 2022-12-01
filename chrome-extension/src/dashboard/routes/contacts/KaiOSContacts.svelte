@@ -1,10 +1,10 @@
 <script lang="ts">
 
     import { onMount, onDestroy } from 'svelte';
-    import { openModal } from 'svelte-modals';
+    import { openModal, closeModal } from 'svelte-modals';
     import { RequestSystemStatus } from '../../../system/protocol';
     import { contactStorage } from '../../../system/stores';
-    import { SyncProtocol, type MozContact, type ContactStore } from '../../../../../kaios-app/src/system/sync_protocol';
+    import { SyncProtocol, type MozContact, type ContactStore, MozContactChangeEventReason } from '../../../../../kaios-app/src/system/sync_protocol';
     import AddContactWidget from '../../widgets/AddContact.svelte';
 
     let isKaiOSDeviceConnected: bool = false;
@@ -15,6 +15,24 @@
         switch (evt.detail.type) {
             case RequestSystemStatus.CONNECTION_STATUS:
                 ({ isKaiOSDeviceConnected } = evt.detail.data);
+                break;
+            case SyncProtocol.CONTACT_SAVE:
+                if (evt.detail.data)
+                    closeModal();
+                else if (evt.detail.error)
+                    console.log(SyncProtocol.CONTACT_SAVE, evt.detail.error);
+                break;
+            case SyncProtocol.CONTACT_EVENT_UPDATE:
+                contactList[evt.detail.data.contactID] = evt.detail.data.contact;
+                contactList = {...contactList};
+                break;
+            case SyncProtocol.CONTACT_EVENT_CREATE:
+                contactList[evt.detail.data.contactID] = evt.detail.data.contact;
+                contactList = {...contactList};
+                break;
+            case SyncProtocol.CONTACT_EVENT_REMOVE:
+                delete contactList[evt.detail.data.contactID];
+                contactList = {...contactList};
                 break;
         }
     }
@@ -33,7 +51,7 @@
     }
 
     function addContact() {
-        openModal(AddContactWidget, { title: 'New Message' });
+        openModal(AddContactWidget, { title: 'Add Contact' , contact: {} });
     }
 
     function updateContact() {}
@@ -42,6 +60,7 @@
 
     onMount(() => {
         window.addEventListener(RequestSystemStatus.STREAM_DOWN, streamEvent);
+        window.addEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         const evt = new CustomEvent(RequestSystemStatus.STREAM_UP, {
             detail: {
               type: RequestSystemStatus.CONNECTION_STATUS
@@ -61,6 +80,7 @@
 
     onDestroy(() => {
         window.removeEventListener(RequestSystemStatus.STREAM_DOWN, streamEvent);
+        window.removeEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         if (contactsUnsubscribe)
             contactsUnsubscribe();
     });
