@@ -1,6 +1,6 @@
 declare var navigator:any;
 
-import { SyncProtocol, BroadcastCallback } from './sync_protocol';
+import { SyncProtocol, BroadcastCallback, type MozContactChangeEvent, MozContactChangeEventReason } from './sync_protocol';
 
 class ContactSyncHub {
 
@@ -8,6 +8,26 @@ class ContactSyncHub {
 
   constructor(callback: BroadcastCallback) {
     this.broadcastCallback = callback;
+    navigator.mozContacts.addEventListener('contactchange', (evt: MozContactChangeEvent) => {
+      let data = {
+        contactID: evt.contactID,
+        contact: evt.contact ? evt.contact.toJSON() : null,
+      }
+      switch (evt.reason) {
+        case MozContactChangeEventReason.UPDATE:
+          data.type = SyncProtocol.CONTACT_EVENT_UPDATE;
+          this.broadcastCallback({ type: SyncProtocol.CONTACT_EVENT_UPDATE, data: data });
+          break;
+        case MozContactChangeEventReason.CREATE:
+          data.type = SyncProtocol.CONTACT_EVENT_CREATE;
+          this.broadcastCallback({ type: SyncProtocol.CONTACT_EVENT_CREATE, data: data });
+          break;
+        case MozContactChangeEventReason.REMOVE:
+          data.type = SyncProtocol.CONTACT_EVENT_REMOVE;
+          this.broadcastCallback({ type: SyncProtocol.CONTACT_EVENT_REMOVE, data: data });
+          break;
+      }
+    });
   }
 
   filterEvent(event: any) {

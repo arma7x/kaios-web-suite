@@ -24,6 +24,9 @@ export enum SyncProtocol {
   CONTACT_GET_REVISION    = "CONTACT_GET_REVISION",
   CONTACT_REMOVE          = "CONTACT_REMOVE",
   CONTACT_SAVE            = "CONTACT_SAVE",
+  CONTACT_EVENT_UPDATE    = "CONTACT_EVENT_UPDATE",
+  CONTACT_EVENT_CREATE    = "CONTACT_EVENT_CREATE",
+  CONTACT_EVENT_REMOVE    = "CONTACT_EVENT_REMOVE",
 }
 
 export type BroadcastCallback = (data: any) => void;
@@ -167,6 +170,18 @@ export interface MozContact {
   sex: string,
   genderIdentity: string,
   key: Array<MozContactGeneric>,
+}
+
+export enum MozContactChangeEventReason {
+  UPDATE = "update",
+  CREATE = "create",
+  REMOVE = "remove",
+}
+
+export interface MozContactChangeEvent {
+  contactID: string,
+  contact: MozContact,
+  reason: MozContactChangeEventReason,
 }
 
 export interface ContactStore {

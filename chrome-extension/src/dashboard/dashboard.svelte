@@ -232,9 +232,13 @@
                 {:else}
                     <a href="#/sms" class="pure-button pure-button-primary menu">SMS</a>
                 {/if}
-                <a href="#/kaios-contacts" class="pure-button pure-button-primary menu">KaiOS Contacts</a>
+                {#if isKaiOSDeviceConnected}
+                    <a href="#/kaios-contacts" class="pure-button pure-button-primary menu">KaiOS Contacts</a>
+                {/if}
                 <a href="#/card-dav-contacts" class="pure-button pure-button-primary menu">CardDAV Contacts</a>
-                <a href="#/sync-contacts" class="pure-button pure-button-primary menu">Sync Contacts</a>
+                {#if isKaiOSDeviceConnected}
+                    <a href="#/sync-contacts" class="pure-button pure-button-primary menu">Sync Contacts</a>
+                {/if}
                 <a href="#/calendar" class="pure-button pure-button-primary menu">Calendar</a>
                 {#if isKaiOSDeviceConnected}
                     <a href="#/filetransfer" class="pure-button pure-button-primary menu">File Transfer</a>
