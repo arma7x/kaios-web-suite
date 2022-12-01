@@ -1,9 +1,11 @@
 <script lang="ts">
 
     import { onMount, onDestroy } from 'svelte';
+    import { openModal } from 'svelte-modals';
     import { RequestSystemStatus } from '../../../system/protocol';
     import { contactStorage } from '../../../system/stores';
     import { SyncProtocol, type MozContact, type ContactStore } from '../../../../../kaios-app/src/system/sync_protocol';
+    import AddContactWidget from '../../widgets/AddContact.svelte';
 
     let isKaiOSDeviceConnected: bool = false;
     let contactsUnsubscribe: any;
@@ -28,6 +30,10 @@
             });
             window.dispatchEvent(evt);
         }, 3000);
+    }
+
+    function addContact() {
+        openModal(AddContactWidget, { title: 'New Message' });
     }
 
     function updateContact() {}
@@ -64,7 +70,10 @@
 <div>
     <h1>KaiOS Contacts</h1>
     {#if isKaiOSDeviceConnected }
-        <div><button on:click={getContact}>getContact</button></div>
+        <div>
+            <button on:click={getContact}>getContact</button>
+            <button on:click={addContact}>addContact</button>
+        </div>
         <div>
         {#each Object.entries(contactList) as [key, contact]}
             <div style="margin-bottom:4px;">{key}: { contact.name[0] },  { contact.tel[0].value }</div>
