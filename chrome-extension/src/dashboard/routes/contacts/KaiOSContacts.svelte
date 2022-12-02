@@ -16,6 +16,10 @@
             case RequestSystemStatus.CONNECTION_STATUS:
                 ({ isKaiOSDeviceConnected } = evt.detail.data);
                 break;
+            case SyncProtocol.CONTACT_REMOVE:
+                if (evt.detail.error)
+                    console.log(SyncProtocol.CONTACT_REMOVE, evt.detail.error);
+                break;
             case SyncProtocol.CONTACT_SAVE:
                 if (evt.detail.data)
                     closeModal();
@@ -51,12 +55,31 @@
     }
 
     function addContact() {
-        openModal(AddContactWidget, { title: 'Add Contact' , contact: {} });
+        openModal(AddContactWidget, { titleText: 'Add Contact', buttonText: 'Submit' , contact: {} });
     }
 
-    function updateContact() {}
+    function updateContact(contact: MozContact) {
+        openModal(AddContactWidget, { titleText: 'Update Contact', buttonText: 'Save', contact: contact });
+    }
 
-    function deleteContact() {}
+    function deleteContact(id: string) {
+        if (!confirm(`Are sure you want to remove ${id} ?`))
+            return;
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+            detail: {
+                type: SyncProtocol.CONTACT_REMOVE,
+                data: {
+                    filter: {
+                        filterBy: ['id'],
+                        filterValue: id,
+                        filterOp: 'equals',
+                        filterLimit: 1
+                    }
+                }
+            }
+        });
+        window.dispatchEvent(evt);
+    }
 
     onMount(() => {
         window.addEventListener(RequestSystemStatus.STREAM_DOWN, streamEvent);
@@ -96,7 +119,11 @@
         </div>
         <div>
         {#each Object.entries(contactList) as [key, contact]}
-            <div style="margin-bottom:4px;">{key}: { contact.name[0] },  { contact.tel[0].value }</div>
+            <div style="margin-bottom:4px;">
+                {key}: { contact.name[0] },  { contact.tel[0].value }
+                <button on:click={() => deleteContact(key) }>deleteContact</button>
+                <button on:click={() => updateContact(contact) }>updateContact</button>
+            </div>
         {/each}
         </div>
     {:else}

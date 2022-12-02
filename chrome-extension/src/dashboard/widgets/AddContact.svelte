@@ -6,7 +6,8 @@
 
     // provided by Modals
     export let isOpen;
-    export let title: string;
+    export let titleText: string;
+    export let buttonText: string;
     export let contact: MozContact = {};
 
     let givenName: string = '';
@@ -86,17 +87,14 @@
 {#if isOpen}
 <div role="dialog" class="modal">
     <div class="contents">
-        <h2>{title}</h2>
-        <div>
+        <h2>{titleText}</h2>
+        <div style="display:flex;flex-direction:column;">
             <input label="Given Name" placeholder="Enter given name" value="{givenName}" type="text" on:input="{onGivenName}" />
             <input label="Family Name" placeholder="Enter family name" value="{familyName}" type="text" on:input="{onFamilyName}" />
             <input label="Phone Number" placeholder="Enter phone number" value="{phoneNumber}" type="tel" on:input="{onPhoneNumber}" />
         </div>
-        <div>
-            { JSON.stringify(contact) }
-        </div>
         <div class="actions">
-            <button on:click="{saveContact}">Save</button>
+            <button on:click="{saveContact}">{buttonText}</button>
             <button on:click="{closeModal}">Close</button>
         </div>
     </div>
@@ -132,11 +130,6 @@
   h2 {
     text-align: center;
     font-size: 24px;
-  }
-
-  p {
-    text-align: center;
-    margin-top: 16px;
   }
 
   .actions {
