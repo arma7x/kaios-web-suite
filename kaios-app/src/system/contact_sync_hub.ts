@@ -140,6 +140,42 @@ class ContactSyncHub {
           _self.broadcastCallback({ type: SyncProtocol.CONTACT_SAVE, error: err.toString() });
         }
         break;
+      case SyncProtocol.CONTACT_UPDATE:
+        try {
+          const filter = {
+            filterBy: ['id'],
+            filterValue: event.data.contact.id,
+            filterOp: 'equals',
+            filterLimit: 1
+          };
+          _self.findContact(filter, false)
+          .then(contacts => {
+            if (contacts.length == 0)
+              return Promise.reject("No contacts was found!");
+            else {
+              const excepts = ["id", "published", "updated"];
+              var contact = contacts[0];
+              Object.keys(contact.toJSON()).forEach(key => {
+                if (excepts.indexOf(key) === -1) {
+                  contact[key] = event.data.contact[key] || null;
+                }
+              });
+              var request = window.navigator.mozContacts.save(contact);
+              request.onsuccess = function () {
+                _self.broadcastCallback({ type: SyncProtocol.CONTACT_UPDATE, data: true });
+              }
+              request.onerror = function (err) {
+                _self.broadcastCallback({ type: SyncProtocol.CONTACT_UPDATE, error: err.toString() });
+              }
+            }
+          })
+          .catch(err => {
+            _self.broadcastCallback({ type: SyncProtocol.CONTACT_UPDATE, error: err.toString() });
+          });
+        } catch (err) {
+          _self.broadcastCallback({ type: SyncProtocol.CONTACT_UPDATE, error: err.toString() });
+        }
+        break;
     }
   }
 
