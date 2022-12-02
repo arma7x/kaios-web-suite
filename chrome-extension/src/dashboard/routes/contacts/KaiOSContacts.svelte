@@ -5,7 +5,7 @@
     import { RequestSystemStatus } from '../../../system/protocol';
     import { contactStorage } from '../../../system/stores';
     import { SyncProtocol, type MozContact, type ContactStore, MozContactChangeEventReason } from '../../../../../kaios-app/src/system/sync_protocol';
-    import AddContactWidget from '../../widgets/AddContact.svelte';
+    import ContactEditorWidget from '../../widgets/ContactEditor.svelte';
 
     let isKaiOSDeviceConnected: bool = false;
     let contactsUnsubscribe: any;
@@ -56,11 +56,11 @@
     }
 
     function addContact() {
-        openModal(AddContactWidget, { titleText: 'Add Contact', buttonText: 'Submit' , contact: {} });
+        openModal(ContactEditorWidget, { titleText: 'Add Contact', buttonText: 'Submit' , contact: {} });
     }
 
     function updateContact(contact: MozContact) {
-        openModal(AddContactWidget, { titleText: 'Update Contact', buttonText: 'Save', contact: contact });
+        openModal(ContactEditorWidget, { titleText: 'Update Contact', buttonText: 'Save', contact: contact });
     }
 
     function deleteContact(id: string) {
