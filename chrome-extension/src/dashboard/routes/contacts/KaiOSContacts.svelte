@@ -20,11 +20,12 @@
                 if (evt.detail.error)
                     console.log(SyncProtocol.CONTACT_REMOVE, evt.detail.error);
                 break;
+            case SyncProtocol.CONTACT_UPDATE:
             case SyncProtocol.CONTACT_SAVE:
                 if (evt.detail.data)
                     closeModal();
                 else if (evt.detail.error)
-                    console.log(SyncProtocol.CONTACT_SAVE, evt.detail.error);
+                    console.log(evt.detail.type, evt.detail.error);
                 break;
             case SyncProtocol.CONTACT_EVENT_UPDATE:
                 contactList[evt.detail.data.contactID] = evt.detail.data.contact;
