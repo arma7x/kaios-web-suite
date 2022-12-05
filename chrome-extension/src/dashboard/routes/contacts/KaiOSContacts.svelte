@@ -6,6 +6,7 @@
     import { contactStorage } from '../../../system/stores';
     import { SyncProtocol, type MozContact, type ContactStore, MozContactChangeEventReason } from '../../../../../kaios-app/src/system/sync_protocol';
     import ContactEditorWidget from '../../widgets/ContactEditor.svelte';
+    import '../../../system/contact2vcard';
 
     let isKaiOSDeviceConnected: bool = false;
     let contactsUnsubscribe: any;
@@ -61,6 +62,10 @@
 
     function updateContact(contact: MozContact) {
         openModal(ContactEditorWidget, { titleText: 'Update Contact', buttonText: 'Save', contact: contact });
+    }
+
+    function exportContact(ct: MozContact) {
+        console.log(ContactToVcard(ct));
     }
 
     function deleteContact(id: string) {
@@ -124,6 +129,7 @@
                 {key}: { contact.name[0] },  { contact.tel[0].value }
                 <button on:click={() => deleteContact(key) }>deleteContact</button>
                 <button on:click={() => updateContact(contact) }>updateContact</button>
+                <button on:click={() => exportContact(contact) }>exportContact</button>
             </div>
         {/each}
         </div>
