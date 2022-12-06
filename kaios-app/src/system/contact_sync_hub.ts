@@ -129,10 +129,10 @@ class ContactSyncHub {
       case SyncProtocol.CONTACT_SAVE:
         try {
           var contact = new mozContact(event.data.contact);
-          if (contact.bday)
-            contact.bday = new Date(contact.bday);
-          if (contact.anniversary)
-            contact.anniversary = new Date(contact.anniversary);
+          if (event.data.contact.bday)
+            contact.bday = new Date(event.data.contact.bday);
+          if (event.data.contact.anniversary)
+            contact.anniversary = new Date(event.data.contact.anniversary);
           var request = window.navigator.mozContacts.save(contact);
           request.onsuccess = function () {
             _self.broadcastCallback({ type: SyncProtocol.CONTACT_SAVE, data: true });
@@ -157,17 +157,17 @@ class ContactSyncHub {
             if (contacts.length == 0)
               return Promise.reject("No contacts was found!");
             else {
-              const excepts = ["id", "published", "updated"];
+              const excepts = ["id", "published", "updated", "bday", "anniversary"];
               var contact = contacts[0];
-              if (contact.bday)
-                contact.bday = new Date(contact.bday);
-              if (contact.anniversary)
-                contact.anniversary = new Date(contact.anniversary);
               Object.keys(contact.toJSON()).forEach(key => {
                 if (excepts.indexOf(key) === -1) {
                   contact[key] = event.data.contact[key] || null;
                 }
               });
+              if (event.data.contact.bday)
+                contact.bday = new Date(event.data.contact.bday);
+              if (event.data.contact.anniversary)
+                contact.anniversary = new Date(event.data.contact.anniversary);
               var request = window.navigator.mozContacts.save(contact);
               request.onsuccess = function () {
                 _self.broadcastCallback({ type: SyncProtocol.CONTACT_UPDATE, data: true });
