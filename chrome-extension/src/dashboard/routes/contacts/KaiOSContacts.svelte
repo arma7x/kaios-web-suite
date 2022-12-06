@@ -69,7 +69,7 @@
         ContactToVcard([ct], (vcards, nCards) => {
             str += vcards;
         }, () => {
-            console.log(str);
+            console.log(str, ct);
         }, null, true);
     }
 
