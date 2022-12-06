@@ -65,7 +65,12 @@
     }
 
     function exportContact(ct: MozContact) {
-        console.log(ContactToVcard(ct));
+        let str = '';
+        ContactToVcard([ct], (vcards, nCards) => {
+            str += vcards;
+        }, () => {
+            console.log(str);
+        }, null, true);
     }
 
     function deleteContact(id: string) {
