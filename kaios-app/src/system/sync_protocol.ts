@@ -157,7 +157,7 @@ export interface MozContact {
   honorificSuffix: Array<string>,
   nickname: Array<string>,
   email: Array<MozContactGeneric>,
-  photo: Blob,
+  photo: Array<Blob>,
   url: Array<MozContactGeneric>,
   category: Array<string>,
   adr: Array<MozContactGeneric>,
@@ -171,6 +171,9 @@ export interface MozContact {
   sex: string,
   genderIdentity: string,
   key: Array<MozContactGeneric>,
+  ringtone: Array<Blob>,
+  phoneticGivenName: Array<string>,
+  phoneticFamilyName: Array<string>,
 }
 
 export enum MozContactChangeEventReason {
