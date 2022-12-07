@@ -73,11 +73,11 @@
 
 </script>
 
-<div class="pure-button" style="max-width:95%;">
+<div class="p-1 border border-dark rounded" style="max-width:95%;">
   {#if showSender}
     <p>{senderName}</p>
   {/if}
-  <p class="wrapword">{ message.subject }</p>
+  <p class="text-wrap">{ message.subject }</p>
   <div class="elements">
         {#each elements as element}
             {#if element.type === ElementType.Image}
@@ -91,10 +91,10 @@
             {/if}
         {/each}
   </div>
-  <div class="detail" style="flex-direction:{senderName != "" ? 'row-reverse' : 'row'}!important;">
-      <small class="margin-right">{@html message.delivery == "error" ? "&#9888;" : "" }</small>
-      <small class="margin-right">{new Date(message.timestamp).toLocaleString()}</small>
-      <button on:click={() => deleteCallback(message.id)} class="button-danger pure-button">DELETE</button>
+  <div class="d-flex flex-row align-items-center">
+      <small class="me-1">{@html message.delivery == "error" ? "&#9888;" : "" }</small>
+      <small class="me-1">{new Date(message.timestamp).toLocaleString()}</small>
+      <button on:click={() => deleteCallback(message.id)} class="btn btn-outline-danger btn-sm">DELETE</button>
   </div>
 </div>
 
@@ -111,20 +111,5 @@
     .elements > .unknown {
         font-weight: bold;
         color: rgb(202, 60, 60);
-    }
-    .detail {
-        display: flex;
-        flex-direction: row;
-        align-items:center;
-    }
-    .detail > .margin-right {
-        margin: 0 0.5em;
-    }
-    .pure-button {
-        text-align: unset;
-    }
-    .button-danger {
-        background: rgb(202, 60, 60);
-        /* this is a maroon */
     }
 </style>

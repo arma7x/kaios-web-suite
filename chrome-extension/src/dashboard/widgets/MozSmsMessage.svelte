@@ -17,32 +17,17 @@
 
 </script>
 
-<div class="pure-button wrapword" style="max-width:95%;">
+<div class="p-1 border border-dark rounded" style="max-width:95%;">
   {#if showSender}
     <p>{senderName}</p>
   {/if}
-  <p class="wrapword">{ message.body }</p>
-  <div class="detail" style="flex-direction:{senderName != "" ? 'row-reverse' : 'row'}!important;">
-      <small class="margin-right">{@html message.delivery == "error" ? "&#9888;" : "" }</small>
-      <small class="margin-right">{new Date(message.timestamp).toLocaleString()}</small>
-      <button on:click={() => deleteCallback(message.id)} class="button-danger pure-button">DELETE</button>
+  <p class="text-wrap">{ message.body }</p>
+  <div class="d-flex flex-row align-items-center">
+      <small class="me-1">{@html message.delivery == "error" ? "&#9888;" : "" }</small>
+      <small class="me-1">{new Date(message.timestamp).toLocaleString()}</small>
+      <button on:click={() => deleteCallback(message.id)} class="btn btn-outline-danger btn-sm">DELETE</button>
   </div>
 </div>
 
 <style>
-    .detail {
-        display: flex;
-        flex-direction: row;
-        align-items:center;
-    }
-    .detail > .margin-right {
-        margin: 0 0.5em;
-    }
-    .pure-button {
-        text-align: unset;
-    }
-    .button-danger {
-        background: rgb(202, 60, 60);
-        margin-left: 0.5em;
-    }
 </style>

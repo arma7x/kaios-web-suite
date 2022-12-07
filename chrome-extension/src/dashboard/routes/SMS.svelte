@@ -79,19 +79,19 @@
 </script>
 
 <div>
-    <div class="header-container">
-        <h1>SMS</h1>
-        <div class="buttons">
-            <button on:click={sendMessage}>Send Message</button>
-            <button on:click={openGuide}>Guide</button>
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h3>SMS</h3>
+        <div class="d-flex flex-row">
+            <button type="button" class="btn btn-primary btn-sm me-1" on:click={sendMessage}>Send Message</button>
+            <button type="button" class="btn btn-primary btn-sm" on:click={openGuide}>Guide</button>
         </div>
     </div>
     <div>
         {#each threads as thread}
-            <div class="thread">
-                <a class="pure-button wrapword" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={encodeURIComponent(threadTitleCache[thread.id] ? threadTitleCache[thread.id] : getThreadTitle(thread))}">
+            <div class="mb-2">
+                <a class="btn btn-outline-dark text-start" style="width:100%;" href="#/chat/{thread.id}?data={encodeURIComponent(JSON.stringify(thread))}&title={encodeURIComponent(threadTitleCache[thread.id] ? threadTitleCache[thread.id] : getThreadTitle(thread))}">
                     <b>
-                        {#if thread.unreadCount > 0}<span class="badge">{thread.unreadCount}</span>{/if}
+                        {#if thread.unreadCount > 0}<span class="badge rounded-pill text-bg-primary">{thread.unreadCount}</span>{/if}
                         {threadTitleCache[thread.id] ? threadTitleCache[thread.id] : getThreadTitle(thread)}
                     </b>
                     <p>{thread.lastMessageType === MessageType.MMS ? MessageType.MMS.toUpperCase() : thread.body}</p>
@@ -103,30 +103,4 @@
 </div>
 
 <style>
-    .header-container {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-        justify-content: space-between;
-        margin-bottom: 1em;
-    }
-    .header-container > .buttons {
-        display: flex;
-        flex-direction: row;
-    }
-    .header-container > .buttons > button {
-        margin-left: 0.5em;
-    }
-    .thread {
-        margin-bottom: 1em;
-    }
-    .pure-button {
-        text-align: unset;
-    }
-    .badge {
-        color: white;
-        background-color: red;
-        padding: 1px 2px 1px 3px;
-        border-radius: 30%;
-    }
 </style>

@@ -235,52 +235,52 @@
 </script>
 
 <div>
-    <div class="header-container">
-        <h1>{ title || 'Thread: ' + params.threadId }</h1>
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h3>{ title || 'Thread: ' + params.threadId }</h3>
     </div>
-    <div bind:this={chatContainerRef} class="chat-container">
+    <div bind:this={chatContainerRef} class="d-flex flex-column chat-container">
         {#each messages as message}
             {#if message.sender == "" }
-                <div class="right">
+                <div class="mb-2 p-1 d-flex flex-row-reverse">
                     <svelte:component this={resolveMessageWidget(message)} showSender={false} senderName="" message={message} deleteCallback={deleteSMSMessage} />
                 </div>
             {:else}
-                <div class="left">
+                <div class="mb-2 p-1 d-flex">
                     <svelte:component this={resolveMessageWidget(message)} showSender={thread.participants.length > 1} senderName={contactTelHash[message.sender] ? contactHash[contactTelHash[message.sender]].name[0] : message.sender} message={message} deleteCallback={deleteSMSMessage} />
                 </div>
             {/if}
         {/each}
     </div>
-    <div class="reply-container">
+    <div class="mb-2 d-flex flex-column reply-container">
         {#if type == MessageType.MMS }
             <input type="text" placeholder="Subject(for group texting)" bind:value={subject}/>
         {/if}
-        <div class="bottom">
-            <div class="input">
-                <textarea placeholder="Enter your message here" bind:value={message}></textarea>
+        <div class="mt-2 pb-5 d-flex flex-row bottom">
+            <div class="col-10">
+                <textarea class="reply-textarea" placeholder="Enter your message here" bind:value={message}></textarea>
                 {#if type == MessageType.MMS }
-                    <div class="attachment-container">
+                    <div class="d-flex flex-row flex-wrap">
                         {#each attachments as attachment, i}
-                            <div class="attachment-item">
-                                <div class="attachment-label">
+                            <div class="d-flex flex-row align-items-center mb-2 me-2">
+                                <button class="btn btn-outline-danger btn-sm" on:click={() => removeAttachment(i)}>
                                     {attachment.name}
                                     {#if attachment.text && attachment.text != ""}
                                         ({attachment.text})
                                     {/if}
-                                </div>
-                                <button class="pure-button" on:click={() => removeAttachment(i)}>Remove</button>
+                                    [X]
+                                </button>
                             </div>
                         {/each}
                     </div>
                 {/if}
             </div>
-            <div class="toolbox">
-                <button class="pure-button" style="margin-bottom:1em;" on:click={toggleMessageType}>Mode: {type.toUpperCase()}</button>
+            <div class="col-2 d-grid gap-2">
+                <button class="btn btn-primary btn-sm" on:click={toggleMessageType}>Mode: {type.toUpperCase()}</button>
                 {#if type == MessageType.MMS }
-                    <button class="pure-button" style="margin-bottom:1em;" on:click={()=>{fileRef.click()}}>Add Attachment</button>
+                    <button class="btn btn-primary btn-sm" on:click={()=>{fileRef.click()}}>Add Attachment</button>
                 {/if}
                 {#if thread && thread.participants.length > 0 && (type == MessageType.SMS ? message != "" : (message != "" || attachments.length > 0)) }
-                    <button class="pure-button" style="margin-bottom:1em;" on:click={replyMessage}>Send</button>
+                    <button class="btn btn-primary btn-sm" on:click={replyMessage}>Send</button>
                 {/if}
             </div>
         </div>
@@ -289,72 +289,18 @@
 </div>
 
 <style>
-    .header-container {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-        justify-content: space-between;
-        margin-bottom: 1em;
-    }
     .chat-container {
-        display: flex;
-        flex-direction: column;
         width: 100%;
         height: 67vh;
         overflow-y: scroll;
     }
-    .chat-container > .right {
-        margin-bottom: 1em;
-        display: flex;
-        flex-direction: row-reverse;
-        width: 100%;
-    }
-    .chat-container > .left {
-        margin-bottom: 1em;
-        display: flex;
-        flex-direction: row;
-    }
     .reply-container {
-        display: flex;
-        flex-direction: column;
         width: 100%;
         height: 20vh;
     }
-    .reply-container > input {
-        height: 30px;
-        width: 100%;
-    }
-    .reply-container > .bottom {
-        display: flex;
-        flex-direction: row;
-        margin-top: 1em;
-    }
-    .reply-container > .bottom > .input {
-        width: 85%;
-    }
-    .reply-container > .bottom > .input > textarea {
+    .reply-textarea {
         width: 98%;
-        height: 60px;
+        height: 100px;
         resize: vertical;
-    }
-    .reply-container > .bottom > .input > .attachment-container {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-    .reply-container > .bottom > .input > .attachment-container > .attachment-item {
-        margin: 1em 0.5em 0 0;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-    }
-    .reply-container > .bottom > .input > .attachment-container > .attachment-item > .attachment-label {
-        margin-right: 0.5em;
-    }
-    .reply-container > .bottom > .toolbox {
-        width: 15%;
-        display: flex;
-        flex-direction: column;
     }
 </style>
