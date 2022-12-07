@@ -182,54 +182,61 @@
 </script>
 
 {#if isOpen}
-    <div role="dialog" class="modal">
-        <div class="contents">
-            <h2>{title}</h2>
-            <div class="recipients-container">
-                {#each receivers as value, i}
-                <div class="recipient-box">{typeof value === 'string' ? value : value.name[0] }<button class="remove" on:click={() => popReceiver(i)}>x</button></div>
-                {/each}
-                <div class="recipient-input">
-                    <input bind:this={inputRef} placeholder="Enter phone number" on:keydown={onKeydown} on:input={onInput}/>
-                    {#if suggestions.length > 0}
-                    <ul class="recipient-suggestions">
-                        {#each suggestions as value, i}
-                            <li class="suggestion"><a href="/#" on:click|preventDefault={() => onSelectSuggestion(value)} >{value.name[0]}</a></li>
-                        {/each}
-                    </ul>
-                    {/if}
+    <div class="svelte-modals modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Guide</h5>
+                    <button on:click={closeModal} type="button" class="btn-close" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="message-container">
-                {#if type == MessageType.MMS }
-                    <input type="text" style="margin-bottom:1em;" placeholder="Subject(for group texting)" bind:value={subject}/>
-                {/if}
-                <textarea placeholder="Enter your message here" bind:value={message}></textarea>
-                {#if type == MessageType.MMS }
-                    <div class="attachment-container">
-                        {#each attachments as attachment, i}
-                            <div class="attachment-item">
-                                <div class="attachment-label">
-                                    {attachment.name}
-                                    {#if attachment.text && attachment.text != ""}
-                                        ({attachment.text})
-                                    {/if}
-                                </div>
-                                <button class="pure-button" on:click={() => removeAttachment(i)}>Remove</button>
-                            </div>
+                <div class="modal-body">
+                    <div class="d-flex flex-row flex-wrap recipients-container">
+                        {#each receivers as value, i}
+                        <div class="border border-primary rounded p-1 me-1 mb-1 d-flex flex-row justify-content-between align-items-center">{typeof value === 'string' ? value : value.name[0] }<button class="btn badge rounded-pill text-bg-danger ms-1" on:click={() => popReceiver(i)}>x</button></div>
                         {/each}
+                        <div class="recipient-input">
+                            <input bind:this={inputRef} placeholder="Enter phone number" on:keydown={onKeydown} on:input={onInput}/>
+                            {#if suggestions.length > 0}
+                            <ul class="recipient-suggestions">
+                                {#each suggestions as value, i}
+                                    <li class="suggestion"><a href="/#" on:click|preventDefault={() => onSelectSuggestion(value)} >{value.name[0]}</a></li>
+                                {/each}
+                            </ul>
+                            {/if}
+                        </div>
                     </div>
-                {/if}
-            </div>
-            <div class="actions">
-                {#if type == MessageType.MMS }
-                    <button class="pure-button" on:click={()=>{fileRef.click()}}>Add Attachment</button>
-                {/if}
-                <button class="pure-button" on:click={toggleMessageType}>Mode: {type.toUpperCase()}</button>
-                {#if receivers.length > 0 && (type == MessageType.SMS ? message != "" : (message != "" || attachments.length > 0)) }
-                    <button class="pure-button" on:click={sendMessage}>Send</button>
-                {/if}
-                <button class="pure-button" on:click={closeModal}>Cancel</button>
+                    <div class="d-flex flex-column reply-container">
+                        {#if type == MessageType.MMS }
+                            <input type="text" placeholder="Subject(for group texting)" bind:value={subject}/>
+                        {/if}
+                        <textarea class="mt-1 reply-textarea" placeholder="Enter your message here" bind:value={message}></textarea>
+                        {#if type == MessageType.MMS }
+                            <div class="mt-1 d-flex flex-row flex-wrap">
+                                {#each attachments as attachment, i}
+                                    <div class="d-flex flex-row align-items-center mb-2 me-2">
+                                        <button class="btn btn-outline-danger btn-sm" on:click={() => removeAttachment(i)}>
+                                            {attachment.name}
+                                            {#if attachment.text && attachment.text != ""}
+                                                ({attachment.text})
+                                            {/if}
+                                            [X]
+                                        </button>
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    {#if type == MessageType.MMS }
+                        <button class="btn btn-primary btn-sm me-2" on:click={()=>{fileRef.click()}}>Add Attachment</button>
+                    {/if}
+                    <button class="btn btn-primary btn-sm me-2" on:click={toggleMessageType}>Mode: {type.toUpperCase()}</button>
+                    {#if receivers.length > 0 && (type == MessageType.SMS ? message != "" : (message != "" || attachments.length > 0)) }
+                        <button class="btn btn-primary btn-sm me-2" on:click={sendMessage}>Send</button>
+                    {/if}
+                    <button class="btn btn-primary btn-sm me-2" on:click={closeModal}>Cancel</button>
+                </div>
             </div>
         </div>
         <input bind:this={fileRef} style="display:none" type="file" accept=".jpg, .jpeg, .png, .mp4" on:change={onFileSelected} />
@@ -237,79 +244,9 @@
 {/if}
 
 <style>
-    .modal {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        left: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        /* allow click-through to backdrop */
-        pointer-events: none;
-    }
-
-    .contents {
-        min-width: 500px;
-        max-width: 500px;
-        border-radius: 6px;
-        padding: 16px;
-        background: white;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        pointer-events: auto;
-    }
-
-    h2 {
-        text-align: center;
-        font-size: 24px;
-    }
-
-    .actions {
-        margin-top: 32px;
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-    }
-
-    .actions > .pure-button {
-        margin-left: 1em;
-    }
-
-    .recipients-container {
-        margin: 0 0 1em 0;
-        padding: 0;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
-    .recipients-container > .recipient-box {
-        box-sizing: border-box;
-        padding: 2px;
-        margin: 0px 4px 2px 0;
-        border: solid red 1px;
-        line-height: 24px;
-        min-height: 30px;
-        max-height: 30px;
-    }
-
-    .recipients-container > .recipient-box > .remove {
-        cursor: pointer;
-        color: rgb(255, 255, 255);
-        background-color: red;
-        margin: -2px 0px 0px 2px;
-        padding: 0px;
-        border-radius: 50%;
-        border: 0px solid transparent;
-        text-align: center;
-        width: 20px;
-        height: 20px;
-        line-height: 0;
-        vertical-align: middle;
+    .reply-textarea {
+        height: 150px;
+        resize: vertical;
     }
 
     .recipients-container > .recipient-input {
@@ -327,47 +264,22 @@
         margin: 0;
         padding: 0;
         position: absolute;
-        top: 33px;
+        top: 30px;
         width: 100%;
         background-color: #fff;
         border: solid 0.5px #c0c0c0;
         border-radius: 3px;
     }
 
-    .recipients-container > .recipient-input > .recipient-suggestions > .suggestion{
+    .recipients-container > .recipient-input > .recipient-suggestions > .suggestion {
         padding: 5px;
         cursor: pointer;
         list-style-type: none;
         font-weight: bold;
     }
 
-    .message-container > textarea {
-        height: 150px;
-        width: 100%;
-        resize: vertical;
-    }
-
-    .message-container > input {
-        height: 30px;
-        width: 100%;
-    }
-
-    .message-container > .attachment-container {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .message-container > .attachment-container > .attachment-item {
-        margin: 1em 0.5em 0 0;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-    }
-
-    .message-container > .attachment-container > .attachment-item > .attachment-label {
-        margin-right: 0.5em;
+    .recipients-container > .recipient-input > .recipient-suggestions > .suggestion > a {
+        text-decoration: none;
     }
 
 </style>

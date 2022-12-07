@@ -255,7 +255,7 @@
         {#if type == MessageType.MMS }
             <input type="text" placeholder="Subject(for group texting)" bind:value={subject}/>
         {/if}
-        <div class="mt-2 pb-5 d-flex flex-row bottom">
+        <div class="mt-2 pb-5 d-flex flex-row">
             <div class="col-10">
                 <textarea class="reply-textarea" placeholder="Enter your message here" bind:value={message}></textarea>
                 {#if type == MessageType.MMS }
@@ -274,14 +274,16 @@
                     </div>
                 {/if}
             </div>
-            <div class="col-2 d-grid gap-2">
-                <button class="btn btn-primary btn-sm" on:click={toggleMessageType}>Mode: {type.toUpperCase()}</button>
-                {#if type == MessageType.MMS }
-                    <button class="btn btn-primary btn-sm" on:click={()=>{fileRef.click()}}>Add Attachment</button>
-                {/if}
-                {#if thread && thread.participants.length > 0 && (type == MessageType.SMS ? message != "" : (message != "" || attachments.length > 0)) }
-                    <button class="btn btn-primary btn-sm" on:click={replyMessage}>Send</button>
-                {/if}
+            <div class="col-2">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-sm" on:click={toggleMessageType}>Mode: {type.toUpperCase()}</button>
+                    {#if type == MessageType.MMS }
+                        <button class="btn btn-primary btn-sm" on:click={()=>{fileRef.click()}}>Add Attachment</button>
+                    {/if}
+                    {#if thread && thread.participants.length > 0 && (type == MessageType.SMS ? message != "" : (message != "" || attachments.length > 0)) }
+                        <button class="btn btn-primary btn-sm" on:click={replyMessage}>Send</button>
+                    {/if}
+                </div>
             </div>
         </div>
     </div>
@@ -291,7 +293,7 @@
 <style>
     .chat-container {
         width: 100%;
-        height: 67vh;
+        height: 60vh;
         overflow-y: scroll;
     }
     .reply-container {
