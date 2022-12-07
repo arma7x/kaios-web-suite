@@ -8,14 +8,21 @@
     export let senderName: string = "";
     export let message: MozSmsMessage;
     export let deleteCallback: Function = (id) => {};
+    export let registerUpdateCallback: Function = (id, fn) => {};
 
-    onMount(() => {});
+    async function updateCallback() {}
+
+    onMount(() => {
+      registerUpdateCallback(message.id, updateCallback);
+    });
 
     onDestroy(() => {});
 
     beforeUpdate(() => {});
 
 </script>
+
+<svelte:options accessors immutable={true}/>
 
 <div class="p-1 border border-dark rounded" style="max-width:95%;">
   {#if showSender}

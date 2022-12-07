@@ -9,33 +9,43 @@ class SMSSyncHub {
   constructor(callback: BroadcastCallback) {
     this.broadcastCallback = callback;
     navigator.mozMobileMessage.ondeliveryerror = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
-      this.broadcastCallback({ type: SyncProtocol.SMS_ON_DELIVERY_ERROR, data: { message: clone(evt.message) } });
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_DELIVERY_ERROR, data: { message: this.prepareMessage(clone(evt.message)) } });
       this.syncThread();
     }
     navigator.mozMobileMessage.ondeliverysuccess = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
-      this.broadcastCallback({ type: SyncProtocol.SMS_ON_DELIVERY_SUCCESS, data: { message: clone(evt.message) } });
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_DELIVERY_SUCCESS, data: { message: this.prepareMessage(clone(evt.message)) } });
       this.syncThread();
     }
     navigator.mozMobileMessage.onreceived = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
-      this.broadcastCallback({ type: SyncProtocol.SMS_ON_RECEIVED, data: { message: clone(evt.message) } });
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_RECEIVED, data: { message: this.prepareMessage(clone(evt.message)) } });
       this.syncThread();
     }
     navigator.mozMobileMessage.onretrieving = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
-      this.broadcastCallback({ type: SyncProtocol.SMS_ON_RETRIEVING, data: { message: clone(evt.message) } });
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_RETRIEVING, data: { message: this.prepareMessage(clone(evt.message)) } });
       this.syncThread();
     }
     navigator.mozMobileMessage.onsent = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
-      this.broadcastCallback({ type: SyncProtocol.SMS_ON_SENT, data: { message: clone(evt.message) } });
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_SENT, data: { message: this.prepareMessage(clone(evt.message)) } });
       this.syncThread();
     }
     navigator.mozMobileMessage.onsending = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
-      this.broadcastCallback({ type: SyncProtocol.SMS_ON_SENDING, data: { message: clone(evt.message) } });
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_SENDING, data: { message: this.prepareMessage(clone(evt.message)) } });
       this.syncThread();
     }
     navigator.mozMobileMessage.onfailed = (evt: SyncProtocol.MozSmsEvent | SyncProtocol.MozMmsEvent) => {
-      this.broadcastCallback({ type: SyncProtocol.SMS_ON_FAILED, data: { message: clone(evt.message) } });
+      this.broadcastCallback({ type: SyncProtocol.SMS_ON_FAILED, data: { message: this.prepareMessage(clone(evt.message)) } });
       this.syncThread();
     }
+  }
+
+  prepareMessage(message) {
+    if (message.attachments) {
+      message.attachments.forEach((attachment, j) => {
+        message.attachments[j]['size'] = attachment.content.size;
+        message.attachments[j]['type'] = attachment.content.type;
+      });
+    }
+    return message;
   }
 
   filterEvent(event: any) {

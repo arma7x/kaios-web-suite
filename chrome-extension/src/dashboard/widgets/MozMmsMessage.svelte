@@ -8,6 +8,7 @@
     export let senderName: string = "";
     export let message: MozSmsMessage;
     export let deleteCallback: Function = (id) => {};
+    export let registerUpdateCallback: Function = (id, fn) => {};
 
     enum ElementType {
         Image   = 'image',
@@ -55,11 +56,7 @@
         });
     }
 
-    onMount(() => {});
-
-    onDestroy(() => {});
-
-    beforeUpdate(async () => {
+    async function updateCallback() {
         let temp: Array<Element> = [];
         for (let i in message.attachments) {
             try {
@@ -69,9 +66,22 @@
             }
         }
         elements = [...temp];
+    }
+
+    onMount(() => {
+        registerUpdateCallback(message.id, updateCallback);
+        updateCallback();
+    });
+
+    onDestroy(() => {});
+
+    beforeUpdate(async () => {
+
     });
 
 </script>
+
+<svelte:options accessors immutable={true}/>
 
 <div class="p-1 border border-dark rounded" style="max-width:95%;">
   {#if showSender}

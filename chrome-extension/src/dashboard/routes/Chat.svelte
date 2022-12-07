@@ -25,6 +25,7 @@
     let thread: MozMobileMessageThread;
     let messages: Array<MozSmsMessage|MozMmsMessage> = [];
     let messageIndex: {[key: string|number]: MessageIndex;} = {};
+    let messageUpdateCallback: {[key: string|number]: Function;} = {};
 
     let contactsUnsubscribe: any;
     let contactHash: {[key: string|number]: MozContact;} = {};
@@ -35,6 +36,10 @@
     let subject: string = "";
     let message: string = "";
     let attachments: Array<FileAttachment> = [];
+
+    function registerUpdateCallback(id: string|number, fn: Function) {
+        messageUpdateCallback[id] = fn;
+    }
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -77,6 +82,10 @@
             case SyncProtocol.SMS_DELETE_MESSAGE:
                 evt.detail.data.request.forEach((messageId, idx) => {
                     if (messageIndex[messageId] && evt.detail.data.response[idx] == 1) {
+                        if (messageUpdateCallback[messageId]) {
+                            messageUpdateCallback[messageId]();
+                            delete messageUpdateCallback[messageId];
+                        }
                         const index = messageIndex[messageId].index;
                         messages.splice(index, 1);
                         delete messageIndex[messageId];
@@ -242,11 +251,11 @@
         {#each messages as message}
             {#if message.sender == "" }
                 <div class="mb-2 p-1 d-flex flex-row-reverse">
-                    <svelte:component this={resolveMessageWidget(message)} showSender={false} senderName="" message={message} deleteCallback={deleteSMSMessage} />
+                    <svelte:component this={resolveMessageWidget(message)} showSender={false} senderName="" message={message} deleteCallback={deleteSMSMessage} registerUpdateCallback={registerUpdateCallback} />
                 </div>
             {:else}
                 <div class="mb-2 p-1 d-flex">
-                    <svelte:component this={resolveMessageWidget(message)} showSender={thread.participants.length > 1} senderName={contactTelHash[message.sender] ? contactHash[contactTelHash[message.sender]].name[0] : message.sender} message={message} deleteCallback={deleteSMSMessage} />
+                    <svelte:component this={resolveMessageWidget(message)} showSender={thread.participants.length > 1} senderName={contactTelHash[message.sender] ? contactHash[contactTelHash[message.sender]].name[0] : message.sender} message={message} deleteCallback={deleteSMSMessage} registerUpdateCallback={registerUpdateCallback} />
                 </div>
             {/if}
         {/each}
