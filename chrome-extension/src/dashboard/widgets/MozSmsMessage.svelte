@@ -29,7 +29,7 @@
     <p>{senderName}</p>
   {/if}
   <p class="text-wrap">{ message.body }</p>
-  <div class="d-flex flex-row align-items-center">
+  <div class="mt-1 d-flex flex-row align-items-center">
       <small class="me-1">{@html message.delivery == "error" ? "&#9888;" : "" }</small>
       <small class="me-1">{new Date(message.timestamp).toLocaleString()}</small>
       <button on:click={() => deleteCallback(message.id)} class="btn btn-outline-danger btn-sm">DELETE</button>
