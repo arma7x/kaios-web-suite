@@ -1,6 +1,6 @@
 <script lang="ts">
-    import "normalize.css";
-    import "purecss";
+    import "bootstrap/dist/css/bootstrap.min.css"
+
     import { onMount, onDestroy } from 'svelte';
     import QRCode from 'qr-image-generator';
     import { RequestSystemStatus } from '../system/protocol';
@@ -45,38 +45,34 @@
 
 </script>
 
-<div class="pure-g container">
-    <div class="pure-u">
-        <h1 style="text-align:center;margin:0em;">KaiOS Web Suite</h1>
-    </div>
-    <div class="pure-u" style="display:flex;flex-direction:row;justify-content:space-between;">
+<div class="container p-2 popup">
+    <h3 class="mt-1 text-center">KaiOS Web Suite</h3>
+    <div class="mt-1 d-flex flex-row justify-content-between">
         <div>Network Status:</div>
         <div><b>{ dataConnectionStatus ? 'Connected' : 'Disconnected' }</b></div>
     </div>
     {#if isKaiOSDeviceConnected}
-        <div class="pure-u">
+        <div class="mt-1">
             <blockquote>
                 <p><em>Show stats</em></p>
             </blockquote>
         </div>
     {:else}
-        <div class="pure-u" style="display:flex;flex-direction:row;justify-content:space-between;">
+        <div class="mt-1 d-flex flex-row justify-content-between">
             <div>KaiOS Device:</div>
             <div><b>{ isKaiOSDeviceConnected ? 'Connected' : 'Disconnected' }</b></div>
         </div>
     {/if}
     {#if buttonVisibility}
-    <div class="pure-u" style="display:flex;justify-content:space-around;">
-        <button class="pure-button pure-button-primary" style="width:100%;" on:click={openWelcome}>Open KaiOS Web Suite</button>
+    <div class="mt-1 d-grid gap-2">
+        <button class="btn btn-primary btn-sm" type="button" on:click={openWelcome}>Open KaiOS Web Suite</button>
     </div>
+
     {/if}
 </div>
 
 <style>
-    .container {
-        margin: 1em;
-        min-width: 200px;
-        display: flex;
-        flex-direction: column;
+    .popup {
+        min-width: 250px;
     }
 </style>

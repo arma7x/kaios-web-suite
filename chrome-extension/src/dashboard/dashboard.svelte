@@ -1,7 +1,5 @@
 <script lang="ts">
-    import "normalize.css";
-    import "purecss";
-    import "../system/global.css";
+    import "bootstrap/dist/css/bootstrap.min.css"
 
     import { onMount, onDestroy } from 'svelte';
     import Router, { push, pop, replace } from 'svelte-spa-router';
@@ -223,32 +221,32 @@
 
 </script>
 
-<div class="pure-g container">
-    <div class="pure-g" style="width:80%;">
-        <div class="pure-u-1-5">
-            <div style="width:90%;">
+<div class="mt-5 col-10 offset-1">
+    <div class="row">
+        <div class="col-2">
+            <div class="mt-2 d-grid gap-2">
                 {#if !isKaiOSDeviceConnected}
-                    <a href="#/" class="pure-button pure-button-primary menu">Link Device</a>
+                    <a href="#/" class="btn btn-outline-primary btn-sm">Link Device</a>
                 {:else}
-                    <a href="#/sms" class="pure-button pure-button-primary menu">SMS</a>
+                    <a href="#/sms" class="btn btn-outline-primary btn-sm">SMS</a>
                 {/if}
                 {#if isKaiOSDeviceConnected}
-                    <a href="#/kaios-contacts" class="pure-button pure-button-primary menu">KaiOS Contacts</a>
+                    <a href="#/kaios-contacts" class="btn btn-outline-primary btn-sm">KaiOS Contacts</a>
                 {/if}
-                <a href="#/card-dav-contacts" class="pure-button pure-button-primary menu">CardDAV Contacts</a>
+                <a href="#/card-dav-contacts" class="btn btn-outline-primary btn-sm">CardDAV Contacts</a>
                 {#if isKaiOSDeviceConnected}
-                    <a href="#/sync-contacts" class="pure-button pure-button-primary menu">Sync Contacts</a>
+                    <a href="#/sync-contacts" class="btn btn-outline-primary btn-sm">Sync Contacts</a>
                 {/if}
-                <a href="#/calendar" class="pure-button pure-button-primary menu">Calendar</a>
+                <a href="#/calendar" class="btn btn-outline-primary btn-sm">Calendar</a>
                 {#if isKaiOSDeviceConnected}
-                    <a href="#/filetransfer" class="pure-button pure-button-primary menu">File Transfer</a>
+                    <a href="#/filetransfer" class="btn btn-outline-primary btn-sm">File Transfer</a>
                 {/if}
-                <a href="#/settings" class="pure-button pure-button-primary menu">Settings</a>
+                <a href="#/settings" class="btn btn-outline-primary btn-sm">Settings</a>
             </div>
         </div>
-        <div class="pure-u-4-5">
+        <div class="col-10">
             <Router {routes}/>
-            <div class="qr-container" style="display: {showQrCode ? 'flex' : 'none'}!important;">
+            <div class="qr-container {showQrCode ? 'd-flex' : 'd-none'}">
                 <h1 class="container-header">KaiOS Web Suite</h1>
                 {#if dataConnectionID}
                     <canvas id="canvas"></canvas>
@@ -259,26 +257,11 @@
         </div>
     </div>
     <Modals>
-      <div slot="backdrop" class="backdrop" on:click={closeModal}/>
+        <div slot="backdrop" class="backdrop" on:click={closeModal}/>
     </Modals>
 </div>
 
 <style>
-    .backdrop {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        left: 0;
-        background: rgba(0,0,0,0.50)
-    }
-    .container {
-        width: 100vw;
-        padding: 0;
-        margin: 0;
-        justify-content: center;
-        margin-top: 5em;
-    }
     .qr-container {
         max-width: unset;
         flex-flow: unset;
@@ -294,11 +277,5 @@
     }
     .qr-container  > .container-header {
         text-align: center;
-    }
-    .menu {
-        width: 100%;
-        font-size: 1.5em;
-        margin-bottom: 0.5em;
-        vertical-align: middle;
     }
 </style>

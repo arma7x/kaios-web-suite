@@ -1,6 +1,4 @@
 <script lang="ts">
-    import "normalize.css";
-    import "purecss";
     import "../../system/global.css";
 
     import { onMount, onDestroy } from 'svelte';

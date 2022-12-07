@@ -1,19 +1,15 @@
-html {
-  overflow-x: hidden;
+.backdrop {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: rgba(0,0,0,0.50)
 }
-
-h1,h2,h3,h4,h5 {
-  padding: 0;
-  margin: 0;
-}
-
-.wrapword {
-  white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
-  white-space: -pre-wrap;      /* Opera 4-6 */
-  white-space: -o-pre-wrap;    /* Opera 7 */
-  white-space: pre-wrap;       /* css-3 */
-  word-wrap: break-word;       /* Internet Explorer 5.5+ */
-  white-space: -webkit-pre-wrap; /* Newer versions of Chrome/Safari*/
-  word-break: break-all;
-  white-space: normal;
+.container {
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    margin-top: 5em;
 }
