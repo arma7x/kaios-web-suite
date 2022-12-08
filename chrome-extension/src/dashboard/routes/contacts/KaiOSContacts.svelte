@@ -10,7 +10,8 @@
 
     let isKaiOSDeviceConnected: bool = false;
     let contactsUnsubscribe: any;
-    let contactList: {[key: string|number]: MozContact;} = {};
+    let contactList: Array<MozContact> = {};
+    let contactListIndex: {[key: string|number]: number;} = {};
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -29,16 +30,21 @@
                     console.log(evt.detail.type, evt.detail.error);
                 break;
             case SyncProtocol.CONTACT_EVENT_UPDATE:
-                contactList[evt.detail.data.contactID] = evt.detail.data.contact;
-                contactList = {...contactList};
+                if (contactListIndex[evt.detail.data.contactID] != null) {
+                    contactList[contactListIndex[evt.detail.data.contactID]] = evt.detail.data.contact;
+                    contactList = [...contactList];
+                }
                 break;
             case SyncProtocol.CONTACT_EVENT_CREATE:
-                contactList[evt.detail.data.contactID] = evt.detail.data.contact;
-                contactList = {...contactList};
+                contactListIndex[evt.detail.data.contactID] = contactList.length;
+                contactList = [...contactList, evt.detail.data.contact];
                 break;
             case SyncProtocol.CONTACT_EVENT_REMOVE:
-                delete contactList[evt.detail.data.contactID];
-                contactList = {...contactList};
+                if (contactListIndex[evt.detail.data.contactID] != null) {
+                    contactList.splice(contactListIndex[evt.detail.data.contactID], 1);
+                    contactList = [...contactList];
+                    delete contactListIndex[evt.detail.data.contactID];
+                }
                 break;
         }
     }
@@ -104,11 +110,11 @@
         contactsUnsubscribe = contactStorage.subscribe((contactStore: ContactStore = {}) => {
             let temp : {[key: string|number]: MozContact;} = {};
             if (contactStore && contactStore.contacts) {
-                contactStore.contacts.forEach(contact => {
-                    temp[contact.id] = contact;
+                contactStore.contacts.forEach((contact, index) => {
+                    contactListIndex[contact.id] = index;
                 });
             }
-            contactList = {...temp};
+            contactList = [...contactStore.contacts];
         });
     });
 
@@ -129,10 +135,10 @@
             <button on:click={addContact}>addContact</button>
         </div>
         <div>
-        {#each Object.entries(contactList) as [key, contact]}
+        {#each contactList as contact}
             <div style="margin-bottom:4px;">
-                {key}: { contact.name[0] },  { contact.tel[0].value }
-                <button on:click={() => deleteContact(key) }>deleteContact</button>
+                {contact.id}: { contact.name[0] },  { contact.tel[0].value }
+                <button on:click={() => deleteContact(contact.id) }>deleteContact</button>
                 <button on:click={() => updateContact(contact) }>updateContact</button>
                 <button on:click={() => exportContact(contact) }>exportContact</button>
             </div>

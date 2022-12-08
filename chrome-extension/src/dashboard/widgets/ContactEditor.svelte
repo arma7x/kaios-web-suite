@@ -73,7 +73,6 @@
     }
 
     function saveContact() {
-        console.log('saveContact:', contact);
         const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
               type: contact.id != null ? SyncProtocol.CONTACT_UPDATE : SyncProtocol.CONTACT_SAVE,
