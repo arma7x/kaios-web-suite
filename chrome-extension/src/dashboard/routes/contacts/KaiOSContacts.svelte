@@ -10,8 +10,11 @@
 
     let isKaiOSDeviceConnected: bool = false;
     let contactsUnsubscribe: any;
-    let contactList: Array<MozContact> = {};
+    let contactList: Array<MozContact> = [];
     let contactListIndex: {[key: string|number]: number;} = {};
+    let LIMIT: number = 10;
+    let offset: number = 0;
+    let maxOffset: number = Math.ceil(contactList.length / LIMIT);
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -38,12 +41,14 @@
             case SyncProtocol.CONTACT_EVENT_CREATE:
                 contactListIndex[evt.detail.data.contactID] = contactList.length;
                 contactList = [...contactList, evt.detail.data.contact];
+                maxOffset = Math.ceil(contactList.length / LIMIT);
                 break;
             case SyncProtocol.CONTACT_EVENT_REMOVE:
                 if (contactListIndex[evt.detail.data.contactID] != null) {
                     contactList.splice(contactListIndex[evt.detail.data.contactID], 1);
                     contactList = [...contactList];
                     delete contactListIndex[evt.detail.data.contactID];
+                    maxOffset = Math.ceil(contactList.length / LIMIT);
                 }
                 break;
         }
@@ -113,8 +118,9 @@
                 contactStore.contacts.forEach((contact, index) => {
                     contactListIndex[contact.id] = index;
                 });
+                contactList = [...contactStore.contacts];
+                maxOffset = Math.ceil(contactList.length / LIMIT);
             }
-            contactList = [...contactStore.contacts];
         });
     });
 
@@ -128,23 +134,58 @@
 </script>
 
 <div>
-    <h1>KaiOS Contacts</h1>
+    <div class="d-flex flex-row justify-content-between align-items-center">
+        <h3>KaiOS Contacts</h3>
+        {#if isKaiOSDeviceConnected }
+        <div class="d-flex flex-row">
+            <button type="button" class="btn btn-primary btn-sm me-1" on:click={getContact}>Reload Contact</button>
+            <button type="button" class="btn btn-primary btn-sm me-1" on:click={addContact}>Add Contact</button>
+        </div>
+        {/if}
+    </div>
+    <div>
     {#if isKaiOSDeviceConnected }
-        <div>
-            <button on:click={getContact}>getContact</button>
-            <button on:click={addContact}>addContact</button>
-        </div>
-        <div>
-        {#each contactList as contact}
-            <div style="margin-bottom:4px;">
-                {contact.id}: { contact.name[0] },  { contact.tel[0].value }
-                <button on:click={() => deleteContact(contact.id) }>deleteContact</button>
-                <button on:click={() => updateContact(contact) }>updateContact</button>
-                <button on:click={() => exportContact(contact) }>exportContact</button>
-            </div>
-        {/each}
-        </div>
+    <div class="table-responsive">
+        <table class="table caption-top">
+            <caption>
+                <div class="d-flex flex-row justify-content-between align-items-center">
+                    <button type="button" class="btn btn-primary btn-sm me-1" on:click={() => {if (offset !== 0) --offset;} }>
+                        Prev{#if offset !== 0 }({offset}){/if}
+                    </button>
+                    <h6>Page: {offset + 1}</h6>
+                    <button type="button" class="btn btn-primary btn-sm" on:click={() => {if (offset + 1 < maxOffset) ++offset;} }>
+                        Next{#if offset + 1 < maxOffset }({offset + 2}){/if}
+                    </button>
+                </div>
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Phone Number</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each contactList.slice(LIMIT * offset, (LIMIT * offset) + LIMIT) as contact}
+                <tr>
+                    <th scope="row">{contact.id}</th>
+                    <td>{ contact.name[0] }</td>
+                    <td>{ contact.tel[0].value }</td>
+                    <td>
+                        <div class="mt-2 d-block gap-2">
+                            <button class="btn btn-outline-info btn-sm mb-1" on:click={() => updateContact(contact) }>Update</button>
+                            <button class="btn btn-outline-dark btn-sm mb-1" on:click={() => exportContact(contact) }>Export</button>
+                            <button class="btn btn-outline-danger btn-sm mb-1" on:click={() => deleteContact(contact.id) }>Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                {/each}
+            </tbody>
+        </table>
+    </div>
     {:else}
         <h5>Not connected</h5>
     {/if}
+    </div>
 </div>
