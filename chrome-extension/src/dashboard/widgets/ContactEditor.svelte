@@ -10,6 +10,8 @@
     export let buttonText: string;
     export let contact: MozContact = {};
 
+    let contactForm;
+
     let givenName: string = '';
     let familyName: string = '';
     let phoneNumber: string = '';
@@ -73,68 +75,63 @@
     }
 
     function saveContact() {
-        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-            detail: {
-              type: contact.id != null ? SyncProtocol.CONTACT_UPDATE : SyncProtocol.CONTACT_SAVE,
-              data: { contact: contact }
+        if (contactForm) {
+            if (!contactForm.checkValidity()) {
+                contactForm.classList.add('was-validated')
+            } else {
+                const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+                    detail: {
+                      type: contact.id != null ? SyncProtocol.CONTACT_UPDATE : SyncProtocol.CONTACT_SAVE,
+                      data: { contact: contact }
+                    }
+                });
+                window.dispatchEvent(evt);
             }
-        });
-        window.dispatchEvent(evt);
+        }
     }
 
 </script>
 
 {#if isOpen}
-<div role="dialog" class="modal">
-    <div class="contents">
-        <h2>{titleText}</h2>
-        <div style="display:flex;flex-direction:column;">
-            <input label="Given Name" placeholder="Enter given name" value="{givenName}" type="text" on:input="{onGivenName}" />
-            <input label="Family Name" placeholder="Enter family name" value="{familyName}" type="text" on:input="{onFamilyName}" />
-            <input label="Phone Number" placeholder="Enter phone number" value="{phoneNumber}" type="tel" on:input="{onPhoneNumber}" />
-        </div>
-        <div class="actions">
-            <button on:click="{saveContact}">{buttonText}</button>
-            <button on:click="{closeModal}">Close</button>
+<div class="svelte-modals modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{titleText}</h5>
+                <button on:click={closeModal} type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form bind:this={contactForm} novalidate>
+                    <div class="input-group mb-1">
+                        <div class="form-floating">
+                            <input id="givenName" class="form-control form-control-sm" placeholder="Enter given name" value="{givenName}" type="text" on:input="{onGivenName}" required/>
+                            <label for="givenName">Given Name</label>
+                            <div class="invalid-feedback">Required</div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-1">
+                        <div class="form-floating">
+                            <input id="familyName" class="form-control form-control-sm" placeholder="Enter family name" value="{familyName}" type="text" on:input="{onFamilyName}" />
+                            <label for="familyName">Family Name</label>
+                        </div>
+                    </div>
+                    <div class="input-group mb-1">
+                        <div class="form-floating">
+                            <input id="phoneNumber" class="form-control form-control-sm" placeholder="Enter phone number" value="{phoneNumber}" type="tel" on:input="{onPhoneNumber}" required/>
+                            <label for="phoneNumber">Phone Number</label>
+                            <div class="invalid-feedback">Required</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-sm me-2" on:click="{saveContact}">{buttonText}</button>
+                <button class="btn btn-primary btn-sm me-2" on:click="{closeModal}">Close</button>
+            </div>
         </div>
     </div>
 </div>
 {/if}
 
 <style>
-  .modal {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    /* allow click-through to backdrop */
-    pointer-events: none;
-  }
-
-  .contents {
-    min-width: 240px;
-    border-radius: 6px;
-    padding: 16px;
-    background: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    pointer-events: auto;
-  }
-
-  h2 {
-    text-align: center;
-    font-size: 24px;
-  }
-
-  .actions {
-    margin-top: 32px;
-    display: flex;
-    justify-content: flex-end;
-  }
 </style>

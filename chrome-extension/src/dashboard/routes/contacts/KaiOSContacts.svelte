@@ -139,7 +139,7 @@
         {#if isKaiOSDeviceConnected }
         <div class="d-flex flex-row">
             <button type="button" class="btn btn-primary btn-sm me-1" on:click={getContact}>Reload Contact</button>
-            <button type="button" class="btn btn-primary btn-sm me-1" on:click={addContact}>Add Contact</button>
+            <button type="button" class="btn btn-primary btn-sm" on:click={addContact}>Add Contact</button>
         </div>
         {/if}
     </div>
