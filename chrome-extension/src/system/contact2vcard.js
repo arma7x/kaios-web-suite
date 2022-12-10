@@ -406,6 +406,9 @@ var Normalizer = {
         var fieldType = field.type.map(function(aType) {
           var out = '';
           if (aType) {
+            if (aType.forEach) {
+              aType = aType.join(',');
+            }
             aType = aType.trim().toLowerCase();
             if (VCARD_SKIP_FIELD.indexOf(aType) !== -1) {
               skipField = true;

@@ -75,6 +75,7 @@
             }
         });
         window.dispatchEvent(evt);
+        closeModal();
     }
 
     function addContact() {

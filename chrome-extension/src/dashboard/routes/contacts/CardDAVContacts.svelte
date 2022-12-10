@@ -1,9 +1,12 @@
 <script lang="ts">
 
     import { onMount, onDestroy } from 'svelte';
+    import { openModal, closeModal } from 'svelte-modals';
     import { DAVClient, getBasicAuthHeaders } from 'tsdav/dist/tsdav';
     import { RequestSystemStatus } from '../../../system/protocol';
+    import ContactEditorWidget from '../../widgets/ContactEditor.svelte';
     import vCard from 'vcf';
+    import {v4 as uuidv4} from 'uuid';
 
     let contactList: Array<{[key: string|number]: any;}> = [];
     let contactListIndex: {[key: string|number]: number;} = {};
@@ -38,9 +41,10 @@
                     });
                     let temp: Array<{[key: string|number]: any;}> = [];
                     vcards.forEach((contact, index) => {
-                        contact.data = new vCard().parse(contact.data);
-                        const { fn, n, tel } = contact.data.data;
+                        contact.vcard = new vCard().parse(contact.data);
+                        const { fn, n, tel } = contact.vcard.data;
                         let mozCt = {};
+                        mozCt['id'] = contact.vcard.data.uid._data;
                         mozCt['name'] = [fn._data];
                         const name = n._data.split(';');
                         ['familyName', 'givenName', 'additionalName', 'honorificPrefix', 'honorificSuffix'].forEach((field, index) => {
@@ -56,7 +60,7 @@
                         }
                         contact.mozContact = mozCt;
                         temp.push(contact);
-                        contactListIndex[contact.data.data.uid._data] = index;
+                        contactListIndex[contact.vcard.data.uid._data] = index;
                     });
                     contactList = [...temp];
                     maxOffset = Math.ceil(contactList.length / LIMIT);
@@ -68,10 +72,47 @@
         }, 3000);
     }
 
+    function contactEditorCallback(contact) {
+        if (contact.id) {
+            let str = '';
+            ContactToVcard([contact], (vcards, nCards) => {
+                str += vcards;
+            }, () => {
+                const temp = new vCard().parse(str);
+                console.log(contact, temp);
+                contactList[contactListIndex[contact.id]].vcard.setProperty(temp.data.fn);
+                contactList[contactListIndex[contact.id]].vcard.setProperty(temp.data.n);
+                if (temp.data.tel.length) {
+                    temp.data.tel.forEach((tel, index) => {
+                        if (index == 0)
+                            contactList[contactListIndex[contact.id]].vcard.setProperty(tel);
+                        else
+                            contactList[contactListIndex[contact.id]].vcard.addProperty(tel);
+                    });
+                } else {
+                    contactList[contactListIndex[contact.id]].vcard.setProperty(temp.data.tel);
+                }
+                console.log(contactList[contactListIndex[contact.id]]);
+            }, null, true);
+        } else {
+            let str = '';
+            ContactToVcard([contact], (vcards, nCards) => {
+                str += vcards;
+            }, () => {
+                const temp = new vCard().parse(str);
+                console.log(contact, temp, uuidv4());
+            }, null, true);
+        }
+        closeModal();
+    }
 
-    function addContact() {}
+    function addContact() {
+        openModal(ContactEditorWidget, { titleText: 'Add Contact', buttonText: 'Submit' , contact: {}, callback: contactEditorCallback });
+    }
 
-    function updateContact(contact) {}
+    function updateContact(contact: MozContact) {
+        openModal(ContactEditorWidget, { titleText: 'Update Contact', buttonText: 'Save', contact: contact.mozContact, callback: contactEditorCallback });
+    }
 
     function exportContact(contact) {}
 
@@ -120,7 +161,7 @@
             <tbody>
                 {#each contactList.slice(LIMIT * offset, (LIMIT * offset) + LIMIT) as contact}
                 <tr>
-                    <th scope="row">{contact.data.data.uid._data}</th>
+                    <th scope="row">{contact.vcard.data.uid._data}</th>
                     <td>{ contact.mozContact.name[0] }</td>
                     <td>{ contact.mozContact.tel[0].value }</td>
                     <td>
