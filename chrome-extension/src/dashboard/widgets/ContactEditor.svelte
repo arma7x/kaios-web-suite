@@ -52,9 +52,12 @@
     function onPhoneNumber(evt) {
         const val = evt.target.value.trim().toString();
         if (val) {
-            contact.tel = [{ "type": [type], "value": val }]
-        } else {
-            contact.tel = null
+            if (contact.tel == null)
+                contact.tel = [];
+            if (contact.tel.length == 0)
+                contact.tel.push({ "type": [type], "value": val });
+            else
+                contact.tel[0] = { "type": [type], "value": val };
         }
         updateName()
     }
