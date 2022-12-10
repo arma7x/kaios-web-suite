@@ -67,12 +67,22 @@
         }, 3000);
     }
 
+    function contactEditorCallback(contact) {
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+            detail: {
+              type: contact.id != null ? SyncProtocol.CONTACT_UPDATE : SyncProtocol.CONTACT_SAVE,
+              data: { contact: contact }
+            }
+        });
+        window.dispatchEvent(evt);
+    }
+
     function addContact() {
-        openModal(ContactEditorWidget, { titleText: 'Add Contact', buttonText: 'Submit' , contact: {} });
+        openModal(ContactEditorWidget, { titleText: 'Add Contact', buttonText: 'Submit' , contact: {}, callback: contactEditorCallback });
     }
 
     function updateContact(contact: MozContact) {
-        openModal(ContactEditorWidget, { titleText: 'Update Contact', buttonText: 'Save', contact: contact });
+        openModal(ContactEditorWidget, { titleText: 'Update Contact', buttonText: 'Save', contact: contact, callback: contactEditorCallback });
     }
 
     function exportContact(ct: MozContact) {

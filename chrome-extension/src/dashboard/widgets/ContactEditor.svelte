@@ -2,13 +2,16 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { closeModal } from 'svelte-modals';
-    import { SyncProtocol, type MozContact } from '../../../../kaios-app/src/system/sync_protocol';
+    import { type MozContact } from '../../../../kaios-app/src/system/sync_protocol';
+
+    type CallbackFunction = (contact: any) => void
 
     // provided by Modals
     export let isOpen;
     export let titleText: string;
     export let buttonText: string;
     export let contact: MozContact = {};
+    export let callback: CallbackFunction = (contact: any) => {};
 
     let contactForm;
 
@@ -79,13 +82,7 @@
             if (!contactForm.checkValidity()) {
                 contactForm.classList.add('was-validated')
             } else {
-                const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-                    detail: {
-                      type: contact.id != null ? SyncProtocol.CONTACT_UPDATE : SyncProtocol.CONTACT_SAVE,
-                      data: { contact: contact }
-                    }
-                });
-                window.dispatchEvent(evt);
+                callback(contact);
             }
         }
     }
