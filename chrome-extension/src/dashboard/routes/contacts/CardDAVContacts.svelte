@@ -79,7 +79,6 @@
                 str += vcards;
             }, () => {
                 const temp = new vCard().parse(str);
-                console.log(contact, temp);
                 contactList[contactListIndex[contact.id]].vcard.setProperty(temp.data.fn);
                 contactList[contactListIndex[contact.id]].vcard.setProperty(temp.data.n);
                 if (temp.data.tel.length) {
@@ -92,7 +91,12 @@
                 } else {
                     contactList[contactListIndex[contact.id]].vcard.setProperty(temp.data.tel);
                 }
-                console.log(contactList[contactListIndex[contact.id]]);
+                console.log("UPDATE:", {
+                  vCard: {
+                    url: contactList[contactListIndex[contact.id]].url,
+                    data: contactList[contactListIndex[contact.id]].vcard.toString(),
+                  },
+                });
             }, null, true);
         } else {
             let str = '';
@@ -100,7 +104,11 @@
                 str += vcards;
             }, () => {
                 const temp = new vCard().parse(str);
-                console.log(contact, temp, uuidv4());
+                console.log("CREATE:", {
+                  addressBook: null,
+                  filename: `${uuidv4()}.vcf`,
+                  vCardString: temp.toString(),
+                });
             }, null, true);
         }
         closeModal();
