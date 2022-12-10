@@ -152,7 +152,7 @@
                     <button type="button" class="btn btn-primary btn-sm me-1" on:click={() => {if (offset !== 0) --offset;} }>
                         Prev{#if offset !== 0 }({offset}){/if}
                     </button>
-                    <h6>Page: {offset + 1}</h6>
+                    <h6>Page: {offset + 1}/{maxOffset}</h6>
                     <button type="button" class="btn btn-primary btn-sm" on:click={() => {if (offset + 1 < maxOffset) ++offset;} }>
                         Next{#if offset + 1 < maxOffset }({offset + 2}){/if}
                     </button>
