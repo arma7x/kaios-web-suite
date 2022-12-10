@@ -54,6 +54,7 @@
                         }
                         // console.log(splitURL[splitURL.length - 1], mozCt);
                     });
+                    console.log(temp);
                     contactList = {...temp};
                 } catch(err) {
                     console.log(err);
@@ -77,7 +78,7 @@
 </script>
 
 <div>
-    <h1>CardDAVContacts</h1>
+    <h1>CardDAV Contacts</h1>
     <div><button on:click={getContact}>getContact</button></div>
     {#each Object.entries(contactList) as [key, contact]}
         <div style="margin-bottom:4px;">{key}: { contact.data.data.fn._data }, { contact.data.data.tel.length ? contact.data.data.tel[0]._data : contact.data.data.tel._data }</div>

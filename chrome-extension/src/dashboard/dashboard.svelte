@@ -229,16 +229,12 @@
                     <a href="#/" class="btn btn-primary btn-sm">Link Device</a>
                 {:else}
                     <a href="#/sms" class="btn btn-primary btn-sm">SMS</a>
-                {/if}
-                {#if isKaiOSDeviceConnected}
                     <a href="#/kaios-contacts" class="btn btn-primary btn-sm">KaiOS Contacts</a>
-                {/if}
-                <a href="#/card-dav-contacts" class="btn btn-primary btn-sm">CardDAV Contacts</a>
-                {#if isKaiOSDeviceConnected}
                     <a href="#/sync-contacts" class="btn btn-primary btn-sm">Sync Contacts</a>
                 {/if}
-                <a href="#/calendar" class="btn btn-primary btn-sm">Calendar</a>
-                {#if isKaiOSDeviceConnected}
+                <a href="#/card-dav-contacts" class="btn btn-primary btn-sm">CardDAV Contacts</a>
+                <!-- <a href="#/calendar" class="btn btn-primary btn-sm">Calendar</a> -->
+                {#if isKaiOSDeviceConnected && false}
                     <a href="#/filetransfer" class="btn btn-primary btn-sm">File Transfer</a>
                 {/if}
                 <a href="#/settings" class="btn btn-primary btn-sm">Settings</a>
