@@ -14,7 +14,7 @@
     let contactListIndex: {[key: string|number]: number;} = {};
     let LIMIT: number = 10;
     let offset: number = 0;
-    let maxOffset: number = Math.ceil(contactList.length / LIMIT);
+    let maxOffset: number = Math.ceil(contactList.length / LIMIT) - 1;
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
@@ -41,30 +41,29 @@
             case SyncProtocol.CONTACT_EVENT_CREATE:
                 contactListIndex[evt.detail.data.contactID] = contactList.length;
                 contactList = [...contactList, evt.detail.data.contact];
-                maxOffset = Math.ceil(contactList.length / LIMIT);
+                maxOffset = Math.ceil(contactList.length / LIMIT) - 1;
                 break;
             case SyncProtocol.CONTACT_EVENT_REMOVE:
                 if (contactListIndex[evt.detail.data.contactID] != null) {
                     contactList.splice(contactListIndex[evt.detail.data.contactID], 1);
                     contactList = [...contactList];
                     delete contactListIndex[evt.detail.data.contactID];
-                    maxOffset = Math.ceil(contactList.length / LIMIT);
+                    maxOffset = Math.ceil(contactList.length / LIMIT) - 1;
                 }
                 break;
         }
     }
 
     function getContact() {
+        offset = 0;
         contactList = [];
-        setTimeout(() => {
-            const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-                detail: {
-                    type: SyncProtocol.CONTACT_GET_ALL,
-                    data: { filter: {} }
-                }
-            });
-            window.dispatchEvent(evt);
-        }, 3000);
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+            detail: {
+                type: SyncProtocol.CONTACT_GET_ALL,
+                data: { filter: {} }
+            }
+        });
+        window.dispatchEvent(evt);
     }
 
     function contactEditorCallback(contact) {
@@ -130,7 +129,7 @@
                     contactListIndex[contact.id] = index;
                 });
                 contactList = [...contactStore.contacts];
-                maxOffset = Math.ceil(contactList.length / LIMIT);
+                maxOffset = Math.ceil(contactList.length / LIMIT) - 1;
             }
         });
     });
@@ -163,9 +162,9 @@
                     <button type="button" class="btn btn-primary btn-sm me-1" on:click={() => {if (offset !== 0) --offset;} }>
                         Prev{#if offset !== 0 }({offset}){/if}
                     </button>
-                    <h6>Page: {offset + 1}/{maxOffset}</h6>
-                    <button type="button" class="btn btn-primary btn-sm" on:click={() => {if (offset + 1 < maxOffset) ++offset;} }>
-                        Next{#if offset + 1 < maxOffset }({offset + 2}){/if}
+                    <h6>Page: {offset + 1}/{maxOffset + 1}</h6>
+                    <button type="button" class="btn btn-primary btn-sm" on:click={() => {if (offset < maxOffset) ++offset;} }>
+                        Next{#if offset < maxOffset }({offset + 2}){/if}
                     </button>
                 </div>
             </caption>

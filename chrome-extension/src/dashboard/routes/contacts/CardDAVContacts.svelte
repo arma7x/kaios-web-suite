@@ -13,7 +13,7 @@
     let contactListIndex: {[key: string|number]: number;} = {};
     let LIMIT: number = 10;
     let offset: number = 0;
-    let maxOffset: number = Math.ceil(contactList.length / LIMIT);
+    let maxOffset: number = Math.ceil(contactList.length / LIMIT) - 1;
 
     function getContact() {
         offset = 0;
@@ -46,7 +46,7 @@
                     contactListIndex[contact.vcard.data.uid._data] = index;
                 });
                 contactList = [...temp];
-                maxOffset = Math.ceil(contactList.length / LIMIT);
+                maxOffset = Math.ceil(contactList.length / LIMIT) - 1;
                 // console.log(contactList);
             } catch(err) {
                 console.log(err);
@@ -147,7 +147,7 @@
                             contactListIndex[contact.vcard.data.uid._data] = contactList.length - 1;
                         });
                         contactList = [...contactList];
-                        maxOffset = Math.ceil(contactList.length / LIMIT);
+                        maxOffset = Math.ceil(contactList.length / LIMIT) - 1;
                     } catch(err) {
                         console.log(err);
                     }
@@ -182,7 +182,9 @@
                 contactList.splice(contactListIndex[id], 1);
                 contactList = [...contactList];
                 delete contactListIndex[id];
-                maxOffset = Math.ceil(contactList.length / LIMIT);
+                maxOffset = Math.ceil(contactList.length / LIMIT) - 1;
+                if (offset > maxOffset)
+                    --offset;
             } catch(err) {
                 console.log(err);
             }
@@ -215,9 +217,9 @@
                     <button type="button" class="btn btn-primary btn-sm me-1" on:click={() => {if (offset !== 0) --offset;} }>
                         Prev{#if offset !== 0 }({offset}){/if}
                     </button>
-                    <h6>Page: {offset + 1}/{maxOffset}</h6>
-                    <button type="button" class="btn btn-primary btn-sm" on:click={() => {if (offset + 1 < maxOffset) ++offset;} }>
-                        Next{#if offset + 1 < maxOffset }({offset + 2}){/if}
+                    <h6>Page: {offset + 1}/{maxOffset + 1}</h6>
+                    <button type="button" class="btn btn-primary btn-sm" on:click={() => {if (offset < maxOffset) ++offset;} }>
+                        Next{#if offset < maxOffset }({offset + 2}){/if}
                     </button>
                 </div>
             </caption>
