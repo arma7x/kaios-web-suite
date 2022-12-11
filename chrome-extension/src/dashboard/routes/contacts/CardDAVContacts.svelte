@@ -2,7 +2,7 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { openModal, closeModal } from 'svelte-modals';
-    import { DAVClient, DAVNamespaceShort } from 'tsdav/dist/tsdav';
+    import { DAVClient } from 'tsdav/dist/tsdav';
     import { RequestSystemStatus } from '../../../system/protocol';
     import ContactEditorWidget from '../../widgets/ContactEditor.svelte';
     import vCard from 'vcf';
