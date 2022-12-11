@@ -2,12 +2,13 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { openModal, closeModal } from 'svelte-modals';
-    import { DAVClient, getBasicAuthHeaders } from 'tsdav/dist/tsdav';
+    import { DAVClient, DAVNamespaceShort } from 'tsdav/dist/tsdav';
     import { RequestSystemStatus } from '../../../system/protocol';
     import ContactEditorWidget from '../../widgets/ContactEditor.svelte';
     import vCard from 'vcf';
     import {v4 as uuidv4} from 'uuid';
 
+    let davClient: DAVClient;
     let contactList: Array<{[key: string|number]: any;}> = [];
     let contactListIndex: {[key: string|number]: number;} = {};
     let LIMIT: number = 10;
@@ -15,61 +16,64 @@
     let maxOffset: number = Math.ceil(contactList.length / LIMIT);
 
     function getContact() {
+        offset = 0;
         contactList = [];
-        setTimeout(() => {
-            let config = {
-                serverUrl: window.localStorage.getItem('serverUrl'),
-                username: window.localStorage.getItem('username'),
-                password: window.localStorage.getItem('password')
+        let config = {
+            serverUrl: window.localStorage.getItem('serverUrl'),
+            username: window.localStorage.getItem('username'),
+            password: window.localStorage.getItem('password')
+        }
+        davClient = new DAVClient({
+            serverUrl: config.serverUrl,
+            credentials: {
+                username: config.username,
+                password: config.password,
+            },
+            authMethod: 'Basic',
+            defaultAccountType: 'carddav',
+        });
+        (async () => {
+            try {
+                await davClient.login();
+                const addressBooks = await davClient.fetchAddressBooks();
+                const vcards = await davClient.fetchVCards({
+                    addressBook: addressBooks[0],
+                });
+                let temp: Array<{[key: string|number]: any;}> = [];
+                vcards.forEach((contact, index) => {
+                    contact = prepareContact(contact);
+                    temp.push(contact);
+                    contactListIndex[contact.vcard.data.uid._data] = index;
+                });
+                contactList = [...temp];
+                maxOffset = Math.ceil(contactList.length / LIMIT);
+                // console.log(contactList);
+            } catch(err) {
+                console.log(err);
             }
+        })();
+    }
 
-            const client = new DAVClient({
-                serverUrl: config.serverUrl,
-                credentials: {
-                    username: config.username,
-                    password: config.password,
-                },
-                authMethod: 'Basic',
-                defaultAccountType: 'carddav',
+    function prepareContact(contact) {
+        contact.vcard = new vCard().parse(contact.data);
+        const { fn, n, tel } = contact.vcard.data;
+        let mozCt = {};
+        mozCt['id'] = contact.vcard.data.uid._data;
+        mozCt['name'] = [fn._data];
+        const name = n._data.split(';');
+        ['familyName', 'givenName', 'additionalName', 'honorificPrefix', 'honorificSuffix'].forEach((field, index) => {
+            mozCt[field] = name[index] ? [name[index]] : null;
+        });
+        if (tel.length) {
+            mozCt['tel'] = [];
+            tel.forEach(t => {
+                mozCt['tel'].push({ "type": [t.type], "value": t._data });
             });
-            (async () => {
-                try {
-                    await client.login();
-                    const addressBooks = await client.fetchAddressBooks();
-                    const vcards = await client.fetchVCards({
-                        addressBook: addressBooks[0],
-                    });
-                    let temp: Array<{[key: string|number]: any;}> = [];
-                    vcards.forEach((contact, index) => {
-                        contact.vcard = new vCard().parse(contact.data);
-                        const { fn, n, tel } = contact.vcard.data;
-                        let mozCt = {};
-                        mozCt['id'] = contact.vcard.data.uid._data;
-                        mozCt['name'] = [fn._data];
-                        const name = n._data.split(';');
-                        ['familyName', 'givenName', 'additionalName', 'honorificPrefix', 'honorificSuffix'].forEach((field, index) => {
-                            mozCt[field] = name[index] ? [name[index]] : null;
-                        });
-                        if (tel.length) {
-                            mozCt['tel'] = [];
-                            tel.forEach(t => {
-                                mozCt['tel'].push({ "type": [t.type], "value": t._data });
-                            });
-                        } else {
-                            mozCt['tel'] = [{ "type": [tel.type], "value": tel._data }];
-                        }
-                        contact.mozContact = mozCt;
-                        temp.push(contact);
-                        contactListIndex[contact.vcard.data.uid._data] = index;
-                    });
-                    contactList = [...temp];
-                    maxOffset = Math.ceil(contactList.length / LIMIT);
-                    // console.log(contactList);
-                } catch(err) {
-                    console.log(err);
-                }
-            })();
-        }, 3000);
+        } else {
+            mozCt['tel'] = [{ "type": [tel.type], "value": tel._data }];
+        }
+        contact.mozContact = mozCt;
+        return contact;
     }
 
     function contactEditorCallback(contact) {
@@ -104,11 +108,30 @@
                 str += vcards;
             }, () => {
                 const temp = new vCard().parse(str);
-                console.log("CREATE:", {
-                  addressBook: null,
-                  filename: `${uuidv4()}.vcf`,
-                  vCardString: temp.toString(),
-                });
+                (async () => {
+                    try {
+                        await davClient.login();
+                        const addressBooks = await davClient.fetchAddressBooks();
+                        const createVCard = await davClient.createVCard({
+                          addressBook: addressBooks[0],
+                          filename: `${uuidv4()}.vcf`,
+                          vCardString: temp.toString(),
+                        });
+                        const vcards = await davClient.fetchVCards({
+                            addressBook: addressBooks[0],
+                            objectUrls: [createVCard.url],
+                        });
+                        vcards.forEach((contact, index) => {
+                            contact = prepareContact(contact);
+                            contactList.push(contact);
+                            contactListIndex[contact.vcard.data.uid._data] = contactList.length - 1;
+                        });
+                        contactList = [...contactList];
+                        maxOffset = Math.ceil(contactList.length / LIMIT);
+                    } catch(err) {
+                        console.log(err);
+                    }
+                })();
             }, null, true);
         }
         closeModal();
