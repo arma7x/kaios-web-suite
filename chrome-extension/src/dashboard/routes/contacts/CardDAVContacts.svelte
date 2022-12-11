@@ -95,12 +95,32 @@
                 } else {
                     contactList[contactListIndex[contact.id]].vcard.setProperty(temp.data.tel);
                 }
-                console.log("UPDATE:", {
-                  vCard: {
-                    url: contactList[contactListIndex[contact.id]].url,
-                    data: contactList[contactListIndex[contact.id]].vcard.toString(),
-                  },
-                });
+                (async () => {
+                    try {
+                        await davClient.login();
+                        const addressBooks = await davClient.fetchAddressBooks();
+                        const updateVCard = await davClient.updateVCard({
+                            vCard: {
+                                url: contactList[contactListIndex[contact.id]].url,
+                                data: contactList[contactListIndex[contact.id]].vcard.toString(),
+                                etag: contactList[contactListIndex[contact.id]].etag
+                            }
+                        });
+                        const vcards = await davClient.fetchVCards({
+                            addressBook: addressBooks[0],
+                            objectUrls: [contactList[contactListIndex[contact.id]].url],
+                        });
+                        vcards.forEach((contact, index) => {
+                            contact = prepareContact(contact);
+                            if (contactListIndex[contact.vcard.data.uid._data]) {
+                                contactList[contactListIndex[contact.vcard.data.uid._data]] = contact;
+                            }
+                        });
+                        contactList = [...contactList];
+                    } catch(err) {
+                        console.log(err);
+                    }
+                })();
             }, null, true);
         } else {
             let str = '';
