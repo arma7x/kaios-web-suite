@@ -167,7 +167,27 @@
 
     function exportContact(contact) {}
 
-    function deleteContact(id: string) {}
+    async function deleteContact(id: string) {
+        if (!confirm(`Are sure you want to remove ${id} ?`))
+            return;
+        if (contactList[contactListIndex[id]]) {
+            try {
+                await davClient.login();
+                const deleteVCard = await davClient.deleteVCard({
+                    vCard: {
+                        url: contactList[contactListIndex[id]].url,
+                        etag: contactList[contactListIndex[id]].etag
+                    }
+                });
+                contactList.splice(contactListIndex[id], 1);
+                contactList = [...contactList];
+                delete contactListIndex[id];
+                maxOffset = Math.ceil(contactList.length / LIMIT);
+            } catch(err) {
+                console.log(err);
+            }
+        }
+    }
 
     onMount(() => {
         console.log('onMount Contacts');
@@ -219,7 +239,7 @@
                         <div class="mt-2 d-block gap-2">
                             <button class="btn btn-outline-info btn-sm mb-1" on:click={() => updateContact(contact) }>Update</button>
                             <button class="btn btn-outline-dark btn-sm mb-1" on:click={() => exportContact(contact) }>Export</button>
-                            <button class="btn btn-outline-danger btn-sm mb-1" on:click={() => deleteContact(contact.id) }>Delete</button>
+                            <button class="btn btn-outline-danger btn-sm mb-1" on:click={() => deleteContact(contact.vcard.data.uid._data) }>Delete</button>
                         </div>
                     </td>
                 </tr>
