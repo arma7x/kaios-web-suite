@@ -5,7 +5,7 @@
     import Router, { push, pop, replace } from 'svelte-spa-router';
     import QRCode from 'qr-image-generator';
     import { Peer, type DataConnection } from 'peerjs';
-    import { RequestSystemStatus } from '../system/protocol';
+    import { ChromeSystemEvent } from '../system/protocol';
     import { contactStorage } from '../system/stores';
     import { SyncProtocol, type ContactStore } from '../../../kaios-app/src/system/sync_protocol';
     import { Modals, closeModal } from 'svelte-modals'
@@ -37,7 +37,7 @@
 
     function onMessage(request, sender, sendResponse) {
         switch (request.type) {
-            case RequestSystemStatus.CONNECTION_STATUS:
+            case ChromeSystemEvent.CONNECTION_STATUS:
                 broadcastCONNECTION_STATUS();
                 if (dataCONNECTION_STATUS == false) {
                     setupPeer();
@@ -141,7 +141,7 @@
 
     function broadcastCONNECTION_STATUS() {
         chrome.runtime.sendMessage({
-            type: RequestSystemStatus.CONNECTION_STATUS,
+            type: ChromeSystemEvent.CONNECTION_STATUS,
             data: {
                 dataConnectionID,
                 dataCONNECTION_STATUS,
@@ -149,9 +149,9 @@
             }
         })
         .catch(err => console.log(err));
-        const evt = new CustomEvent(RequestSystemStatus.STREAM_DOWN, {
+        const evt = new CustomEvent(ChromeSystemEvent.STREAM_DOWN, {
             detail: {
-                type: RequestSystemStatus.CONNECTION_STATUS,
+                type: ChromeSystemEvent.CONNECTION_STATUS,
                 data: {
                     dataConnectionID,
                     dataCONNECTION_STATUS,
@@ -198,9 +198,9 @@
                 dataConnection.send(evt.detail);
             }
         });
-        window.addEventListener(RequestSystemStatus.STREAM_UP, (evt) => {
+        window.addEventListener(ChromeSystemEvent.STREAM_UP, (evt) => {
             switch (evt.detail.type) {
-                case RequestSystemStatus.CONNECTION_STATUS:
+                case ChromeSystemEvent.CONNECTION_STATUS:
                     broadcastCONNECTION_STATUS();
             }
         });

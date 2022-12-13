@@ -3,7 +3,7 @@
 
     import { onMount, onDestroy } from 'svelte';
     import QRCode from 'qr-image-generator';
-    import { RequestSystemStatus } from '../system/protocol';
+    import { ChromeSystemEvent } from '../system/protocol';
 
     let buttonVisibility: bool = false;
     let dataConnectionID: string;
@@ -23,7 +23,7 @@
 
     function onMessage(request, sender, sendResponse) {
         switch (request.type) {
-            case RequestSystemStatus.ConnectionStatus:
+            case ChromeSystemEvent.ConnectionStatus:
                 ({ dataConnectionID, dataConnectionStatus, isKaiOSDeviceConnected } = request.data);
                 break;
             default:
@@ -33,7 +33,7 @@
 
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
-        chrome.runtime.sendMessage({ type: RequestSystemStatus.ConnectionStatus }).catch(err => console.log(err));
+        chrome.runtime.sendMessage({ type: ChromeSystemEvent.ConnectionStatus }).catch(err => console.log(err));
         chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
             buttonVisibility = tabs[0].url.indexOf(chrome.runtime.getURL('src/dashboard/dashboard.html')) < 0;
         });

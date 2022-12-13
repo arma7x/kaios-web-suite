@@ -1,7 +1,7 @@
 <script lang="ts">
 
     import { onMount, onDestroy } from 'svelte';
-    import { RequestSystemStatus } from '../../../system/protocol';
+    import { ChromeSystemEvent } from '../../../system/protocol';
     import { contactStorage } from '../../../system/stores';
     import { SyncProtocol, type MozContact, type ContactStore } from '../../../../../kaios-app/src/system/sync_protocol';
     import { DAVClient } from 'tsdav/dist/tsdav';
@@ -37,7 +37,7 @@
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
-            case RequestSystemStatus.CONNECTION_STATUS:
+            case ChromeSystemEvent.CONNECTION_STATUS:
                 ({ isKaiOSDeviceConnected } = evt.detail.data);
                 break;
         }
@@ -154,7 +154,7 @@
     }
 
     onMount(() => {
-        window.addEventListener(RequestSystemStatus.STREAM_DOWN, streamEvent);
+        window.addEventListener(ChromeSystemEvent.STREAM_DOWN, streamEvent);
         kaiosContactsUnsubscribe = contactStorage.subscribe((contactStore: ContactStore = {}) => {
             let temp : {[key: string|number]: MozContact;} = {};
             if (contactStore && contactStore.contacts) {
@@ -173,7 +173,7 @@
     });
 
     onDestroy(() => {
-        window.removeEventListener(RequestSystemStatus.STREAM_DOWN, streamEvent);
+        window.removeEventListener(ChromeSystemEvent.STREAM_DOWN, streamEvent);
         if (kaiosContactsUnsubscribe)
             kaiosContactsUnsubscribe();
     });

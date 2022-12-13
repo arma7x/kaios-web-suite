@@ -1,3 +1,3 @@
-export enum RequestSystemStatus {
+export enum ChromeSystemEvent {
   ConnectionStatus,
 }

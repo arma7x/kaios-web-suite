@@ -2,7 +2,7 @@
 
     import { onMount, onDestroy } from 'svelte';
     import { openModal, closeModal } from 'svelte-modals';
-    import { RequestSystemStatus } from '../../../system/protocol';
+    import { ChromeSystemEvent } from '../../../system/protocol';
     import { contactStorage } from '../../../system/stores';
     import { SyncProtocol, type MozContact, type ContactStore, MozContactChangeEventReason } from '../../../../../kaios-app/src/system/sync_protocol';
     import ContactEditorWidget from '../../widgets/ContactEditor.svelte';
@@ -18,7 +18,7 @@
 
     function streamEvent(evt) {
         switch (evt.detail.type) {
-            case RequestSystemStatus.CONNECTION_STATUS:
+            case ChromeSystemEvent.CONNECTION_STATUS:
                 ({ isKaiOSDeviceConnected } = evt.detail.data);
                 break;
             case SyncProtocol.CONTACT_REMOVE:
@@ -114,11 +114,11 @@
     }
 
     onMount(() => {
-        window.addEventListener(RequestSystemStatus.STREAM_DOWN, streamEvent);
+        window.addEventListener(ChromeSystemEvent.STREAM_DOWN, streamEvent);
         window.addEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
-        const evt = new CustomEvent(RequestSystemStatus.STREAM_UP, {
+        const evt = new CustomEvent(ChromeSystemEvent.STREAM_UP, {
             detail: {
-              type: RequestSystemStatus.CONNECTION_STATUS
+              type: ChromeSystemEvent.CONNECTION_STATUS
             }
         });
         window.dispatchEvent(evt);
@@ -135,7 +135,7 @@
     });
 
     onDestroy(() => {
-        window.removeEventListener(RequestSystemStatus.STREAM_DOWN, streamEvent);
+        window.removeEventListener(ChromeSystemEvent.STREAM_DOWN, streamEvent);
         window.removeEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         if (contactsUnsubscribe)
             contactsUnsubscribe();

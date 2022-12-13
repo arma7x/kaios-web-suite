@@ -3,7 +3,7 @@
     import { onMount, onDestroy } from 'svelte';
     import { openModal, closeModal } from 'svelte-modals';
     import { DAVClient } from 'tsdav/dist/tsdav';
-    import { RequestSystemStatus } from '../../../system/protocol';
+    import { ChromeSystemEvent } from '../../../system/protocol';
     import ContactEditorWidget from '../../widgets/ContactEditor.svelte';
     import vCard from 'vcf';
     import {v4 as uuidv4} from 'uuid';
