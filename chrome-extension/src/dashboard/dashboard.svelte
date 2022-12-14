@@ -12,7 +12,7 @@
 
     import SMS from './routes/SMS.svelte';
     import Chat from './routes/Chat.svelte';
-    import { CardDAVContacts, KaiOSContacts, SyncContact } from './routes/contacts';
+    import { CardDAVContacts, KaiOSContacts, SyncKaiOSContacts, SyncCardDavContacts } from './routes/contacts';
     import Calendar from './routes/Calendar.svelte';
     import FileTransfer from './routes/FileTransfer.svelte';
     import Settings from './routes/Settings.svelte';
@@ -29,7 +29,8 @@
         '/chat/:threadId': Chat,
         '/card-dav-contacts': CardDAVContacts,
         '/kaios-contacts': KaiOSContacts,
-        '/sync-contacts': SyncContact,
+        '/sync-kaios-contacts': SyncKaiOSContacts,
+        '/sync-carddav-contacts': SyncCardDavContacts,
         '/calendar': Calendar,
         '/filetransfer': FileTransfer,
         '/settings': Settings,
@@ -230,7 +231,8 @@
                 {:else}
                     <a href="#/sms" class="btn btn-primary btn-sm">SMS</a>
                     <a href="#/kaios-contacts" class="btn btn-primary btn-sm">KaiOS Contacts</a>
-                    <a href="#/sync-contacts" class="btn btn-primary btn-sm">Sync Contacts</a>
+                    <a href="#/sync-kaios-contacts" class="btn btn-primary btn-sm">Sync KaiOS -> CardDAV</a>
+                    <a href="#/sync-carddav-contacts" class="btn btn-primary btn-sm">Sync CardDAV -> KaiOS</a>
                 {/if}
                 <a href="#/card-dav-contacts" class="btn btn-primary btn-sm">CardDAV Contacts</a>
                 <!-- <a href="#/calendar" class="btn btn-primary btn-sm">Calendar</a> -->
