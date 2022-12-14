@@ -8,19 +8,11 @@
     import vCard from 'vcf';
     import {v4 as uuidv4} from 'uuid';
 
-    enum MODE {
-        NONE            = "NONE",
-        KAIOS_CARDDAV   = "KAIOS_CARDDAV",
-        CARDDAV_KAIOS   = "CARDDAV_KAIOS",
-    }
-
     interface _Contact {
         kaios: string,
         carddav: string,
         status: boolean,
     }
-
-    let mode: MODE = MODE.NONE;
 
     let isKaiOSDeviceConnected: bool = false;
     let kaiosContactsUnsubscribe: any;
@@ -107,50 +99,19 @@
                     davContactListIndex[contact.vcard.data.uid._data] = index;
                 });
                 davContactList = [...temp];
-                if (mode !== MODE.NONE && mode === MODE.KAIOS_CARDDAV) {
-                    skipOrUpdateList = [];
-                    removeOrPushList = [];
-                    kaiosContactList.forEach(c => {
-                        if (c.key && c.key.length > 0) {
-                            let push = true;
-                            for (let i in c.key) {
-                                if (davContactListIndex[c.key[i]]) {
-                                    skipOrUpdateList.push({ kaios: c.id, carddav: c.key[i], status: false });
-                                    push = false;
-                                    break;
-                                }
-                            }
-                            if (push)
-                                removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
-                        } else
-                            removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
-                    });
-                    console.log(mode, skipOrUpdateList, removeOrPushList);
-                } else if (mode !== MODE.NONE && mode === MODE.CARDDAV_KAIOS) {
-                    skipOrUpdateList = [];
-                    removeOrPushList = [];
-                    Object.keys(davContactListIndex).forEach((key) => {
-                        if (kaiosContactKeyIndex[key])
-                            skipOrUpdateList.push({ kaios: kaiosContactList[kaiosContactKeyIndex[key]].id, carddav: key, status: false });
-                        else
-                            removeOrPushList.push({ kaios: null, carddav: key, status: false });
-                    });
-                    console.log(mode, skipOrUpdateList, removeOrPushList);
-                }
+                skipOrUpdateList = [];
+                removeOrPushList = [];
+                Object.keys(davContactListIndex).forEach((key) => {
+                    if (kaiosContactKeyIndex[key])
+                        skipOrUpdateList.push({ kaios: kaiosContactList[kaiosContactKeyIndex[key]].id, carddav: key, status: false });
+                    else
+                        removeOrPushList.push({ kaios: null, carddav: key, status: false });
+                });
+                console.log(skipOrUpdateList, removeOrPushList);
             } catch(err) {
                 console.log(err);
             }
         })();
-    }
-
-    function KaiOSToCardDav() {
-        mode = MODE.KAIOS_CARDDAV;
-        getKaiOSContact();
-    }
-
-    function CardDavToKaiOS() {
-        mode = MODE.CARDDAV_KAIOS;
-        getKaiOSContact();
     }
 
     onMount(() => {
@@ -180,9 +141,8 @@
 </script>
 
 <div>
-    <h1>Sync Contacts</h1>
+    <h1>Sync Contacts [CardDAV->KaiOS]</h1>
     <div>
-        <button on:click={KaiOSToCardDav}>KaiOS -> CardDAV</button>
-        <button on:click={CardDavToKaiOS}>CardDAV -> KaiOS</button>
+        <button on:click={getKaiOSContact}>Refresh</button>
     </div>
 </div>

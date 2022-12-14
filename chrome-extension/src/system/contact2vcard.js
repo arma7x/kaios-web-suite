@@ -697,6 +697,59 @@ var Normalizer = {
     //return navigator.mozL10n.formatValue('noName').then(name => name + '.vcf');
   }
 
+  function ConvertMozContactToVcard(ct) {
+    var n = 'n:' + ([
+      ct.familyName,
+      ct.givenName,
+      ct.additionalName,
+      ct.honorificPrefix,
+      ct.honorificSuffix
+    ].map(function(f) {
+      f = f || [''];
+      return f.join(',') + ';';
+    }).join(''));
+
+    // vCard standard does not accept contacts without 'n' or 'fn' fields.
+    if (n === 'n:;;;;;' || !ct.name) {
+      return;
+    }
+
+    var allFields = [
+      n,
+      fromStringArray(ct.name, 'FN'),
+      fromStringArray(ct.nickname, 'NICKNAME'),
+      fromStringArray(ct.category, 'CATEGORY'),
+      fromStringArray(ct.org, 'ORG'),
+      fromStringArray(ct.jobTitle, 'TITLE'),
+      fromStringArray(ct.note, 'NOTE'),
+      fromStringArray(ct.key, 'KEY')
+    ];
+
+    if (ct.bday) {
+      allFields.push('BDAY:' + ISODateString(ct.bday));
+    }
+    if (ct.anniversary) {
+      allFields.push('ANNIVERSARY:' + ISODateString(ct.anniversary));
+    }
+
+    allFields.push.apply(allFields, fromContactField(ct.email, 'EMAIL'));
+    allFields.push.apply(allFields, fromContactField(ct.url, 'URL'));
+    allFields.push.apply(allFields, fromContactField(ct.tel, 'TEL'));
+
+    var adrs = fromContactField(ct.adr, 'ADR');
+    allFields.push.apply(allFields, adrs.map(function(adrStr, i) {
+      var orig = ct.adr[i];
+      return adrStr + ([
+        '',
+        '',
+        orig.streetAddress || '', orig.locality || '', orig.region || '',
+        orig.postalCode || '', orig.countryName || ''].join(';'));
+    }));
+
+    return HEADER + joinFields(allFields) + CRLF + FOOTER;
+  }
+
+  exports.ConvertMozContactToVcard = ConvertMozContactToVcard;
   exports.ContactToVcard = ContactToVcard;
   exports.ContactToVcardBlob = ContactToVcardBlob;
   exports.VcardFilename  = getVcardFilename;
