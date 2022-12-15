@@ -39,7 +39,7 @@
     function onMessage(request, sender, sendResponse) {
         switch (request.type) {
             case ChromeSystemEvent.CONNECTION_STATUS:
-                broadcastCONNECTION_STATUS();
+                broadcastConnectionStatus();
                 if (dataCONNECTION_STATUS == false) {
                     setupPeer();
                 }
@@ -55,7 +55,7 @@
             dataCONNECTION_STATUS = true;
             dataConnectionID = id;
             // console.log("[MASTER] open", dataConnectionID, dataCONNECTION_STATUS);
-            broadcastCONNECTION_STATUS();
+            broadcastConnectionStatus();
             generateQrCode();
         });
         // SLAVE CONNECTED TO MASTER
@@ -65,7 +65,7 @@
             dataConnection.on("open", () => {
                 // console.log("[MASTER] open");
                 isKaiOSDeviceConnected = true;
-                broadcastCONNECTION_STATUS();
+                broadcastConnectionStatus();
                 dataConnection.send({ type: SyncProtocol.CONTACT_GET_ALL, data: { filter: {} } });
                 push("#/sms");
             });
@@ -122,7 +122,7 @@
             dataConnection.on("close", () => {
                 // console.log("[MASTER] close"); // SLAVE DC
                 isKaiOSDeviceConnected = false;
-                broadcastCONNECTION_STATUS();
+                broadcastConnectionStatus();
                 generateQrCode();
                 document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
             });
@@ -135,12 +135,12 @@
             // dataConnectionID = null;
             // dataCONNECTION_STATUS = false;
             // isKaiOSDeviceConnected = false;
-            // broadcastCONNECTION_STATUS();
+            // broadcastConnectionStatus();
             // document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
         });
     }
 
-    function broadcastCONNECTION_STATUS() {
+    function broadcastConnectionStatus() {
         chrome.runtime.sendMessage({
             type: ChromeSystemEvent.CONNECTION_STATUS,
             data: {
@@ -188,7 +188,7 @@
 
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
-        broadcastCONNECTION_STATUS();
+        broadcastConnectionStatus();
         if (dataCONNECTION_STATUS == false) {
             setupPeer();
         }
@@ -202,7 +202,7 @@
         window.addEventListener(ChromeSystemEvent.STREAM_UP, (evt) => {
             switch (evt.detail.type) {
                 case ChromeSystemEvent.CONNECTION_STATUS:
-                    broadcastCONNECTION_STATUS();
+                    broadcastConnectionStatus();
             }
         });
     });
