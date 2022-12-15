@@ -38,18 +38,6 @@
         }
     }
 
-    function getKaiOSContact() {
-        kaiosContactList = [];
-        kaiosContactListIndex = {};
-        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
-            detail: {
-                type: SyncProtocol.CONTACT_GET_ALL,
-                data: { filter: {} }
-            }
-        });
-        window.dispatchEvent(evt);
-    }
-
     function prepareContact(contact) {
         contact.vcard = new vCard().parse(contact.data);
         const { fn, n, tel } = contact.vcard.data;
@@ -70,6 +58,18 @@
         }
         contact.mozContact = mozCt;
         return contact;
+    }
+
+    function getKaiOSContact() {
+        kaiosContactList = [];
+        kaiosContactListIndex = {};
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+            detail: {
+                type: SyncProtocol.CONTACT_GET_ALL,
+                data: { filter: {} }
+            }
+        });
+        window.dispatchEvent(evt);
     }
 
     function getDAVContact() {
@@ -134,7 +134,7 @@
 
     async function sync() {
         let deleteList = [];
-        let pushList = {};
+        let updateList = {};
         let objectUrls = {};
         let vcards = [];
         // console.log(kaiosContactList, kaiosContactListIndex, kaiosContactKeyIndex);
@@ -164,16 +164,26 @@
             vcards.forEach((contact, index) => {
                 contact = prepareContact(contact);
                 if (objectUrls[contact.url]) {
-                    pushList[objectUrls[contact.url]] = contact.vcard.data.uid._data;
+                    updateList[objectUrls[contact.url]] = contact.vcard.data.uid._data;
                 }
             });
         } catch (err) {
             console.log(err);
         }
         console.log('deleteList:', deleteList);
-        console.log('pushList:', pushList);
+        console.log('updateList:', updateList);
         // console.log('objectUrls:', objectUrls);
         // console.log('vcards:', vcards);
+        const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
+            detail: {
+                type: SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV,
+                data: {
+                    deleteList: deleteList,
+                    updateList: updateList,
+                }
+            }
+        });
+        window.dispatchEvent(evt);
     }
 
     onMount(() => {
