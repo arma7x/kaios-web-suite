@@ -14,6 +14,8 @@
         status: boolean,
     }
 
+    let tabIndex: number = 0;
+
     let isKaiOSDeviceConnected: bool = false;
     let kaiosContactsUnsubscribe: any;
     let kaiosContactList: Array<MozContact> = [];
@@ -21,6 +23,7 @@
     let kaiosContactKeyIndex: {[key: string|number]: number;} = {};
 
     let davClient: DAVClient;
+    let addressBooks: Array<any> = [];
     let davContactList: Array<{[key: string|number]: any;}> = [];
     let davContactListIndex: {[key: string|number]: number;} = {};
 
@@ -88,7 +91,7 @@
         (async () => {
             try {
                 await davClient.login();
-                const addressBooks = await davClient.fetchAddressBooks();
+                addressBooks = await davClient.fetchAddressBooks();
                 const vcards = await davClient.fetchVCards({
                     addressBook: addressBooks[0],
                 });
@@ -113,6 +116,7 @@
                         }
                         if (push)
                             removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
+                            removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
                     } else
                         removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
                 });
@@ -122,23 +126,54 @@
         })();
     }
 
+    function invertRemoveOrPushList() {
+        removeOrPushList.forEach((c, i) => {
+            removeOrPushList[i].status = !removeOrPushList[i].status;
+        });
+    }
+
     async function sync() {
         let deleteList = [];
         let pushList = {};
-        let pushListVcard = {};
+        let objectUrls = {};
+        let vcards = [];
         // console.log(kaiosContactList, kaiosContactListIndex, kaiosContactKeyIndex);
         // console.log(skipOrUpdateList, removeOrPushList);
-        removeOrPushList.forEach(c => {
+        for (let i in removeOrPushList) {
+            const c = removeOrPushList[i];
             if (c.status === true)
                 deleteList.push(c.kaios);
             else {
-                pushList[c.kaios] = `${uuidv4()}.vcf`;
-                pushListVcard[c.kaios] = ConvertMozContactToVcard(kaiosContactList[kaiosContactListIndex[c.kaios]]);
+                try {
+                    const createVCard = await davClient.createVCard({
+                      addressBook: addressBooks[0],
+                      filename: `${uuidv4()}.vcf`,
+                      vCardString: ConvertMozContactToVcard(kaiosContactList[kaiosContactListIndex[c.kaios]]),
+                    });
+                    objectUrls[createVCard.url] = c.kaios;
+                } catch (err) {
+                    console.log(c.kaios, err);
+                }
             }
-        });
+        }
+        try {
+            vcards = await davClient.fetchVCards({
+                addressBook: addressBooks[0],
+                objectUrls: Object.keys(objectUrls),
+            });
+            vcards.forEach((contact, index) => {
+                contact = prepareContact(contact);
+                if (objectUrls[contact.url]) {
+                    pushList[objectUrls[contact.url]] = contact.vcard.data.uid._data;
+                }
+            });
+        } catch (err) {
+            console.log(err);
+        }
         console.log('deleteList:', deleteList);
         console.log('pushList:', pushList);
-        console.log('pushListVcard:', pushListVcard);
+        // console.log('objectUrls:', objectUrls);
+        // console.log('vcards:', vcards);
     }
 
     onMount(() => {
@@ -171,46 +206,59 @@
     <div class="d-flex flex-row justify-content-between align-items-center">
         <h3>Sync Contacts [KaiOS->CardDAV]</h3>
         <div class="d-flex flex-row">
-            <button type="button" class="btn btn-primary btn-sm me-1" on:click={getKaiOSContact}>Refres</button>
+            <button type="button" class="btn btn-primary btn-sm me-1" on:click={getKaiOSContact}>Refresh</button>
             <button type="button" class="btn btn-primary btn-sm" on:click={sync}>Sync</button>
         </div>
     </div>
-    <div>
-    {#each skipOrUpdateList as meta}
-        <div>
-        {JSON.stringify(kaiosContactList[kaiosContactListIndex[meta.kaios]])}
-        {JSON.stringify(meta)}
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button on:click={() => {tabIndex = 0}} class="nav-link {tabIndex == 0 ? 'active' : ''}" id="nav-update-tab" data-bs-toggle="tab" data-bs-target="#nav-update" type="button" role="tab" aria-controls="nav-update" aria-selected="true">Update to CardDAV</button>
+            <button on:click={() => {tabIndex = 1}} class="nav-link {tabIndex == 1 ? 'active' : ''}" id="nav-push-tab" data-bs-toggle="tab" data-bs-target="#nav-push" type="button" role="tab" aria-controls="nav-push" aria-selected="false">Push to CardDAV</button>
         </div>
-    {/each}
-    </div>
-    <div>
-        <div class="table-responsive">
-            <table class="table caption-top">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Phone Number</th>
-                        <th scope="col" class="col-1">Remove(KaiOS)</th>
-                        <th scope="col" class="col-1">save(CardDAV)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each removeOrPushList as meta, i}
-                    <tr>
-                        <th scope="row">{kaiosContactList[kaiosContactListIndex[meta.kaios]].id}</th>
-                        <td>{ kaiosContactList[kaiosContactListIndex[meta.kaios]].name[0] }</td>
-                        <td>{ kaiosContactList[kaiosContactListIndex[meta.kaios]].tel[0].value }</td>
-                        <td class="col-1">
-                            <input type="checkbox" checked={removeOrPushList[i].status} on:click={() => { removeOrPushList[i].status = !removeOrPushList[i].status }}>
-                        </td>
-                        <td class="col-1">
-                            <input type="checkbox" checked={!removeOrPushList[i].status} on:click={() => { removeOrPushList[i].status = !removeOrPushList[i].status }}>
-                        </td>
-                    </tr>
-                    {/each}
-                </tbody>
-            </table>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade {tabIndex == 0 ? 'show active' : ''}" id="nav-update" role="tabpanel" aria-labelledby="nav-update-tab">
+            {#each skipOrUpdateList as meta}
+                <div>
+                {JSON.stringify(kaiosContactList[kaiosContactListIndex[meta.kaios]])}
+                {JSON.stringify(meta)}
+                </div>
+            {/each}
+        </div>
+        <div class="tab-pane fade {tabIndex == 1 ? 'show active' : ''}" id="nav-push" role="tabpanel" aria-labelledby="nav-push-tab">
+            <div class="table-responsive">
+                <table class="table caption-top">
+                    <caption>
+                        <div class="d-flex flex-row justify-content-end align-items-center">
+                            <button type="button" class="btn btn-primary btn-sm" on:click={invertRemoveOrPushList}>Invert Selection</button>
+                        </div>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Phone Number</th>
+                            <th scope="col" class="col-1">Remove(KaiOS)</th>
+                            <th scope="col" class="col-1">Push(CardDAV)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each removeOrPushList as meta, i}
+                        <tr>
+                            <th scope="row">{kaiosContactList[kaiosContactListIndex[meta.kaios]].id}</th>
+                            <td>{ kaiosContactList[kaiosContactListIndex[meta.kaios]].name[0] }</td>
+                            <td>{ kaiosContactList[kaiosContactListIndex[meta.kaios]].tel[0].value }</td>
+                            <td class="col-1">
+                                <input type="checkbox" checked={removeOrPushList[i].status} on:click={() => { removeOrPushList[i].status = !removeOrPushList[i].status }}>
+                            </td>
+                            <td class="col-1">
+                                <input type="checkbox" checked={!removeOrPushList[i].status} on:click={() => { removeOrPushList[i].status = !removeOrPushList[i].status }}>
+                            </td>
+                        </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
