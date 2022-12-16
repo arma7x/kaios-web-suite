@@ -35,6 +35,9 @@
             case ChromeSystemEvent.CONNECTION_STATUS:
                 ({ isKaiOSDeviceConnected } = evt.detail.data);
                 break;
+            case SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV:
+                console.log(evt.detail);
+                break;
         }
     }
 
@@ -63,6 +66,11 @@
     function getKaiOSContact() {
         kaiosContactList = [];
         kaiosContactListIndex = {};
+        kaiosContactKeyIndex = {};
+        davContactList = [];
+        davContactListIndex = {};
+        skipOrUpdateList = [];
+        removeOrPushList = [];
         const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
                 type: SyncProtocol.CONTACT_GET_ALL,
@@ -102,20 +110,17 @@
                     davContactListIndex[contact.vcard.data.uid._data] = index;
                 });
                 davContactList = [...temp];
-                skipOrUpdateList = [];
-                removeOrPushList = [];
                 kaiosContactList.forEach(c => {
                     if (c.key && c.key.length > 0) {
                         let push = true;
                         for (let i in c.key) {
-                            if (davContactListIndex[c.key[i]]) {
-                                skipOrUpdateList.push({ kaios: c.id, carddav: c.key[i], status: false });
+                            if (davContactListIndex[c.key[i]] != null) {
+                                skipOrUpdateList = [...skipOrUpdateList, { kaios: c.id, carddav: c.key[i], status: true }];
                                 push = false;
                                 break;
                             }
                         }
                         if (push)
-                            removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
                             removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
                     } else
                         removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
@@ -124,6 +129,12 @@
                 console.log(err);
             }
         })();
+    }
+
+    function invertSkipOrUpdateList() {
+        skipOrUpdateList.forEach((c, i) => {
+            skipOrUpdateList[i].status = !skipOrUpdateList[i].status;
+        });
     }
 
     function invertRemoveOrPushList() {
@@ -137,8 +148,37 @@
         let updateList = {};
         let objectUrls = {};
         let vcards = [];
-        // console.log(kaiosContactList, kaiosContactListIndex, kaiosContactKeyIndex);
-        // console.log(skipOrUpdateList, removeOrPushList);
+        for (let i in skipOrUpdateList) {
+            const c = skipOrUpdateList[i];
+            if (!c.status) {
+                const str = ConvertMozContactToVcard(kaiosContactList[kaiosContactListIndex[c.kaios]]);
+                const temp = new vCard().parse(str);
+                davContactList[davContactListIndex[c.carddav]].vcard.setProperty(temp.data.fn);
+                davContactList[davContactListIndex[c.carddav]].vcard.setProperty(temp.data.n);
+                if (temp.data.tel.length) {
+                    temp.data.tel.forEach((tel, index) => {
+                        if (index == 0)
+                            davContactList[davContactListIndex[c.carddav]].vcard.setProperty(tel);
+                        else
+                            davContactList[davContactListIndex[c.carddav]].vcard.addProperty(tel);
+                    });
+                } else {
+                    davContactList[davContactListIndex[c.carddav]].vcard.setProperty(temp.data.tel);
+                }
+                // console.log(davContactList[davContactListIndex[c.carddav]]);
+                try {
+                    const updateVCard = await davClient.updateVCard({
+                        vCard: {
+                            url: davContactList[davContactListIndex[c.carddav]].url,
+                            data: davContactList[davContactListIndex[c.carddav]].vcard.toString(),
+                            etag: davContactList[davContactListIndex[c.carddav]].etag
+                        }
+                    });
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+        }
         for (let i in removeOrPushList) {
             const c = removeOrPushList[i];
             if (c.status === true)
@@ -170,10 +210,8 @@
         } catch (err) {
             console.log(err);
         }
-        console.log('deleteList:', deleteList);
-        console.log('updateList:', updateList);
-        // console.log('objectUrls:', objectUrls);
-        // console.log('vcards:', vcards);
+        // console.log('deleteList:', deleteList);
+        // console.log('updateList:', updateList);
         const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
                 type: SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV,
@@ -188,6 +226,7 @@
 
     onMount(() => {
         window.addEventListener(ChromeSystemEvent.STREAM_DOWN, streamEvent);
+        window.addEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         kaiosContactsUnsubscribe = contactStorage.subscribe((contactStore: ContactStore = {}) => {
             let temp : {[key: string|number]: MozContact;} = {};
             if (contactStore && contactStore.contacts) {
@@ -207,6 +246,7 @@
 
     onDestroy(() => {
         window.removeEventListener(ChromeSystemEvent.STREAM_DOWN, streamEvent);
+        window.removeEventListener(SyncProtocol.STREAM_DOWN, streamEvent);
         if (kaiosContactsUnsubscribe)
             kaiosContactsUnsubscribe();
     });
@@ -214,7 +254,7 @@
 
 <div>
     <div class="d-flex flex-row justify-content-between align-items-center">
-        <h3>Sync Contacts [KaiOS->CardDAV]</h3>
+        <h3>Sync Contacts[KaiOS->CardDAV]</h3>
         <div class="d-flex flex-row">
             <button type="button" class="btn btn-primary btn-sm me-1" on:click={getKaiOSContact}>Refresh</button>
             <button type="button" class="btn btn-primary btn-sm" on:click={sync}>Sync</button>
@@ -222,18 +262,45 @@
     </div>
     <nav>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <button on:click={() => {tabIndex = 0}} class="nav-link {tabIndex == 0 ? 'active' : ''}" id="nav-update-tab" data-bs-toggle="tab" data-bs-target="#nav-update" type="button" role="tab" aria-controls="nav-update" aria-selected="true">Update to CardDAV</button>
+            <button on:click={() => {tabIndex = 0}} class="nav-link {tabIndex == 0 ? 'active' : ''}" id="nav-update-tab" data-bs-toggle="tab" data-bs-target="#nav-update" type="button" role="tab" aria-controls="nav-update" aria-selected="true">Update CardDAV</button>
             <button on:click={() => {tabIndex = 1}} class="nav-link {tabIndex == 1 ? 'active' : ''}" id="nav-push-tab" data-bs-toggle="tab" data-bs-target="#nav-push" type="button" role="tab" aria-controls="nav-push" aria-selected="false">Push to CardDAV</button>
         </div>
     </nav>
     <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade {tabIndex == 0 ? 'show active' : ''}" id="nav-update" role="tabpanel" aria-labelledby="nav-update-tab">
-            {#each skipOrUpdateList as meta}
-                <div>
-                {JSON.stringify(kaiosContactList[kaiosContactListIndex[meta.kaios]])}
-                {JSON.stringify(meta)}
-                </div>
-            {/each}
+            <div class="table-responsive">
+                <table class="table caption-top">
+                    <caption>
+                        <div class="d-flex flex-row justify-content-end align-items-center">
+                            <button type="button" class="btn btn-primary btn-sm" on:click={invertSkipOrUpdateList}>Invert Selection</button>
+                        </div>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Phone Number</th>
+                            <th scope="col" class="col-1">Skip</th>
+                            <th scope="col" class="col-1">Update(CardDAV)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each skipOrUpdateList as meta, i}
+                        <tr>
+                            <th scope="row">{kaiosContactList[kaiosContactListIndex[meta.kaios]].id}</th>
+                            <td>{ kaiosContactList[kaiosContactListIndex[meta.kaios]].name[0] }</td>
+                            <td>{ kaiosContactList[kaiosContactListIndex[meta.kaios]].tel[0].value }</td>
+                            <td class="col-1">
+                                <input type="checkbox" checked={skipOrUpdateList[i].status} on:click={() => { skipOrUpdateList[i].status = !skipOrUpdateList[i].status }}>
+                            </td>
+                            <td class="col-1">
+                                <input type="checkbox" checked={!skipOrUpdateList[i].status} on:click={() => { skipOrUpdateList[i].status = !skipOrUpdateList[i].status }}>
+                            </td>
+                        </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
         </div>
         <div class="tab-pane fade {tabIndex == 1 ? 'show active' : ''}" id="nav-push" role="tabpanel" aria-labelledby="nav-push-tab">
             <div class="table-responsive">

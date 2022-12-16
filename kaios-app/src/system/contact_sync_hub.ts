@@ -1,6 +1,6 @@
 declare var navigator:any;
 
-import { SyncProtocol, BroadcastCallback, type MozContactChangeEvent, MozContactChangeEventReason } from './sync_protocol';
+import { SyncProtocol, BroadcastCallback, type MozContactChangeEvent, MozContactChangeEventReason, FilterOp } from './sync_protocol';
 
 class ContactSyncHub {
 
@@ -30,7 +30,7 @@ class ContactSyncHub {
     });
   }
 
-  filterEvent(event: any) {
+  async filterEvent(event: any) {
     // console.log('ContactSyncHub.filterEvent: ', event.type);
     var _self = this;
     switch (event.type) {
@@ -149,7 +149,7 @@ class ContactSyncHub {
           const filter = {
             filterBy: ['id'],
             filterValue: event.data.contact.id,
-            filterOp: 'equals',
+            filterOp: FilterOp.EQUALS,
             filterLimit: 1
           };
           _self.findContact(filter, false)
@@ -184,6 +184,53 @@ class ContactSyncHub {
           _self.broadcastCallback({ type: SyncProtocol.CONTACT_UPDATE, error: err.toString() });
         }
         break;
+      case SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV:
+        if (Object.keys(event.data.updateList).length > 0) {
+          let filter = {
+            filterBy: ['id'],
+            filterValue: '',
+            filterOp: FilterOp.EQUALS
+          };
+          for (let i in event.data.updateList) {
+            try {
+              filter.filterValue = i;
+              const c = await _self.findContact(filter);
+              if (c.length > 0) {
+                for (let j in c) {
+                  if (c[j].key == null)
+                    c[j].key = [event.data.updateList[i]];
+                  else
+                    c[j].key = [...c[j].key, event.data.updateList[i]];
+                  await _self.saveContact(c[j]);
+                }
+              }
+            } catch(err) {
+              console.log(err);
+            }
+          }
+        }
+        if (event.data.deleteList.length > 0) {
+          let filter = {
+            filterBy: ['id'],
+            filterValue: '',
+            filterOp: FilterOp.EQUALS
+          };
+          for (let i in event.data.deleteList) {
+            try {
+              filter.filterValue = event.data.deleteList[i];
+              const c = await _self.findContact(filter);
+              if (c.length > 0) {
+                for (let j in c) {
+                  await _self.removeContact(c[j]);
+                }
+              }
+            } catch(err) {
+              console.log(err);
+            }
+          }
+        }
+        _self.broadcastCallback({ type: SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV, data: true });
+        break;
     }
   }
 
@@ -202,6 +249,18 @@ class ContactSyncHub {
         }
       }
       request.onerror = function(err) {
+        reject(err);
+      }
+    });
+  }
+
+  saveContact(contact): Promise<any> {
+    return new Promise((resolve, reject) => {
+      var request = window.navigator.mozContacts.save(contact);
+      request.onsuccess = function () {
+        resolve();
+      }
+      request.onerror = function (err) {
         reject(err);
       }
     });
