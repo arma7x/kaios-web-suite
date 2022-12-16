@@ -254,7 +254,7 @@
 
 <div>
     <div class="d-flex flex-row justify-content-between align-items-center">
-        <h3>Sync Contacts[KaiOS->CardDAV]</h3>
+        <h3>Sync KaiOS Contacts</h3>
         <div class="d-flex flex-row">
             <button type="button" class="btn btn-primary btn-sm me-1" on:click={getKaiOSContact}>Refresh</button>
             <button type="button" class="btn btn-primary btn-sm" on:click={sync}>Sync</button>

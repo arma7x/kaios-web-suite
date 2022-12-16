@@ -231,8 +231,8 @@
                 {:else}
                     <a href="#/sms" class="btn btn-primary btn-sm">SMS</a>
                     <a href="#/kaios-contacts" class="btn btn-primary btn-sm">KaiOS Contacts</a>
-                    <a href="#/sync-kaios-contacts" class="btn btn-primary btn-sm">Sync Contacts <small>[KaiOS->CardDAV]</small></a>
-                    <a href="#/sync-carddav-contacts" class="btn btn-primary btn-sm">Sync Contacts <small>[CardDAV->KaiOS]</small></a>
+                    <a href="#/sync-kaios-contacts" class="btn btn-primary btn-sm">Sync KaiOS Contacts<br><small>KaiOS to CardDAV</small></a>
+                    <a href="#/sync-carddav-contacts" class="btn btn-primary btn-sm">Sync CardDAV Contacts<br><small>CardDAV to KaiOS</small></a>
                 {/if}
                 <a href="#/card-dav-contacts" class="btn btn-primary btn-sm">CardDAV Contacts</a>
                 <!-- <a href="#/calendar" class="btn btn-primary btn-sm">Calendar</a> -->

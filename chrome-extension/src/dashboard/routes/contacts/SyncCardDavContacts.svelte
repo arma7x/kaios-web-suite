@@ -141,7 +141,7 @@
 </script>
 
 <div>
-    <h1>Sync Contacts [CardDAV->KaiOS]</h1>
+    <h3>Sync CardDAV Contacts</h3>
     <div>
         <button on:click={getKaiOSContact}>Refresh</button>
     </div>
