@@ -262,8 +262,8 @@
     </div>
     <nav>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
-            <button on:click={() => {tabIndex = 0}} class="nav-link {tabIndex == 0 ? 'active' : ''}" id="nav-update-tab" data-bs-toggle="tab" data-bs-target="#nav-update" type="button" role="tab" aria-controls="nav-update" aria-selected="true">Update CardDAV</button>
-            <button on:click={() => {tabIndex = 1}} class="nav-link {tabIndex == 1 ? 'active' : ''}" id="nav-push-tab" data-bs-toggle="tab" data-bs-target="#nav-push" type="button" role="tab" aria-controls="nav-push" aria-selected="false">Push to CardDAV</button>
+            <button on:click={() => {tabIndex = 0}} class="nav-link {tabIndex == 0 ? 'active' : ''}" id="nav-update-tab" data-bs-toggle="tab" data-bs-target="#nav-update" type="button" role="tab" aria-controls="nav-update" aria-selected="true">Push update to CardDAV</button>
+            <button on:click={() => {tabIndex = 1}} class="nav-link {tabIndex == 1 ? 'active' : ''}" id="nav-push-tab" data-bs-toggle="tab" data-bs-target="#nav-push" type="button" role="tab" aria-controls="nav-push" aria-selected="false">Save contacts to CardDAV</button>
         </div>
     </nav>
     <div class="tab-content" id="nav-tabContent">
