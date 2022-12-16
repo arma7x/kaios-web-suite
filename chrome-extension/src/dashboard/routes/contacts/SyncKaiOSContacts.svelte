@@ -121,9 +121,9 @@
                             }
                         }
                         if (push)
-                            removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
+                            removeOrPushList = [...removeOrPushList, { kaios: c.id, carddav: null, status: false }];
                     } else
-                        removeOrPushList.push({ kaios: c.id, carddav: null, status: false });
+                        removeOrPushList = [...removeOrPushList, { kaios: c.id, carddav: null, status: false }];
                 });
             } catch(err) {
                 console.log(err);
