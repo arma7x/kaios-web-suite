@@ -231,6 +231,46 @@ class ContactSyncHub {
         }
         _self.broadcastCallback({ type: SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV, data: true });
         break;
+      case SyncProtocol.SYNC_CONTACT_CARDDAV_KAIOS:
+        if (Object.keys(event.data.updateList).length > 0) {
+          let filter = {
+            filterBy: ['id'],
+            filterValue: '',
+            filterOp: FilterOp.EQUALS
+          };
+          for (let i in event.data.updateList) {
+            try {
+              filter.filterValue = i;
+              const c = await _self.findContact(filter);
+              if (c.length > 0) {
+                for (let j in c) {
+                  const excepts = ["id", "published", "updated", "bday", "anniversary", "key"];
+                  let contact = c[j];
+                  Object.keys(contact.toJSON()).forEach(key => {
+                    if (excepts.indexOf(key) === -1) {
+                      contact[key] = event.data.updateList[i][key] || null;
+                    }
+                  });
+                  if (event.data.updateList[i].bday)
+                    contact.bday = new Date(event.data.updateList[i].bday);
+                  if (event.data.updateList[i].anniversary)
+                    contact.anniversary = new Date(event.data.updateList[i].anniversary);
+                  await _self.saveContact(contact);
+                }
+              }
+            } catch(err) {
+              console.log(err);
+            }
+          }
+        }
+        if (event.data.saveList.length > 0) {
+          for (let i in event.data.saveList) {
+            let contact = new mozContact(event.data.saveList[i]);
+            await _self.saveContact(contact);
+          }
+        }
+        _self.broadcastCallback({ type: SyncProtocol.SYNC_CONTACT_CARDDAV_KAIOS, data: true });
+        break
     }
   }
 
