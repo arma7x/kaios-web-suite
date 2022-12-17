@@ -227,19 +227,21 @@
         <div class="col-2">
             <div class="mt-2 d-grid gap-2">
                 {#if !isKaiOSDeviceConnected}
-                    <a href="#/" class="btn btn-primary btn-sm">Link Device</a>
+                    <a href="#/" class="btn btn-primary btn-sm text-start">Link Device</a>
                 {:else}
-                    <a href="#/sms" class="btn btn-primary btn-sm">SMS</a>
-                    <a href="#/kaios-contacts" class="btn btn-primary btn-sm">KaiOS Contacts</a>
-                    <a href="#/sync-kaios-contacts" class="btn btn-primary btn-sm">Sync KaiOS Contacts<br><small>KaiOS to CardDAV</small></a>
-                    <a href="#/sync-carddav-contacts" class="btn btn-primary btn-sm">Sync CardDAV Contacts<br><small>CardDAV to KaiOS</small></a>
+                    <a href="#/sms" class="btn btn-primary btn-sm text-start">SMS</a>
+                    <a href="#/kaios-contacts" class="btn btn-primary btn-sm text-start">KaiOS Contacts</a>
                 {/if}
-                <a href="#/card-dav-contacts" class="btn btn-primary btn-sm">CardDAV Contacts</a>
-                <!-- <a href="#/calendar" class="btn btn-primary btn-sm">Calendar</a> -->
+                <a href="#/card-dav-contacts" class="btn btn-primary btn-sm text-start">CardDAV Contacts</a>
+                {#if isKaiOSDeviceConnected}
+                    <a href="#/sync-kaios-contacts" class="btn btn-primary btn-sm text-start">Sync KaiOS Contacts<br><small class="fw-bold">(Sync KaiOS with CardDAV)</small></a>
+                    <a href="#/sync-carddav-contacts" class="btn btn-primary btn-sm text-start">Sync CardDAV Contacts<br><small class="fw-bold">(Sync CardDAV with KaiOS)</small></a>
+                {/if}
+                <!-- <a href="#/calendar" class="btn btn-primary btn-sm text-start">Calendar</a> -->
                 {#if isKaiOSDeviceConnected && false}
-                    <a href="#/filetransfer" class="btn btn-primary btn-sm">File Transfer</a>
+                    <a href="#/filetransfer" class="btn btn-primary btn-sm text-start">File Transfer</a>
                 {/if}
-                <a href="#/settings" class="btn btn-primary btn-sm">Settings</a>
+                <a href="#/settings" class="btn btn-primary btn-sm text-start">Settings</a>
             </div>
         </div>
         <div class="col-10">
