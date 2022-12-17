@@ -5,6 +5,8 @@
     let username: string = '';
     let password: string = '';
 
+    let passwordRef;
+
     function save() {
         window.localStorage.setItem('serverUrl', serverUrl);
         window.localStorage.setItem('username', username);
@@ -54,20 +56,30 @@
     onDestroy(() => {
         console.log('onDestroy Settings');
     });
+
 </script>
 
 <div>
     <h1>Settings</h1>
-    <div>
-        <input bind:value={serverUrl} />
+    <div class="mb-2">
+        <label for="serverUrl" class="form-label">Email address</label>
+        <input id="serverUrl" type="text" class="form-control" bind:value={serverUrl} />
     </div>
-    <div>
-        <input bind:value={username} />
+    <div class="mb-2">
+        <label for="username" class="form-label">Email address</label>
+        <input id="username" type="text" class="form-control" bind:value={username} />
     </div>
-    <div>
-        <input bind:value={password} />
+    <div class="mb-2">
+        <label for="password" class="form-label">Email address</label>
+        <input bind:this={passwordRef} id="password" type="password" class="form-control" bind:value={password} />
     </div>
-    <div>
-        <button on:click={save}>Save</button>
+    <div class="d-flex flex-row">
+        <button class="btn btn-sm btn-primary me-1" on:click={save}>Save</button>
+        <button class="btn btn-sm btn-primary" on:click={() => {
+            if (passwordRef.type === "password")
+                passwordRef.type = "text";
+            else
+                passwordRef.type = "password";
+        }}>Password Visibility</button>
     </div>
 </div>

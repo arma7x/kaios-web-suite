@@ -12,7 +12,7 @@
   export let navigate: any;
   export let getAppProp: Function;
 
-  let name: string = 'Welcome';
+  let title: string = 'KaiOS Web Suite';
   let wakeLock: any;
 
   const PING_INTERVAL = 1000;
@@ -177,7 +177,7 @@
 
   onMount(() => {
     const { appBar, softwareKey } = getAppProp();
-    appBar.setTitleText(name);
+    appBar.setTitleText(title);
     softwareKey.setText({ left: 'Exit', center: '', right: 'Scan' });
     navInstance.attachListener();
     initPeer();
@@ -192,7 +192,7 @@
 </script>
 
 <main id="welcome-screen" data-pad-top="28" data-pad-bottom="30">
-  <h1>Hello {name}!</h1>
+  <h1>DON'T EXIT THIS APP!</h1>
   <h4>Status: {#if dataConnectionStatus}Connected{:else}Disconnected{/if}</h4>
 </main>
 

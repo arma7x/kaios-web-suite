@@ -36,7 +36,9 @@
                 ({ isKaiOSDeviceConnected } = evt.detail.data);
                 break;
             case SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV:
-                console.log(evt.detail);
+                // console.log(evt.detail);
+                tabIndex = 0;
+                getKaiOSContact();
                 break;
         }
     }
@@ -81,7 +83,6 @@
     }
 
     function getDAVContact() {
-        davContactList = [];
         let config = {
             serverUrl: window.localStorage.getItem('serverUrl'),
             username: window.localStorage.getItem('username'),
@@ -210,8 +211,6 @@
         } catch (err) {
             console.log(err);
         }
-        // console.log('deleteList:', deleteList);
-        // console.log('updateList:', updateList);
         const evt = new CustomEvent(SyncProtocol.STREAM_UP, {
             detail: {
                 type: SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV,
@@ -316,7 +315,7 @@
                             <th scope="col">Name</th>
                             <th scope="col">Phone Number</th>
                             <th scope="col" class="col-1">Remove(KaiOS)</th>
-                            <th scope="col" class="col-1">Push(CardDAV)</th>
+                            <th scope="col" class="col-1">Save(CardDAV)</th>
                         </tr>
                     </thead>
                     <tbody>
