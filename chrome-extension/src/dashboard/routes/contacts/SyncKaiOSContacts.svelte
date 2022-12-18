@@ -15,6 +15,8 @@
     }
 
     let tabIndex: number = 0;
+    let isRefresh: boolean = false;
+    let isSync: boolean = false;
 
     let isKaiOSDeviceConnected: bool = false;
     let kaiosContactsUnsubscribe: any;
@@ -37,6 +39,7 @@
                 break;
             case SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV:
                 // console.log(evt.detail);
+                isSync = false;
                 tabIndex = 0;
                 getKaiOSContact();
                 break;
@@ -82,7 +85,8 @@
         window.dispatchEvent(evt);
     }
 
-    function getDAVContact() {
+    async function getDAVContact() {
+        isRefresh = true;
         let config = {
             serverUrl: window.localStorage.getItem('serverUrl'),
             username: window.localStorage.getItem('username'),
@@ -97,39 +101,42 @@
             authMethod: 'Basic',
             defaultAccountType: 'carddav',
         });
-        (async () => {
-            try {
-                await davClient.login();
-                addressBooks = await davClient.fetchAddressBooks();
-                const vcards = await davClient.fetchVCards({
-                    addressBook: addressBooks[0],
-                });
-                let temp: Array<{[key: string|number]: any;}> = [];
-                vcards.forEach((contact, index) => {
-                    contact = prepareContact(contact);
-                    temp.push(contact);
-                    davContactListIndex[contact.vcard.data.uid._data] = index;
-                });
-                davContactList = [...temp];
-                kaiosContactList.forEach(c => {
-                    if (c.key && c.key.length > 0) {
-                        let push = true;
-                        for (let i in c.key) {
-                            if (davContactListIndex[c.key[i]] != null) {
-                                skipOrUpdateList = [...skipOrUpdateList, { kaios: c.id, carddav: c.key[i], status: true }];
-                                push = false;
-                                break;
-                            }
+        try {
+            await davClient.login();
+            addressBooks = await davClient.fetchAddressBooks();
+            const vcards = await davClient.fetchVCards({
+                addressBook: addressBooks[0],
+            });
+            let temp: Array<{[key: string|number]: any;}> = [];
+            vcards.forEach((contact, index) => {
+                contact = prepareContact(contact);
+                temp.push(contact);
+                davContactListIndex[contact.vcard.data.uid._data] = index;
+            });
+            davContactList = [...temp];
+            let temp1 = [];
+            let temp2 = [];
+            kaiosContactList.forEach(c => {
+                if (c.key && c.key.length > 0) {
+                    let push = true;
+                    for (let i in c.key) {
+                        if (davContactListIndex[c.key[i]] != null) {
+                            temp1.push({ kaios: c.id, carddav: c.key[i], status: true });
+                            push = false;
+                            break;
                         }
-                        if (push)
-                            removeOrPushList = [...removeOrPushList, { kaios: c.id, carddav: null, status: false }];
-                    } else
-                        removeOrPushList = [...removeOrPushList, { kaios: c.id, carddav: null, status: false }];
-                });
-            } catch(err) {
-                console.log(err);
-            }
-        })();
+                    }
+                    if (push)
+                        temp2.push({ kaios: c.id, carddav: null, status: false });
+                } else
+                    temp2.push({ kaios: c.id, carddav: null, status: false });
+            });
+            skipOrUpdateList = [...temp1];
+            removeOrPushList = [...temp2];
+        } catch(err) {
+            console.log(err);
+        }
+        isRefresh = false;
     }
 
     function invertSkipOrUpdateList() {
@@ -145,6 +152,7 @@
     }
 
     async function sync() {
+        isSync = true;
         let deleteList = [];
         let updateList = {};
         let objectUrls = {};
@@ -255,8 +263,12 @@
     <div class="d-flex flex-row justify-content-between align-items-center">
         <h3>Sync KaiOS Contacts</h3>
         <div class="d-flex flex-row">
-            <button type="button" class="btn btn-primary btn-sm me-1" on:click={getKaiOSContact}>Refresh</button>
-            <button type="button" class="btn btn-primary btn-sm" on:click={sync}>Sync</button>
+            <button type="button" class="btn btn-primary btn-sm me-1" on:click={getKaiOSContact}>
+                {#if (isRefresh)}<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>{/if} Refresh
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" on:click={sync}>
+                {#if (isSync)}<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>{/if} Sync
+            </button>
         </div>
     </div>
     <nav>

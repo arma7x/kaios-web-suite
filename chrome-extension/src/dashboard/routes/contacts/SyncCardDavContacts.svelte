@@ -15,6 +15,8 @@
     }
 
     let tabIndex: number = 0;
+    let isRefresh: boolean = false;
+    let isSync: boolean = false;
 
     let isKaiOSDeviceConnected: bool = false;
     let kaiosContactsUnsubscribe: any;
@@ -37,6 +39,7 @@
                 break;
             case SyncProtocol.SYNC_CONTACT_CARDDAV_KAIOS:
                 // console.log(evt.detail);
+                isSync = false;
                 tabIndex = 0;
                 getKaiOSContact();
                 break;
@@ -82,7 +85,8 @@
         return contact;
     }
 
-    function getDAVContact() {
+    async function getDAVContact() {
+        isRefresh = true;
         let config = {
             serverUrl: window.localStorage.getItem('serverUrl'),
             username: window.localStorage.getItem('username'),
@@ -97,30 +101,33 @@
             authMethod: 'Basic',
             defaultAccountType: 'carddav',
         });
-        (async () => {
-            try {
-                await davClient.login();
-                addressBooks = await davClient.fetchAddressBooks();
-                const vcards = await davClient.fetchVCards({
-                    addressBook: addressBooks[0],
-                });
-                let temp: Array<{[key: string|number]: any;}> = [];
-                vcards.forEach((contact, index) => {
-                    contact = prepareContact(contact);
-                    temp.push(contact);
-                    davContactListIndex[contact.vcard.data.uid._data] = index;
-                });
-                davContactList = [...temp];
-                Object.keys(davContactListIndex).forEach((key) => {
-                    if (kaiosContactKeyIndex[key] != null)
-                        skipOrUpdateList = [...skipOrUpdateList, { kaios: kaiosContactList[kaiosContactKeyIndex[key]].id, carddav: key, status: true }];
-                    else
-                        removeOrPushList = [...removeOrPushList, { kaios: null, carddav: key, status: false }];
-                });
-            } catch(err) {
-                console.log(err);
-            }
-        })();
+        try {
+            await davClient.login();
+            addressBooks = await davClient.fetchAddressBooks();
+            const vcards = await davClient.fetchVCards({
+                addressBook: addressBooks[0],
+            });
+            let temp: Array<{[key: string|number]: any;}> = [];
+            vcards.forEach((contact, index) => {
+                contact = prepareContact(contact);
+                temp.push(contact);
+                davContactListIndex[contact.vcard.data.uid._data] = index;
+            });
+            davContactList = [...temp];
+            let temp1 = [];
+            let temp2 = [];
+            Object.keys(davContactListIndex).forEach((key) => {
+                if (kaiosContactKeyIndex[key] != null)
+                    temp1.push({ kaios: kaiosContactList[kaiosContactKeyIndex[key]].id, carddav: key, status: true });
+                else
+                    temp2.push({ kaios: null, carddav: key, status: false });
+            });
+            skipOrUpdateList = [...temp1];
+            removeOrPushList = [...temp2];
+        } catch(err) {
+            console.log(err);
+        }
+        isRefresh = false;
     }
 
     function invertSkipOrUpdateList() {
@@ -136,6 +143,7 @@
     }
 
     async function sync() {
+        isSync = true;
         let saveList = [];
         let updateList = {};
         for (let i in skipOrUpdateList) {
@@ -202,8 +210,12 @@
     <div class="d-flex flex-row justify-content-between align-items-center">
         <h3>Sync CardDAV Contacts</h3>
         <div class="d-flex flex-row">
-            <button type="button" class="btn btn-primary btn-sm me-1" on:click={getKaiOSContact}>Refresh</button>
-            <button type="button" class="btn btn-primary btn-sm" on:click={sync}>Sync</button>
+            <button type="button" class="btn btn-primary btn-sm me-1" on:click={getKaiOSContact}>
+                {#if (isRefresh)}<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>{/if} Refresh
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" on:click={sync}>
+                {#if (isSync)}<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>{/if} Sync
+            </button>
         </div>
     </div>
     <nav>
