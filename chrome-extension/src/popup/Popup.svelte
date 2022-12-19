@@ -23,7 +23,7 @@
 
     function onMessage(request, sender, sendResponse) {
         switch (request.type) {
-            case ChromeSystemEvent.ConnectionStatus:
+            case ChromeSystemEvent.CONNECTION_STATUS:
                 ({ dataConnectionID, dataConnectionStatus, isKaiOSDeviceConnected } = request.data);
                 break;
             default:
@@ -33,7 +33,7 @@
 
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
-        chrome.runtime.sendMessage({ type: ChromeSystemEvent.ConnectionStatus }).catch(err => console.log(err));
+        chrome.runtime.sendMessage({ type: ChromeSystemEvent.CONNECTION_STATUS }).catch(err => console.log(err));
         chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
             buttonVisibility = tabs[0].url.indexOf(chrome.runtime.getURL('src/dashboard/dashboard.html')) < 0;
         });

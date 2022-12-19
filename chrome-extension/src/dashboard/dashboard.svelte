@@ -20,7 +20,7 @@
     let peer: Peer;
     let dataConnection: DataConnection;
     let dataConnectionID: string;
-    let dataCONNECTION_STATUS: bool = false;
+    let dataConnectionStatus: bool = false;
     let isKaiOSDeviceConnected: bool = false;
     let showQrCode: bool = true;
 
@@ -40,21 +40,21 @@
         switch (request.type) {
             case ChromeSystemEvent.CONNECTION_STATUS:
                 broadcastConnectionStatus();
-                if (dataCONNECTION_STATUS == false) {
+                if (dataConnectionStatus == false) {
                     setupPeer();
                 }
                 break;
             default:
-                console.log("Unknown Type:", request.type);
+                console.log("Unknown Type:", request);
         }
     }
 
     function setupPeer() {
         peer = new Peer({ debug: 0, referrerPolicy: "origin-when-cross-origin" });
         peer.on("open", (id) => {
-            dataCONNECTION_STATUS = true;
+            dataConnectionStatus = true;
             dataConnectionID = id;
-            // console.log("[MASTER] open", dataConnectionID, dataCONNECTION_STATUS);
+            // console.log("[MASTER] open", dataConnectionID, dataConnectionStatus);
             broadcastConnectionStatus();
             generateQrCode();
         });
@@ -114,7 +114,7 @@
                         }
                     }
                 } else {
-                    if (dataCONNECTION_STATUS && dataConnection && dataConnection.open) {
+                    if (dataConnectionStatus && dataConnection && dataConnection.open) {
                         dataConnection.send({ type: SyncProtocol.PONG, data: { time: new Date().getTime() } });
                     }
                 }
@@ -133,7 +133,7 @@
         peer.on("disconnected", () => {
             // console.log("[MASTER] disconnected");
             // dataConnectionID = null;
-            // dataCONNECTION_STATUS = false;
+            // dataConnectionStatus = false;
             // isKaiOSDeviceConnected = false;
             // broadcastConnectionStatus();
             // document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
@@ -145,7 +145,7 @@
             type: ChromeSystemEvent.CONNECTION_STATUS,
             data: {
                 dataConnectionID,
-                dataCONNECTION_STATUS,
+                dataConnectionStatus,
                 isKaiOSDeviceConnected
             }
         })
@@ -155,7 +155,7 @@
                 type: ChromeSystemEvent.CONNECTION_STATUS,
                 data: {
                     dataConnectionID,
-                    dataCONNECTION_STATUS,
+                    dataConnectionStatus,
                     isKaiOSDeviceConnected
                 }
             }
@@ -189,13 +189,13 @@
     onMount(() => {
         chrome.runtime.onMessage.addListener(onMessage);
         broadcastConnectionStatus();
-        if (dataCONNECTION_STATUS == false) {
+        if (dataConnectionStatus == false) {
             setupPeer();
         }
         if (document.location.href !== chrome.runtime.getURL('src/dashboard/dashboard.html'))
             document.location.href = chrome.runtime.getURL('src/dashboard/dashboard.html');
         window.addEventListener(SyncProtocol.STREAM_UP, (evt) => {
-            if (dataCONNECTION_STATUS && dataConnection && dataConnection.open) {
+            if (dataConnectionStatus && dataConnection && dataConnection.open) {
                 dataConnection.send(evt.detail);
             }
         });
