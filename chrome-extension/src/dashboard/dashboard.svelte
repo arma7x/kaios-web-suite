@@ -227,23 +227,23 @@
         <div class="col-2">
             <div class="mt-2 d-grid gap-2">
                 {#if !isKaiOSDeviceConnected}
-                    <a href="#/" class="btn btn-outline-primary btn-sm text-start">Link Device</a>
+                    <a href="#/" class="btn btn-outline-primary btn-sm text-start fw-bold">Link Device</a>
                 {:else}
-                    <a href="#/sms" class="btn btn-outline-primary btn-sm text-start">SMS</a>
-                    <a href="#/kaios-contacts" class="btn btn-outline-success btn-sm text-start">KaiOS Contacts</a>
+                    <a href="#/sms" class="btn btn-outline-primary btn-sm text-start fw-bold">SMS</a>
+                    <a href="#/kaios-contacts" class="btn btn-outline-success btn-sm text-start fw-bold">KaiOS Contacts</a>
                 {/if}
                 {#if isKaiOSDeviceConnected}
-                    <a href="#/sync-kaios-contacts" class="btn btn-outline-success btn-sm text-start">Sync KaiOS Contacts<br><small class="fw-bold">(Sync KaiOS with CardDAV)</small></a>
+                    <a href="#/sync-kaios-contacts" class="btn btn-outline-success btn-sm text-start fw-bold">Sync KaiOS Contacts<br><small class="fst-italic">(Sync KaiOS with CardDAV)</small></a>
                 {/if}
-                <a href="#/card-dav-contacts" class="btn btn-outline-dark btn-sm text-start">CardDAV Contacts</a>
+                <a href="#/card-dav-contacts" class="btn btn-outline-dark btn-sm text-start fw-bold">CardDAV Contacts</a>
                 {#if isKaiOSDeviceConnected}
-                    <a href="#/sync-carddav-contacts" class="btn btn-outline-dark btn-sm text-start">Sync CardDAV Contacts<br><small class="fw-bold">(Sync CardDAV with KaiOS)</small></a>
+                    <a href="#/sync-carddav-contacts" class="btn btn-outline-dark btn-sm text-start fw-bold">Sync CardDAV Contacts<br><small class="fst-italic">(Sync CardDAV with KaiOS)</small></a>
                 {/if}
-                <!-- <a href="#/calendar" class="btn btn-outline-primary btn-sm text-start">Calendar</a> -->
+                <!-- <a href="#/calendar" class="btn btn-outline-primary btn-sm text-start fw-bold">Calendar</a> -->
                 {#if isKaiOSDeviceConnected && false}
-                    <a href="#/filetransfer" class="btn btn-outline-primary btn-sm text-start">File Transfer</a>
+                    <a href="#/filetransfer" class="btn btn-outline-primary btn-sm text-start fw-bold">File Transfer</a>
                 {/if}
-                <a href="#/settings" class="btn btn-outline-primary btn-sm text-start">Settings</a>
+                <a href="#/settings" class="btn btn-outline-primary btn-sm text-start fw-bold">Settings</a>
             </div>
         </div>
         <div class="col-10">
