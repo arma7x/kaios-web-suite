@@ -212,7 +212,7 @@
     <div class="d-flex flex-row justify-content-between align-items-center">
         <h3>Sync CardDAV Contacts</h3>
         <div class="d-flex flex-row">
-            <button type="button" class="btn btn-primary btn-sm" on:click={() => { openModal(CardDAVSyncGuide) }}>Guide</button>
+            <button type="button" class="btn btn-primary btn-sm me-1" on:click={() => { openModal(CardDAVSyncGuide) }}>Guide</button>
             <button type="button" class="btn btn-primary btn-sm me-1" on:click={getKaiOSContact}>
                 {#if (isRefresh)}<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>{/if} Refresh
             </button>

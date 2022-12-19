@@ -15,9 +15,9 @@
                     <button on:click={closeModal} type="button" class="btn-close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>1. If a new contact has been added to KaiOS and you also want to add this new contact to CardDAV</p>
-                    <p>2. If any KaiOS contacts have been updated and you also want to apply the update on CardDAV</p>
-                    <p>3. If any CardDAV contacts have been removed and you also want to remove these contacts from KaiOS</p>
+                    <p>1. If a new contact has been added to <b>KaiOS</b> and you also want to add this new contact to <b>CardDAV</b></p>
+                    <p>2. If any <b>KaiOS</b> contacts have been updated and you also want to apply the update on <b>CardDAV</b></p>
+                    <p>3. If any <b>CardDAV</b> contacts have been removed and you also want to remove these contacts from <b>KaiOS</b></p>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary btn-sm me-2" on:click="{closeModal}">Close</button>
