@@ -62,15 +62,15 @@
 <div>
     <h1>Settings</h1>
     <div class="mb-2">
-        <label for="serverUrl" class="form-label">Email address</label>
+        <label for="serverUrl" class="form-label">Server</label>
         <input id="serverUrl" type="text" class="form-control" bind:value={serverUrl} />
     </div>
     <div class="mb-2">
-        <label for="username" class="form-label">Email address</label>
+        <label for="username" class="form-label">Email Address/Username</label>
         <input id="username" type="text" class="form-control" bind:value={username} />
     </div>
     <div class="mb-2">
-        <label for="password" class="form-label">Email address</label>
+        <label for="password" class="form-label">Password</label>
         <input bind:this={passwordRef} id="password" type="password" class="form-control" bind:value={password} />
     </div>
     <div class="d-flex flex-row">
