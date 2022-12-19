@@ -203,7 +203,7 @@
 
 <div>
     <div class="d-flex flex-row justify-content-between align-items-center">
-        <h3>CardDAV</h3>
+        <h3>CardDAV Contacts</h3>
         <div class="d-flex flex-row">
             <button type="button" class="btn btn-primary btn-sm me-1" on:click={getContact}>Reload Contact</button>
             <button type="button" class="btn btn-primary btn-sm" on:click={addContact}>Add Contact</button>
