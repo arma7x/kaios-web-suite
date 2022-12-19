@@ -230,14 +230,14 @@
                     <a href="#/" class="btn btn-primary btn-sm text-start">Link Device</a>
                 {:else}
                     <a href="#/sms" class="btn btn-primary btn-sm text-start">SMS</a>
-                    <a href="#/kaios-contacts" class="btn btn-primary btn-sm text-start">KaiOS Contacts</a>
+                    <a href="#/kaios-contacts" class="btn btn-success btn-sm text-start">KaiOS Contacts</a>
                 {/if}
                 {#if isKaiOSDeviceConnected}
-                    <a href="#/sync-kaios-contacts" class="btn btn-primary btn-sm text-start">Sync KaiOS Contacts<br><small class="fw-bold">(Sync KaiOS with CardDAV)</small></a>
+                    <a href="#/sync-kaios-contacts" class="btn btn-success btn-sm text-start">Sync KaiOS Contacts<br><small class="fw-bold">(Sync KaiOS with CardDAV)</small></a>
                 {/if}
-                <a href="#/card-dav-contacts" class="btn btn-primary btn-sm text-start">CardDAV Contacts</a>
+                <a href="#/card-dav-contacts" class="btn btn-dark btn-sm text-start">CardDAV Contacts</a>
                 {#if isKaiOSDeviceConnected}
-                    <a href="#/sync-carddav-contacts" class="btn btn-primary btn-sm text-start">Sync CardDAV Contacts<br><small class="fw-bold">(Sync CardDAV with KaiOS)</small></a>
+                    <a href="#/sync-carddav-contacts" class="btn btn-dark btn-sm text-start">Sync CardDAV Contacts<br><small class="fw-bold">(Sync CardDAV with KaiOS)</small></a>
                 {/if}
                 <!-- <a href="#/calendar" class="btn btn-primary btn-sm text-start">Calendar</a> -->
                 {#if isKaiOSDeviceConnected && false}
