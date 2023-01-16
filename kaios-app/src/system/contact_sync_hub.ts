@@ -184,6 +184,17 @@ class ContactSyncHub {
           _self.broadcastCallback({ type: SyncProtocol.CONTACT_UPDATE, error: err.toString() });
         }
         break;
+      case SyncProtocol.CONTACT_IMPORT
+        if (event.data.length > 0) {
+          for (let i in event.data) {
+            try {
+              let contact = new mozContact(event.data[i]);
+              await _self.saveContact(contact);
+            } catch (err) {}
+          }
+        }
+        _self.broadcastCallback({ type: SyncProtocol.CONTACT_IMPORT, data: true });
+        break;
       case SyncProtocol.SYNC_CONTACT_KAIOS_CARDDAV:
         if (Object.keys(event.data.updateList).length > 0) {
           let filter = {

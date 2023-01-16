@@ -54,6 +54,9 @@
                     maxOffset = Math.ceil(contactList.length / LIMIT) - 1;
                 }
                 break;
+            case SyncProtocol.CONTACT_IMPORT:
+                getContact();
+                break;
         }
     }
 
@@ -155,7 +158,6 @@
                         }
                     });
                     window.dispatchEvent(evt);
-                    console.log(mozContacts);
                 }
             }
             reader.readAsText(file);
