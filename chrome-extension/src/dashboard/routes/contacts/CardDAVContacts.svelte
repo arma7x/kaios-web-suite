@@ -240,7 +240,7 @@
                     <td>
                         <div class="mt-2 d-block gap-2">
                             <button class="btn btn-outline-info btn-sm mb-1" on:click={() => updateContact(contact) }>Update</button>
-                            <button class="btn btn-outline-dark btn-sm mb-1" on:click={() => exportContact(contact) }>Export</button>
+                            <!-- <button class="btn btn-outline-dark btn-sm mb-1" on:click={() => exportContact(contact) }>Export</button> -->
                             <button class="btn btn-outline-danger btn-sm mb-1" on:click={() => deleteContact(contact.vcard.data.uid._data) }>Delete</button>
                         </div>
                     </td>
